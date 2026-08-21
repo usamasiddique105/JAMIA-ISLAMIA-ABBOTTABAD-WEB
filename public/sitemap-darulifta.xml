@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  
+  <!-- Online Darul Ifta Main Portal -->
+  <url>
+    <loc>https://JamiaIslamaiAbottabad.com/#fatwas</loc>
+    <lastmod>2026-08-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+    <xhtml:link rel="alternate" hreflang="ur" href="https://JamiaIslamaiAbottabad.com/#fatwas" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://JamiaIslamaiAbottabad.com/#fatwas?lang=en" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://JamiaIslamaiAbottabad.com/#fatwas?lang=ar" />
+  </url>
+
+  <!-- Ask Online Fatwa Form -->
+  <url>
+    <loc>https://JamiaIslamaiAbottabad.com/#fatwa-new</loc>
+    <lastmod>2026-08-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="ur" href="https://JamiaIslamaiAbottabad.com/#fatwa-new" />
+  </url>
+
+  <!-- Masnoon Duas & Daily Azkar -->
+  <url>
+    <loc>https://JamiaIslamaiAbottabad.com/#fatwa-duas</loc>
+    <lastmod>2026-08-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+    <xhtml:link rel="alternate" hreflang="ur" href="https://JamiaIslamaiAbottabad.com/#fatwa-duas" />
+  </url>
+
+  <!-- Islamic Names Directory -->
+  <url>
+    <loc>https://JamiaIslamaiAbottabad.com/#fatwa-names</loc>
+    <lastmod>2026-08-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+    <xhtml:link rel="alternate" hreflang="ur" href="https://JamiaIslamaiAbottabad.com/#fatwa-names" />
+  </url>
+
+  <!-- Fatwa Archive & Publications Library -->
+  <url>
+    <loc>https://JamiaIslamaiAbottabad.com/#library</loc>
+    <lastmod>2026-08-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+
+</urlset>

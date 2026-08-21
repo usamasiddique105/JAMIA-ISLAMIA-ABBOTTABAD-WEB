@@ -1,0 +1,263 @@
+{
+  "entities": {
+    "Fatwa": {
+      "title": "Fatwa",
+      "description": "Islamic legal rulings issued by Darul Ifta Jamia Islamia Abbottabad",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "fatwaNumber": { "type": "string", "maxLength": 128 },
+        "title": { "type": "object", "description": "Localized title" },
+        "question": { "type": "object", "description": "Localized question" },
+        "questionerName": { "type": "string", "maxLength": 150 },
+        "questionerEmail": { "type": "string", "maxLength": 150 },
+        "category": { "type": "string", "maxLength": 100 },
+        "answer": { "type": "object", "description": "Localized answer" },
+        "arabicText": { "type": "string", "maxLength": 5000 },
+        "date": { "type": "string", "maxLength": 64 },
+        "muftiName": { "type": "string", "maxLength": 150 },
+        "status": { "type": "string", "enum": ["Published", "Draft", "Under Review", "Private Reply"] },
+        "isFeatured": { "type": "boolean" },
+        "views": { "type": "number" }
+      },
+      "required": ["id", "fatwaNumber", "title", "question", "category", "answer", "date", "muftiName", "status", "views"]
+    },
+    "OnlineQuestion": {
+      "title": "OnlineQuestion",
+      "description": "User-submitted questions to Darul Ifta for Istifta",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "questionerName": { "type": "string", "maxLength": 150 },
+        "questionerEmail": { "type": "string", "maxLength": 150 },
+        "phone": { "type": "string", "maxLength": 50 },
+        "category": { "type": "string", "maxLength": 100 },
+        "subject": { "type": "string", "maxLength": 300 },
+        "question": { "type": "string", "maxLength": 10000 },
+        "submissionDate": { "type": "string", "maxLength": 64 },
+        "isAnswered": { "type": "boolean" },
+        "reply": { "type": "string", "maxLength": 10000 },
+        "isPublishedToArchive": { "type": "boolean" }
+      },
+      "required": ["id", "questionerName", "questionerEmail", "category", "subject", "question", "submissionDate", "isAnswered"]
+    },
+    "ClassBooking": {
+      "title": "ClassBooking",
+      "description": "Online admissions and trial class bookings for Jamia Quran Academy",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "bookingType": { "type": "string", "enum": ["Trial", "Admission", "General"] },
+        "studentName": { "type": "string", "maxLength": 150 },
+        "guardianName": { "type": "string", "maxLength": 150 },
+        "age": { "type": "string", "maxLength": 30 },
+        "country": { "type": "string", "maxLength": 100 },
+        "phone": { "type": "string", "maxLength": 50 },
+        "whatsapp": { "type": "string", "maxLength": 50 },
+        "email": { "type": "string", "maxLength": 150 },
+        "course": { "type": "string", "maxLength": 200 },
+        "preferredTime": { "type": "string", "maxLength": 100 },
+        "date": { "type": "string", "maxLength": 64 },
+        "status": { "type": "string", "enum": ["Pending", "Contacted", "Confirmed", "Completed", "Cancelled"] },
+        "adminNotes": { "type": "string", "maxLength": 2000 },
+        "replyMessage": { "type": "string", "maxLength": 3000 },
+        "replyDate": { "type": "string", "maxLength": 64 }
+      },
+      "required": ["id", "bookingType", "studentName", "country", "phone", "course", "date", "status"]
+    },
+    "ExamResult": {
+      "title": "ExamResult",
+      "description": "Student examination results and academic transcripts",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "rollNumber": { "type": "string", "maxLength": 64 },
+        "registrationNumber": { "type": "string", "maxLength": 64 },
+        "studentName": { "type": "string", "maxLength": 150 },
+        "fatherName": { "type": "string", "maxLength": 150 },
+        "department": { "type": "string", "maxLength": 150 },
+        "academicYear": { "type": "string", "maxLength": 64 },
+        "examType": { "type": "string", "maxLength": 64 },
+        "subjects": { "type": "array" },
+        "totalMarks": { "type": "number" },
+        "obtainedMarks": { "type": "number" },
+        "percentage": { "type": "number" },
+        "grade": { "type": "string", "maxLength": 64 },
+        "division": { "type": "string", "maxLength": 64 },
+        "status": { "type": "string", "maxLength": 64 },
+        "remarks": { "type": "string", "maxLength": 500 }
+      },
+      "required": ["id", "rollNumber", "registrationNumber", "studentName", "fatherName", "department", "academicYear", "totalMarks", "obtainedMarks", "percentage", "grade", "division", "status"]
+    },
+    "Department": {
+      "title": "Department",
+      "description": "Academic faculty and educational departments at Jamia Islamia",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "name": { "type": "object" },
+        "code": { "type": "string", "maxLength": 64 },
+        "description": { "type": "object" },
+        "duration": { "type": "string", "maxLength": 100 },
+        "headOfDept": { "type": "string", "maxLength": 150 },
+        "totalStudents": { "type": "number" },
+        "curriculum": { "type": "array" },
+        "eligibility": { "type": "string", "maxLength": 300 }
+      },
+      "required": ["id", "name", "code", "description", "duration", "headOfDept", "totalStudents", "curriculum", "eligibility"]
+    },
+    "FacultyMember": {
+      "title": "FacultyMember",
+      "description": "Teachers, senior scholars, and muftis of Jamia Islamia",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "name": { "type": "object" },
+        "designation": { "type": "object" },
+        "department": { "type": "string", "maxLength": 150 },
+        "specialization": { "type": "string", "maxLength": 200 },
+        "qualification": { "type": "string", "maxLength": 200 },
+        "photoUrl": { "type": "string", "maxLength": 1000 },
+        "experienceYears": { "type": "number" },
+        "bio": { "type": "string", "maxLength": 2000 }
+      },
+      "required": ["id", "name", "designation", "department", "specialization", "qualification", "photoUrl", "experienceYears"]
+    },
+    "PublicationBook": {
+      "title": "PublicationBook",
+      "description": "Digital publications, research papers, and books published by Jamia",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "title": { "type": "object" },
+        "author": { "type": "string", "maxLength": 150 },
+        "category": { "type": "string", "maxLength": 100 },
+        "description": { "type": "string", "maxLength": 2000 },
+        "coverImage": { "type": "string", "maxLength": 1000 },
+        "fileUrl": { "type": "string", "maxLength": 1000 },
+        "fileSize": { "type": "string", "maxLength": 50 },
+        "publishYear": { "type": "string", "maxLength": 50 },
+        "downloadsCount": { "type": "number" }
+      },
+      "required": ["id", "title", "author", "category", "description", "coverImage", "fileUrl", "fileSize", "publishYear", "downloadsCount"]
+    },
+    "MediaItem": {
+      "title": "MediaItem",
+      "description": "Audio khutbahs, video lectures, and campus photography",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "title": { "type": "object" },
+        "type": { "type": "string", "enum": ["audio", "video", "photo"] },
+        "category": { "type": "string", "maxLength": 100 },
+        "url": { "type": "string", "maxLength": 1000 },
+        "speaker": { "type": "string", "maxLength": 150 },
+        "date": { "type": "string", "maxLength": 64 },
+        "thumbnail": { "type": "string", "maxLength": 1000 },
+        "description": { "type": "string", "maxLength": 2000 }
+      },
+      "required": ["id", "title", "type", "category", "url", "date"]
+    },
+    "NewsItem": {
+      "title": "NewsItem",
+      "description": "Institutional news, announcements, and events",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "title": { "type": "object" },
+        "content": { "type": "object" },
+        "date": { "type": "string", "maxLength": 64 },
+        "category": { "type": "string", "enum": ["News", "Announcement", "Event", "Admission"] },
+        "imageUrl": { "type": "string", "maxLength": 1000 },
+        "isPinned": { "type": "boolean" }
+      },
+      "required": ["id", "title", "content", "date", "category"]
+    },
+    "DonationRecord": {
+      "title": "DonationRecord",
+      "description": "Online donation and zakat contributions records",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "donorName": { "type": "string", "maxLength": 150 },
+        "donorEmail": { "type": "string", "maxLength": 150 },
+        "donorPhone": { "type": "string", "maxLength": 50 },
+        "fundType": { "type": "string", "maxLength": 100 },
+        "amount": { "type": "number" },
+        "currency": { "type": "string", "maxLength": 10 },
+        "paymentMethod": { "type": "string", "maxLength": 100 },
+        "transactionRef": { "type": "string", "maxLength": 100 },
+        "date": { "type": "string", "maxLength": 64 },
+        "status": { "type": "string", "enum": ["Verified", "Pending"] }
+      },
+      "required": ["id", "donorName", "donorEmail", "donorPhone", "fundType", "amount", "currency", "paymentMethod", "transactionRef", "date", "status"]
+    },
+    "SiteSettings": {
+      "title": "SiteSettings",
+      "description": "Global institutional configuration, bank accounts, and contact info",
+      "type": "object",
+      "properties": {
+        "jamiaNameUrdu": { "type": "string", "maxLength": 150 },
+        "jamiaNameEnglish": { "type": "string", "maxLength": 150 },
+        "jamiaNameArabic": { "type": "string", "maxLength": 150 },
+        "tagline": { "type": "object" },
+        "phonePrimary": { "type": "string", "maxLength": 50 },
+        "phoneSecondary": { "type": "string", "maxLength": 50 },
+        "email": { "type": "string", "maxLength": 150 },
+        "whatsappNumber": { "type": "string", "maxLength": 50 },
+        "address": { "type": "string", "maxLength": 500 },
+        "city": { "type": "string", "maxLength": 100 },
+        "visitorCount": { "type": "number" },
+        "heroAnnouncement": { "type": "object" },
+        "bankDetails": { "type": "object" }
+      },
+      "required": ["jamiaNameUrdu", "jamiaNameEnglish", "jamiaNameArabic", "tagline", "phonePrimary", "email", "address", "bankDetails"]
+    }
+  },
+  "firestore": {
+    "/fatwas/{fatwaId}": {
+      "schema": "Fatwa",
+      "description": "Collection of official Islamic fatwas and rulings"
+    },
+    "/online_questions/{questionId}": {
+      "schema": "OnlineQuestion",
+      "description": "Collection of incoming istifta and online queries from users"
+    },
+    "/class_bookings/{bookingId}": {
+      "schema": "ClassBooking",
+      "description": "Collection of online Quran and Dars-e-Nizami class registrations"
+    },
+    "/exam_results/{resultId}": {
+      "schema": "ExamResult",
+      "description": "Collection of student examination records and transcripts"
+    },
+    "/departments/{departmentId}": {
+      "schema": "Department",
+      "description": "Academic faculties and curriculum information"
+    },
+    "/faculty/{facultyId}": {
+      "schema": "FacultyMember",
+      "description": "Faculty directory of shuyookh and teachers"
+    },
+    "/books/{bookId}": {
+      "schema": "PublicationBook",
+      "description": "Digital publications and library books"
+    },
+    "/media/{mediaId}": {
+      "schema": "MediaItem",
+      "description": "Audio, video and photographic archives"
+    },
+    "/news/{newsId}": {
+      "schema": "NewsItem",
+      "description": "Institutional news and public announcements"
+    },
+    "/donations/{donationId}": {
+      "schema": "DonationRecord",
+      "description": "Donation and zakat receipts records"
+    },
+    "/site_settings/{settingId}": {
+      "schema": "SiteSettings",
+      "description": "Portal global configurations and bank accounts"
+    }
+  }
+}

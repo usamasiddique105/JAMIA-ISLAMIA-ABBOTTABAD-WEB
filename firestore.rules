@@ -1,0 +1,70 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions
+    function isValidId(id) {
+      return id is string && id.size() <= 128;
+    }
+
+    // 1. Fatwas Collection (Public read & write)
+    match /fatwas/{fatwaId} {
+      allow read, write: if true;
+    }
+
+    // 2. Online Questions / Istifta
+    match /online_questions/{questionId} {
+      allow read, write: if true;
+    }
+
+    // 3. Online Class Bookings & Admissions
+    match /class_bookings/{bookingId} {
+      allow read, write: if true;
+    }
+
+    // 4. Exam Results
+    match /exam_results/{resultId} {
+      allow read, write: if true;
+    }
+
+    // 5. Academic Departments
+    match /departments/{departmentId} {
+      allow read, write: if true;
+    }
+
+    // 6. Faculty & Shuyookh
+    match /faculty/{facultyId} {
+      allow read, write: if true;
+    }
+
+    // 7. Library Publications & Books
+    match /books/{bookId} {
+      allow read, write: if true;
+    }
+
+    // 8. Media Gallery
+    match /media/{mediaId} {
+      allow read, write: if true;
+    }
+
+    // 9. News & Announcements
+    match /news/{newsId} {
+      allow read, write: if true;
+    }
+
+    // 10. Donations & Zakat Records
+    match /donations/{donationId} {
+      allow read, write: if true;
+    }
+
+    // 11. Site Settings
+    match /site_settings/{settingId} {
+      allow read, write: if true;
+    }
+
+    // 12. Test Connection Collection
+    match /test/{docId} {
+      allow read, write: if true;
+    }
+  }
+}

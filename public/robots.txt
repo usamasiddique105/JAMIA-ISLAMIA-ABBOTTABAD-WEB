@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://jamia-islamia-abbottabad.ai.studio/sitemap.xml
+Sitemap: https://jamia-islamia-abbottabad.ai.studio/sitemap-quran.xml
+Sitemap: https://jamia-islamia-abbottabad.ai.studio/sitemap-donations.xml
+
+Crawl-delay: 1
+
+Host: https://jamia-islamia-abbottabad.ai.studio/
