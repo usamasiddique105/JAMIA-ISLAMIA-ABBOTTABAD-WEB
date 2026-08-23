@@ -4,29 +4,30 @@
   
   <!-- Annual Examination Results Portal -->
   <url>
-    <loc>https://JamiaIslamaiAbottabad.com/#results</loc>
-    <lastmod>2026-08-18</lastmod>
+    <loc>https://jamia-islamia-abbottabad.pages.dev/?tab=results</loc>
+    <lastmod>2026-08-23</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
-    <xhtml:link rel="alternate" hreflang="ur" href="https://JamiaIslamaiAbottabad.com/#results" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://JamiaIslamaiAbottabad.com/#results?lang=en" />
-    <xhtml:link rel="alternate" hreflang="ar" href="https://JamiaIslamaiAbottabad.com/#results?lang=ar" />
+    <xhtml:link rel="alternate" hreflang="ur" href="https://jamia-islamia-abbottabad.pages.dev/?tab=results" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://jamia-islamia-abbottabad.pages.dev/?tab=results&amp;lang=en" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://jamia-islamia-abbottabad.pages.dev/?tab=results&amp;lang=ar" />
   </url>
 
   <!-- Roll Number Examination Verification -->
   <url>
-    <loc>https://JamiaIslamaiAbottabad.com/#results-rollno</loc>
-    <lastmod>2026-08-18</lastmod>
+    <loc>https://jamia-islamia-abbottabad.pages.dev/?tab=results</loc>
+    <lastmod>2026-08-23</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
 
   <!-- Wifaqul Madaris Certificate Verification -->
   <url>
-    <loc>https://JamiaIslamaiAbottabad.com/#results-verification</loc>
-    <lastmod>2026-08-18</lastmod>
+    <loc>https://jamia-islamia-abbottabad.pages.dev/?tab=results</loc>
+    <lastmod>2026-08-23</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
 
 </urlset>
+
