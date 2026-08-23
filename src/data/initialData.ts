@@ -35,8 +35,12 @@ export const INITIAL_SITE_SETTINGS: SiteSettings = {
   },
   phonePrimary: '03489002496',
   phoneSecondary: '03489002496',
-  email: 'Coming Soon',
+  email: 'usamasiddique105@gmail.com',
   whatsappNumber: '03489002496',
+  notificationEmail: 'usamasiddique105@gmail.com',
+  notificationWhatsApp: '03489002496',
+  enableEmailNotifications: true,
+  enableWhatsAppNotifications: true,
   address: 'جامعہ اسلامیہ، مری روڈ، کالا پل، ایبٹ آباد، خیبر پختونخوا، پاکستان',
   city: 'Abbottabad',
   visitorCount: 1428590,
@@ -75,6 +79,34 @@ export const INITIAL_SITE_SETTINGS: SiteSettings = {
 };
 
 export const INITIAL_FATWAS: Fatwa[] = [
+  {
+    id: 'fatwa-1001',
+    fatwaNumber: '1001',
+    title: {
+      ur: 'میاں بیوی کا ہبہ سے رجوع کرنے کا حکم',
+      en: 'Ruling on Revoking a Gift Between Spouses After Divorce',
+      ar: 'حكم رجوع أحد الزوجين في الهبة بعد الطلاق'
+    },
+    question: {
+      ur: 'کیا فرماتے ہیں مفتیانِ کرام کہ شوہر نے اپنی بیوی کو تین تولہ سونا بطور تحفہ کے دیا، بعد ازاں شوہر نے بیوی کو طلاق دی، کیا اب وہ مذکورہ سونا کے واپس لینے کا حق رکھتا ہے یا نہیں؟',
+      en: 'What is the ruling regarding a husband who gifted three tolas of gold to his wife during marriage, and later divorced her? Does he have the right to revoke this gift and reclaim the gold?',
+      ar: 'ما قولكم في رجل وهب زوجته ثلاثة تولات من الذهب حال قيام الزوجية، ثم طلقها بعد ذلك، فهل يملك حق الرجوع في تلك الهبة واسترداد الذهب أم لا؟'
+    },
+    questionerName: 'سائل',
+    questionerEmail: 'questioner@example.com',
+    category: 'نکاح و طلاق',
+    answer: {
+      ur: 'الجواب باسم ملہم الصواب: واضح رہے کہ ہبہ پر جب موہوب لہ (جس کے لیے ہبہ کیا گیا ہو) قبضہ کر لے، تو اس میں رجوع کرنا مکروہ ہے، تاہم اگر ہبہ قریبی رشتہ دار کے لیے ہو، یا رجوع کے موانع (جیسے میاں بیوی کے درمیان ہبہ ہونا وغیرہ) پائے جائیں، تو پھر رجوع کرنا شرعاً جائز نہیں ہوتا۔ صورتِ مسئولہ میں اگر واقعی شوہر نے بیوی کو نکاح کی حالت میں مذکورہ سونا بطور تحفہ دیا تھا اور بیوی نے اس پر قبضہ بھی کر لیا تھا، تو بعد از قبضہ کے شوہر اس ہبہ سے رجوع کا حق نہیں رکھتا، خواہ بیوی اس کے نکاح میں ہو یا نکاح سے نکل چکی ہو۔ فقط واللہ تعالی اعلم بالصواب۔',
+      en: 'In Islamic jurisprudence (Hanafi Fiqh), once a gift (Hibah) is delivered and possessed between spouses during marriage, it becomes irrevocable by virtue of the spousal relationship (Mani\' min ar-Ruju\'). Subsequent divorce does not revoke this prohibition. Therefore, since the husband gifted and handed over the gold to his wife during marriage, he has no legal right in Shariah to revoke the gift or demand the gold back after divorce.',
+      ar: 'الجواب باسم ملهم الصواب: من القواعد المقررة في الفقه الحنفي أن الهبة إذا تمت وقبضها الموهوب له، وكانت بين الزوجين حال قيام الزوجية، فإنه يمتنع الرجوع فيها شرعاً، ولا يسقط هذا المانع بوقوع الطلاق بعد ذلك. وعليه؛ فإذا كان الزوج قد وهب الذهب لزوجته في حال النكاح وسلّمه إليها، فلا يحق له الرجوع في هذه الهبة ولا استرداد الذهب بعد الطلاق. فقط والله تعالى أعلم بالصواب.'
+    },
+    arabicText: 'وفي الفتاوى الهندية: الرجوع في الهبة مكروه في الأحوال كلها ويصح، كذا في التاتارخانية... أما العوارض المانعة من الرجوع فأنواع: (ومنها الزوجية) سواء كان أحد الزوجين مسلما أو كافرا، كذا في الاختيار شرح المختار. وإذا وهب أحد الزوجين لصاحبه لا يرجع في الهبة، وإن انقطع النكاح بينهما. (الفتاوى الهندية: 4/385)\n\nكتبه: اسامہ صدیقی',
+    date: '۱۹ اگست ۲۰۲۶ء',
+    muftiName: 'مفتیانِ دار الافتاء جامعہ اسلامیہ ایبٹ آباد',
+    status: 'Published',
+    isFeatured: true,
+    views: 1890
+  },
   {
     id: 'fatwa-1',
     fatwaNumber: '1448-01-101',

@@ -27,13 +27,13 @@ import {
 import { IDatabaseService } from './dbInterface';
 
 export const STORAGE_KEYS = {
-  FATWAS: 'jia_fatwas_v2',
+  FATWAS: 'jia_fatwas_v5',
   QUESTIONS: 'jia_questions_v2',
   BOOKINGS: 'jia_class_bookings_v1',
   RESULTS: 'jia_exam_results_v1',
-  DEPARTMENTS: 'jia_departments_v3',
+  DEPARTMENTS: 'jia_departments_v4',
   FACULTY: 'jia_faculty_v1',
-  BOOKS: 'jia_books_v2',
+  BOOKS: 'jia_books_v3',
   MEDIA: 'jia_media_v2',
   NEWS: 'jia_news_v1',
   DONATIONS: 'jia_donations_v1',
@@ -66,7 +66,55 @@ function setItem<T>(key: string, value: T): void {
 export class LocalStorageAdapter implements IDatabaseService {
   // Fatwas
   getFatwas(): Fatwa[] {
-    return getItem(STORAGE_KEYS.FATWAS, INITIAL_FATWAS);
+    const stored = getItem<Fatwa[]>(STORAGE_KEYS.FATWAS, INITIAL_FATWAS);
+    // Ensure all fatwas have complete localized translations (ur, ar, en)
+    const initialMap = new Map<string, Fatwa>();
+    INITIAL_FATWAS.forEach(f => {
+      initialMap.set(f.id, f);
+      if (f.fatwaNumber) initialMap.set(f.fatwaNumber, f);
+    });
+
+    return stored.map(item => {
+      const defaultFatwa = initialMap.get(item.id) || (item.fatwaNumber ? initialMap.get(item.fatwaNumber) : undefined);
+      
+      // Normalize title
+      let title = typeof item.title === 'string' ? { ur: item.title, ar: '', en: '' } : { ...item.title };
+      if (defaultFatwa) {
+        title = {
+          ur: title.ur || defaultFatwa.title.ur,
+          ar: (title.ar && title.ar.trim()) ? title.ar : defaultFatwa.title.ar,
+          en: (title.en && title.en.trim()) ? title.en : defaultFatwa.title.en,
+        };
+      }
+
+      // Normalize question
+      let question = typeof item.question === 'string' ? { ur: item.question, ar: '', en: '' } : { ...item.question };
+      if (defaultFatwa) {
+        question = {
+          ur: question.ur || defaultFatwa.question.ur,
+          ar: (question.ar && question.ar.trim()) ? question.ar : defaultFatwa.question.ar,
+          en: (question.en && question.en.trim()) ? question.en : defaultFatwa.question.en,
+        };
+      }
+
+      // Normalize answer
+      let answer = typeof item.answer === 'string' ? { ur: item.answer, ar: '', en: '' } : { ...item.answer };
+      if (defaultFatwa) {
+        answer = {
+          ur: answer.ur || defaultFatwa.answer.ur,
+          ar: (answer.ar && answer.ar.trim()) ? answer.ar : defaultFatwa.answer.ar,
+          en: (answer.en && answer.en.trim()) ? answer.en : defaultFatwa.answer.en,
+        };
+      }
+
+      return {
+        ...item,
+        title,
+        question,
+        answer,
+        arabicText: item.arabicText || defaultFatwa?.arabicText,
+      };
+    });
   }
   saveFatwas(data: Fatwa[]): void {
     setItem(STORAGE_KEYS.FATWAS, data);

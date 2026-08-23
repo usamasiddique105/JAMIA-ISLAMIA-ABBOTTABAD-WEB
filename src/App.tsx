@@ -78,7 +78,7 @@ function MainApp() {
   };
 
   return (
-    <div className="w-full max-w-full min-h-screen overflow-x-clip bg-white dark:bg-slate-950 text-slate-800 dark:text-slate-100 flex flex-col font-sans transition-colors selection:bg-[#064e3b] selection:text-white">
+    <div className={`w-full max-w-full min-h-screen overflow-x-clip ${currentTab === 'home' ? 'bg-islamic-pattern' : 'bg-white dark:bg-slate-950'} text-slate-800 dark:text-slate-100 flex flex-col font-sans transition-colors selection:bg-[#064e3b] selection:text-white`}>
       {/* Dynamic SEO Head Manager */}
       <SEOHead currentTab={currentTab} />
       

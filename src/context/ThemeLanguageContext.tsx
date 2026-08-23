@@ -61,6 +61,22 @@ const translations: Record<Language, Record<string, string>> = {
     totalFatwas: '۴۵,۰۰۰+ جاری شدہ فتاویٰ',
     yearsExcellence: '۷۵+ سالہ تعلیمی خدمات',
     searchTitle: 'جامعہ گلوبل سرچ پورٹل',
+    search: 'تلاش کریں',
+    searchKeyword: 'مطلوبہ لفظ',
+    fatwaNo: 'فتویٰ نمبر',
+    selectCategory: 'شعبہ منتخب کریں',
+    selectChapter: 'باب منتخب کریں',
+    selectSubChapter: 'ضمنی منتخب کریں',
+    askQuestionTitle: 'طلب فتویٰ شرعیہ',
+    submitQuestionBtn: 'سوال پوچھیں',
+    backToList: 'واپس تمام فتاویٰ کی فہرست پر جائیں',
+    copiedText: 'کاپی ہو گیا',
+    copyLinkText: 'لنک کاپی کریں',
+    viewsLabel: 'کل مشاہدات',
+    evidenceLabel: 'وَالدَّلِيلُ عَلَى ذَلِكَ',
+    answerHeader: 'الْجَوَابُ بِاسْمِ مُلْهِمِ الصَّوَابْ',
+    questionHeader: 'ســوال',
+    conclusionText: 'فقط والله تعالی اعلم بالصواب',
   },
   en: {
     home: 'Home',
@@ -112,6 +128,22 @@ const translations: Record<Language, Record<string, string>> = {
     totalFatwas: '45,000+ Verified Fatwas',
     yearsExcellence: '75+ Years of Service',
     searchTitle: 'Jamia Global Search Portal',
+    search: 'Search',
+    searchKeyword: 'Keywords',
+    fatwaNo: 'Fatwa Record No',
+    selectCategory: 'Select Category',
+    selectChapter: 'Select Chapter',
+    selectSubChapter: 'Select Sub-topic',
+    askQuestionTitle: 'Ask a Question',
+    submitQuestionBtn: 'Submit Question',
+    backToList: 'Back to All Fatwas',
+    copiedText: 'Copied',
+    copyLinkText: 'Copy Link',
+    viewsLabel: 'Total Views',
+    evidenceLabel: 'Evidence & References',
+    answerHeader: 'Answer in the Name of Allah',
+    questionHeader: 'Question',
+    conclusionText: 'And Allah Almighty knows best',
   },
   ar: {
     home: 'الرئيسية',
@@ -163,22 +195,101 @@ const translations: Record<Language, Record<string, string>> = {
     totalFatwas: '٤٥,٠٠٠+ فتوى شرعية',
     yearsExcellence: '٧٥+ عاماً في خدمة العلم',
     searchTitle: 'البحث الشامل في موقع الجامعة',
+    search: 'بحث',
+    searchKeyword: 'الكلمة المفتاحية',
+    fatwaNo: 'رقم الفتوى',
+    selectCategory: 'اختر القسم الشرعي',
+    selectChapter: 'اختر الباب',
+    selectSubChapter: 'اختر الفرع',
+    askQuestionTitle: 'طلب فتوى شرعية',
+    submitQuestionBtn: 'إرسال سؤال للفتوى',
+    backToList: 'العودة إلى قائمة الفتاوى',
+    copiedText: 'تم النسخ',
+    copyLinkText: 'نسخ الرابط',
+    viewsLabel: 'إجمالي المشاهدات',
+    evidenceLabel: 'وَالدَّلِيلُ عَلَى ذَلِكَ',
+    answerHeader: 'الْجَوَابُ بِاسْمِ مُلْهِمِ الصَّوَابْ',
+    questionHeader: 'الســؤال',
+    conclusionText: 'فقط والله تعالى أعلم بالصواب',
+  }
+};
+
+const detectDefaultLanguage = (): Language => {
+  try {
+    // 1. Check browser languages
+    const browserLangs = (typeof navigator !== 'undefined' && navigator.languages && navigator.languages.length > 0)
+      ? navigator.languages
+      : (typeof navigator !== 'undefined' ? [navigator.language || ''] : ['ur']);
+    
+    for (const l of browserLangs) {
+      const code = (l || '').toLowerCase();
+      if (code.startsWith('ur') || code.startsWith('pa') || code.startsWith('sd') || code.startsWith('ps') || code.startsWith('ks') || code.startsWith('hi') || code.startsWith('bn')) {
+        return 'ur';
+      }
+      if (code.startsWith('ar')) {
+        return 'ar';
+      }
+    }
+
+    // 2. Check user timezone
+    if (typeof Intl !== 'undefined' && Intl.DateTimeFormat) {
+      const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+      const tzLower = timeZone.toLowerCase();
+
+      // South Asia (Pakistan, India, Bangladesh, Afghanistan) -> Urdu
+      const southAsiaZones = [
+        'karachi', 'islamabad', 'lahore', 'kolkata', 'calcutta', 'dhaka', 'kabul', 'kathmandu', 'thimphu', 'colombo', 'pk', 'in', 'bd', 'af'
+      ];
+      if (southAsiaZones.some(z => tzLower.includes(z))) {
+        return 'ur';
+      }
+
+      // Middle East & Arab countries (Saudi, UAE, Qatar, Kuwait, Egypt, etc.) -> Arabic
+      const arabZones = [
+        'riyadh', 'dubai', 'qatar', 'kuwait', 'bahrain', 'muscat', 'amman', 'beirut', 'damascus', 
+        'baghdad', 'cairo', 'tripoli', 'tunis', 'algiers', 'casablanca', 'khartoum', 'jerusalem', 
+        'gaza', 'hebron', 'aden', 'sanaa', 'mecca', 'medina', 'jeddah', 'sharjah', 'abu_dhabi'
+      ];
+      if (arabZones.some(z => tzLower.includes(z))) {
+        return 'ar';
+      }
+    }
+
+    // Default for Western/Europe/America and all other international regions -> English
+    return 'en';
+  } catch (e) {
+    return 'ur';
   }
 };
 
 const ThemeLanguageContext = createContext<ThemeLanguageContextType | undefined>(undefined);
 
 export const ThemeLanguageProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [language, setLanguage] = useState<Language>('ur');
-  const [darkMode, setDarkMode] = useState<boolean>(false);
+  const [language, setLanguage] = useState<Language>(() => {
+    if (typeof window !== 'undefined') {
+      const savedLang = localStorage.getItem('jia_lang') as Language;
+      if (savedLang && ['ur', 'en', 'ar'].includes(savedLang)) {
+        return savedLang;
+      }
+      return detectDefaultLanguage();
+    }
+    return 'ur';
+  });
+
+  const [darkMode, setDarkMode] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('jia_dark') === 'true';
+    }
+    return false;
+  });
 
   useEffect(() => {
     const savedLang = localStorage.getItem('jia_lang') as Language;
-    if (savedLang && ['ur', 'en', 'ar'].includes(savedLang)) {
-      setLanguage(savedLang);
+    if (!savedLang || !['ur', 'en', 'ar'].includes(savedLang)) {
+      const detected = detectDefaultLanguage();
+      setLanguage(detected);
+      localStorage.setItem('jia_lang', detected);
     }
-    const savedDark = localStorage.getItem('jia_dark') === 'true';
-    setDarkMode(savedDark);
   }, []);
 
   useEffect(() => {

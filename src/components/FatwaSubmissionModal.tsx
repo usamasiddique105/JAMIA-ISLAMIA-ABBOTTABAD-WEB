@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { FatwaCategory, OnlineQuestion } from '../types';
 import { StorageService } from '../services/storage';
+import { NotificationService } from '../services/notificationService';
 import { useThemeLanguage } from '../context/ThemeLanguageContext';
-import { X, Send, Sparkles, CheckCircle2, Shield, Lock } from 'lucide-react';
+import { X, Send, Sparkles, CheckCircle2, Shield, Lock, MessageCircle, Mail } from 'lucide-react';
 
 interface FatwaSubmissionModalProps {
   isOpen: boolean;
@@ -32,13 +33,17 @@ export const FatwaSubmissionModal: React.FC<FatwaSubmissionModalProps> = ({ isOp
   const [subject, setSubject] = useState('');
   const [question, setQuestion] = useState('');
   const [submitted, setSubmitted] = useState(false);
+  const [submittedQuestion, setSubmittedQuestion] = useState<OnlineQuestion | null>(null);
+  const [whatsappUrl, setWhatsappUrl] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim() || !email.trim() || !question.trim()) return;
 
+    setIsSubmitting(true);
     const newQuestion: OnlineQuestion = {
       id: `q-${Date.now()}`,
       questionerName: name,
@@ -52,7 +57,17 @@ export const FatwaSubmissionModal: React.FC<FatwaSubmissionModalProps> = ({ isOp
     };
 
     StorageService.addQuestion(newQuestion);
-    setSubmitted(true);
+    setSubmittedQuestion(newQuestion);
+
+    try {
+      const res = await NotificationService.sendFatwaQuestionNotification(newQuestion);
+      setWhatsappUrl(res.whatsappUrl);
+    } catch (err) {
+      console.error('Notification dispatch error:', err);
+    } finally {
+      setIsSubmitting(false);
+      setSubmitted(true);
+    }
   };
 
   const handleReset = () => {
@@ -63,6 +78,8 @@ export const FatwaSubmissionModal: React.FC<FatwaSubmissionModalProps> = ({ isOp
     setSubject('');
     setQuestion('');
     setSubmitted(false);
+    setSubmittedQuestion(null);
+    setWhatsappUrl('');
     onClose();
   };
 
@@ -92,20 +109,52 @@ export const FatwaSubmissionModal: React.FC<FatwaSubmissionModalProps> = ({ isOp
         {/* Body */}
         <div className="p-4 sm:p-5 overflow-y-auto flex-1 text-right">
           {submitted ? (
-            <div className="text-center py-6 space-y-3">
-              <div className="w-12 h-12 bg-amber-50 dark:bg-slate-800 text-[#0B5D3B] rounded-full flex items-center justify-center mx-auto border-2 border-[#0B5D3B]">
-                <CheckCircle2 className="w-7 h-7" />
+            <div className="text-center py-5 space-y-4 font-urdu">
+              <div className="w-14 h-14 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 rounded-full flex items-center justify-center mx-auto border-2 border-emerald-600 shadow-sm">
+                <CheckCircle2 className="w-8 h-8" />
               </div>
-              <h3 className="text-lg font-bold text-[#3C2E21] dark:text-amber-100">
-                آپ کا سوال دار الافتاء کو موصول ہو گیا ہے!
-              </h3>
-              <p className="text-xs text-stone-600 dark:text-stone-300 max-w-sm mx-auto leading-relaxed">
-                مفتیانِ کرام جلد از جلد آپ کے سوال کا شرعی جائزہ لے کر جواب فراہم کریں گے۔
-              </p>
-              <div className="pt-2">
+              
+              <div className="space-y-1">
+                <h3 className="text-lg font-bold text-[#3C2E21] dark:text-amber-100">
+                  آپ کا شرعی سوال دار الافتاء کو موصول ہو گیا ہے!
+                </h3>
+                <p className="text-xs text-stone-600 dark:text-stone-300 max-w-sm mx-auto leading-relaxed">
+                  مفتیانِ کرام جلد از جلد آپ کے سوال کا شرعی جائزہ لے کر بذریعہ ای میل جواب فراہم کریں گے۔
+                </p>
+              </div>
+
+              {submittedQuestion && (
+                <div className="bg-amber-50/70 dark:bg-slate-800/70 border border-amber-200 dark:border-slate-700 rounded-xl p-3 text-xs text-right space-y-1.5 max-w-md mx-auto">
+                  <div className="flex justify-between items-center text-[11px] pb-1 border-b border-amber-200/60 dark:border-slate-700">
+                    <span className="text-stone-500 dark:text-stone-400">سوال کا ٹکٹ نمبر:</span>
+                    <span className="font-mono font-bold text-[#0B5D3B] dark:text-emerald-400">{submittedQuestion.id}</span>
+                  </div>
+                  <div className="text-stone-700 dark:text-stone-300">
+                    <span className="font-bold">سائل:</span> {submittedQuestion.questionerName} ({submittedQuestion.questionerEmail})
+                  </div>
+                  <div className="text-stone-700 dark:text-stone-300">
+                    <span className="font-bold">موضوع:</span> {submittedQuestion.subject}
+                  </div>
+                </div>
+              )}
+
+              {/* Direct Instant Action Buttons */}
+              <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-2.5 max-w-md mx-auto">
+                {whatsappUrl && (
+                  <a 
+                    href={whatsappUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full sm:w-auto px-4 py-2.5 bg-[#25D366] hover:bg-[#20ba5a] text-white text-xs font-bold rounded-xl shadow-sm flex items-center justify-center gap-2 transition-transform hover:scale-[1.02]"
+                  >
+                    <MessageCircle className="w-4 h-4" />
+                    <span>واٹس ایپ پر فوری نقل بھیجیں</span>
+                  </a>
+                )}
+
                 <button 
                   onClick={handleReset}
-                  className="px-5 py-2 bg-[#0B5D3B] hover:bg-[#08482D] text-white text-xs font-bold rounded-lg shadow-sm transition-colors cursor-pointer"
+                  className="w-full sm:w-auto px-5 py-2.5 bg-[#0B5D3B] hover:bg-[#08482D] text-white text-xs font-bold rounded-xl shadow-sm transition-colors cursor-pointer"
                 >
                   مکمل کریں (بند کریں)
                 </button>

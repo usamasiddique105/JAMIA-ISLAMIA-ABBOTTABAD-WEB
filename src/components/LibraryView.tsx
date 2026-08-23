@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { PublicationBook } from '../types';
 import { StorageService } from '../services/storage';
 import { useThemeLanguage } from '../context/ThemeLanguageContext';
+import { getLocalizedText } from '../utils/translationHelper';
 import headerLogoCalligraphy from '../assets/images/jamia_logo_calligraphy_transparent.png';
 import { JAMIA_HEADER_LOGO_DATA_URI } from '../assets/logoBase64';
 import { 
@@ -218,23 +219,39 @@ export const LibraryView: React.FC<LibraryViewProps> = ({ onSelectTab }) => {
             </ul>
           </div>
 
-          {/* WIDGET 3: Search Box */}
-          <div className="bg-[#FAF7F0] dark:bg-slate-900 border border-[#D5C7B2] dark:border-slate-800 p-4 rounded-xs shadow-xs space-y-3">
-            <div className="flex items-center gap-2 text-[#3C2E21] dark:text-amber-300 font-bold border-b border-[#EADFCF] dark:border-slate-800 pb-2">
-              <Search className="w-4 h-4 text-[#B88A3B]" />
-              <h3 className="text-base font-urdu">
+          {/* WIDGET 3: Search Box (عین اسی ڈیزائن میں) */}
+          <div className="bg-[#FAF7F0] dark:bg-slate-900 border border-[#D5C7B2] dark:border-slate-800 rounded-xs shadow-xs overflow-hidden">
+            <div 
+              className="bg-[#3C2E21] text-white px-4 py-3 flex items-center gap-2.5 border-b-2 border-[#B88A3B]"
+              style={{
+                backgroundImage: `url("data:image/svg+xml,%3Csvg width='24' height='24' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23B88A3B' fill-opacity='0.15'%3E%3Cpath d='M12 0l12 12-12 12L0 12 12 0zm0 3.5L3.5 12 12 20.5 20.5 12 12 3.5z'/%3E%3C/g%3E%3C/svg%3E")`
+              }}
+            >
+              <Search className="w-5 h-5 text-[#B88A3B]" />
+              <h2 className="text-lg sm:text-xl font-bold font-urdu tracking-wide">
                 {language === 'ur' ? 'کتاب تلاش کریں' : language === 'ar' ? 'بحث في الكتب' : 'Search Book'}
-              </h3>
+              </h2>
             </div>
-            <div className="relative">
-              <input 
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="عنوان یا مصنف کا نام لکھیں..."
-                className="w-full pr-3 pl-8 py-2 text-xs bg-white dark:bg-slate-800 border border-stone-300 dark:border-slate-700 rounded focus:outline-none focus:border-[#0B5D3B] text-right font-urdu"
-              />
-              <Search className="w-4 h-4 text-stone-400 absolute left-2.5 top-2.5" />
+            <div className="p-4 space-y-3">
+              <div className="relative">
+                <input 
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder={language === 'ur' ? 'عنوان یا مصنف کا نام لکھیں...' : language === 'ar' ? 'اكتب اسم الكتاب أو المؤلف...' : 'Enter book title or author...'}
+                  className="w-full pr-4 pl-9 py-2.5 text-sm bg-white dark:bg-slate-800 border border-[#D2C2A7] dark:border-slate-700 rounded-xs focus:outline-none focus:border-[#B88A3B] text-right font-urdu text-stone-900 dark:text-stone-100 placeholder-stone-400"
+                />
+                <Search className="w-4 h-4 text-[#B88A3B] absolute left-3 top-3.5" />
+              </div>
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery('')}
+                  className="w-full py-1.5 text-xs text-stone-600 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-200 underline font-urdu"
+                >
+                  {language === 'ur' ? 'تلاش ختم کریں' : 'مسح البحث'}
+                </button>
+              )}
             </div>
           </div>
 
@@ -287,16 +304,16 @@ export const LibraryView: React.FC<LibraryViewProps> = ({ onSelectTab }) => {
                     {/* Text Details */}
                     <div className="flex-1 space-y-2 text-right">
                       <h3 className="text-base sm:text-lg lg:text-xl font-bold text-[#2B1B0E] dark:text-amber-100 font-urdu leading-relaxed">
-                        {book.title.ur}
+                        {getLocalizedText(book.title, language)}
                         {book.author && (
                           <span className="text-sm font-normal text-stone-600 dark:text-stone-300 mr-1.5">
-                            : {book.description || `جامعہ کے شیوخ کی تصنیف کردہ مبارک کتاب۔`}
+                            : {getLocalizedText(book.description, language) || `جامعہ کے شیوخ کی تصنیف کردہ مبارک کتاب۔`}
                           </span>
                         )}
                       </h3>
                       {!book.author && book.description && (
                         <p className="text-sm sm:text-base text-stone-700 dark:text-stone-300 font-urdu leading-relaxed">
-                          {book.description}
+                          {getLocalizedText(book.description, language)}
                         </p>
                       )}
                     </div>
@@ -306,7 +323,7 @@ export const LibraryView: React.FC<LibraryViewProps> = ({ onSelectTab }) => {
                       <div className="shrink-0 self-center sm:self-start">
                         <img 
                           src={book.coverImage} 
-                          alt={book.title.ur} 
+                          alt={getLocalizedText(book.title, language)} 
                           className="w-24 sm:w-28 md:w-32 h-auto max-h-44 object-cover rounded-xs border border-[#C9B9A2] shadow-xs bg-white"
                           loading="lazy"
                         />

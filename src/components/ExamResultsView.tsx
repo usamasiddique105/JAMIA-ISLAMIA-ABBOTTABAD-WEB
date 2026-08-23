@@ -74,55 +74,72 @@ export const ExamResultsView: React.FC = () => {
         </div>
       </div>
 
-      {/* Lookup Card */}
-      <div className="bg-white dark:bg-slate-900 p-6 sm:p-8 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-md max-w-2xl mx-auto no-print space-y-4">
-        <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100 font-urdu text-center">
-          نتیجہ معلوم کرنے کے لیے رول نمبر درج کریں
-        </h2>
-
-        <form onSubmit={handleSearch} className="space-y-3">
-          <div className="flex gap-2">
-            <div className="relative flex-1">
-              <Search className="w-4 h-4 text-slate-400 absolute right-3 top-3.5" />
-              <input 
-                type="text"
-                value={rollNumber}
-                onChange={(e) => setRollNumber(e.target.value)}
-                placeholder="مثلاً: 2026-8801 یا 2026-8802..."
-                className="w-full pr-10 pl-4 py-3 text-sm bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl focus:outline-none focus:border-emerald-500 font-mono font-bold text-slate-900 dark:text-slate-100"
-              />
-            </div>
-            <button 
-              type="submit"
-              className="px-6 py-3 bg-emerald-800 hover:bg-emerald-900 text-amber-200 font-bold text-xs rounded-xl shadow-md transition-colors font-urdu flex items-center gap-1.5"
-            >
-              <Search className="w-4 h-4" />
-              <span>نتیجہ دیکھیں</span>
-            </button>
+      {/* Lookup Card (عین نشر و اشاعت والے ڈیزائن میں) */}
+      <div className="bg-[#FAF7F0] dark:bg-slate-900 border border-[#D5C7B2] dark:border-slate-800 rounded-xs shadow-xs overflow-hidden max-w-2xl mx-auto no-print">
+        
+        {/* Header with Islamic geometric pattern */}
+        <div 
+          className="bg-[#3C2E21] text-white px-5 py-3.5 flex items-center justify-between border-b-2 border-[#B88A3B]"
+          style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg width='24' height='24' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23B88A3B' fill-opacity='0.15'%3E%3Cpath d='M12 0l12 12-12 12L0 12 12 0zm0 3.5L3.5 12 12 20.5 20.5 12 12 3.5z'/%3E%3C/g%3E%3C/svg%3E")`
+          }}
+        >
+          <div className="flex items-center gap-2.5">
+            <Search className="w-5 h-5 text-[#B88A3B]" />
+            <h2 className="text-lg sm:text-xl font-bold font-urdu tracking-wide">
+              نتیجہ معلوم کرنے کے لیے رول نمبر درج کریں
+            </h2>
           </div>
+          <span className="text-[#B88A3B] text-xs px-2.5 py-0.5 bg-black/25 rounded-xs font-urdu">
+            سالانہ امتحان ۲۰۲۶ء
+          </span>
+        </div>
 
-          {/* Quick Demo Roll Numbers */}
-          <div className="flex items-center justify-center gap-2 text-xs text-slate-500">
-            <span>آزمائشی رول نمبرز:</span>
-            {['2026-8801', '2026-8802', '2026-8803'].map(num => (
+        <div className="p-5 sm:p-7 space-y-4">
+          <form onSubmit={handleSearch} className="space-y-4">
+            <div className="flex flex-col sm:flex-row gap-2.5">
+              <div className="relative flex-1">
+                <input 
+                  type="text"
+                  value={rollNumber}
+                  onChange={(e) => setRollNumber(e.target.value)}
+                  placeholder="مثلاً: 2026-8801 یا 2026-8802..."
+                  className="w-full pr-10 pl-4 py-2.5 text-sm bg-white dark:bg-slate-800 border border-[#D2C2A7] dark:border-slate-700 rounded-xs focus:outline-none focus:border-[#B88A3B] font-mono font-bold text-stone-900 dark:text-stone-100 placeholder-stone-400"
+                />
+                <Search className="w-4 h-4 text-[#B88A3B] absolute right-3.5 top-3.5" />
+              </div>
               <button 
-                key={num}
-                type="button"
-                onClick={() => { setRollNumber(num); }}
-                className="px-2 py-0.5 rounded bg-amber-100 dark:bg-slate-800 text-emerald-900 dark:text-amber-300 font-mono font-bold hover:underline"
+                type="submit"
+                className="px-6 py-2.5 bg-[#5C4632] hover:bg-[#483625] text-amber-100 font-bold text-sm rounded-xs shadow-xs transition-colors font-urdu flex items-center justify-center gap-2 cursor-pointer border border-[#B88A3B]/40"
               >
-                {num}
+                <Search className="w-4 h-4 text-[#B88A3B]" />
+                <span>نتیجہ دیکھیں</span>
               </button>
-            ))}
-          </div>
-        </form>
+            </div>
 
-        {errorMsg && (
-          <div className="p-4 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900 rounded-xl text-red-700 dark:text-red-300 text-xs font-urdu flex items-center gap-2">
-            <AlertCircle className="w-5 h-5 shrink-0" />
-            <span>{errorMsg}</span>
-          </div>
-        )}
+            {/* Quick Demo Roll Numbers */}
+            <div className="flex flex-wrap items-center justify-center gap-2 text-xs text-stone-600 dark:text-stone-400 font-urdu pt-1">
+              <span>آزمائشی رول نمبرز (Trail):</span>
+              {['2026-8801', '2026-8802', '2026-8803'].map(num => (
+                <button 
+                  key={num}
+                  type="button"
+                  onClick={() => { setRollNumber(num); }}
+                  className="px-2.5 py-1 rounded-xs bg-[#EFE8DA] dark:bg-slate-800 text-[#5C4632] dark:text-amber-300 font-mono font-bold hover:bg-[#E2D6C0] border border-[#D5C7B2] dark:border-slate-700 transition-colors cursor-pointer"
+                >
+                  {num}
+                </button>
+              ))}
+            </div>
+          </form>
+
+          {errorMsg && (
+            <div className="p-3.5 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900 rounded-xs text-red-700 dark:text-red-300 text-xs font-urdu flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 shrink-0" />
+              <span>{errorMsg}</span>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Official Mark Sheet Result Card */}

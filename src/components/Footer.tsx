@@ -19,14 +19,15 @@ export const Footer: React.FC<FooterProps> = ({ setCurrentTab, onOpenFatwaModal 
 
   return (
     <footer 
-      className="text-[#E0D8C7] relative overflow-hidden font-urdu border-t-2 border-[#38261A]"
+      className="text-[#E0D8C7] relative overflow-hidden font-urdu border-t-2 border-[#4A3222]"
       style={{
-        backgroundColor: '#1E1611',
+        backgroundColor: '#241811',
         backgroundImage: `
-          radial-gradient(circle at 50% 50%, rgba(54, 40, 28, 0.45) 0%, rgba(20, 14, 10, 0.95) 100%),
-          url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23B89B72' fill-opacity='0.055' fill-rule='evenodd'%3E%3Cpath d='M0 40L40 0l40 40-40 40L0 40zm40-28.284L11.716 40 40 68.284 68.284 40 40 11.716zM40 20L20 40l20 20 20-20-20-20zm0 8.485L28.485 40 40 51.515 51.515 40 40 28.485z'/%3E%3Ccircle cx='40' cy='40' r='4'/%3E%3Cpath d='M0 0l20 20L0 40V0zm80 0L60 20l20 20V0zM0 80l20-20L0 40v40zm80 0L60 60l20-20v40z'/%3E%3C/g%3E%3C/svg%3E")
+          url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%23C7A87A' stroke-width='0.75' stroke-opacity='0.055' stroke-linejoin='round' stroke-linecap='round'%3E%3Crect x='26' y='26' width='28' height='28' /%3E%3Crect x='26' y='26' width='28' height='28' transform='rotate(45 40 40)' /%3E%3Ccircle cx='40' cy='40' r='6' /%3E%3Ccircle cx='40' cy='40' r='18' /%3E%3Crect x='-14' y='-14' width='28' height='28' /%3E%3Crect x='-14' y='-14' width='28' height='28' transform='rotate(45 0 0)' /%3E%3Ccircle cx='0' cy='0' r='6' /%3E%3Ccircle cx='0' cy='0' r='18' /%3E%3Crect x='66' y='-14' width='28' height='28' /%3E%3Crect x='66' y='-14' width='28' height='28' transform='rotate(45 80 0)' /%3E%3Ccircle cx='80' cy='0' r='6' /%3E%3Ccircle cx='80' cy='0' r='18' /%3E%3Crect x='-14' y='66' width='28' height='28' /%3E%3Crect x='-14' y='66' width='28' height='28' transform='rotate(45 0 80)' /%3E%3Ccircle cx='0' cy='80' r='6' /%3E%3Ccircle cx='0' cy='80' r='18' /%3E%3Crect x='66' y='66' width='28' height='28' /%3E%3Crect x='66' y='66' width='28' height='28' transform='rotate(45 80 80)' /%3E%3Ccircle cx='80' cy='80' r='6' /%3E%3Ccircle cx='80' cy='80' r='18' /%3E%3Cline x1='0' y1='40' x2='80' y2='40' /%3E%3Cline x1='40' y1='0' x2='40' y2='80' /%3E%3Cline x1='0' y1='0' x2='80' y2='80' /%3E%3Cline x1='80' y1='0' x2='0' y2='80' /%3E%3C/g%3E%3C/svg%3E"),
+          linear-gradient(180deg, #2B1D15 0%, #22160F 50%, #1A100B 100%)
         `,
-        backgroundRepeat: 'repeat'
+        backgroundSize: '80px 80px, 100% 100%',
+        backgroundRepeat: 'repeat, no-repeat'
       }}
     >
       <div className="max-w-[1350px] mx-auto px-6 py-12 relative z-10">
@@ -190,7 +191,7 @@ export const Footer: React.FC<FooterProps> = ({ setCurrentTab, onOpenFatwaModal 
             <div className="space-y-2 text-sm sm:text-base font-mono text-[#D1C7B3] pt-2 text-right">
               <div>P.O. Box : 22010. Abbottabad, Pakistan</div>
               <div dir="ltr" className="text-right">+923489002496</div>
-              <div>JamiaIslamaiAbottabad.com</div>
+              <div>jamia-islamia-abbottabad.pages.dev</div>
             </div>
 
             {/* Admin Portal Access (Discreet Admin Login Button) */}
@@ -249,4 +250,3 @@ export const Footer: React.FC<FooterProps> = ({ setCurrentTab, onOpenFatwaModal 
     </footer>
   );
 };
-

@@ -36,32 +36,42 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({ isOpen, on
 
   return (
     <div className="fixed inset-0 z-[9999] flex items-start justify-center pt-16 p-4 bg-slate-950/80 backdrop-blur-xs font-sans">
-      <div className="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-2xl max-w-2xl w-full border border-amber-300 dark:border-slate-800 shadow-2xl overflow-hidden flex flex-col max-h-[80vh]">
+      <div className="bg-[#FAF7F0] dark:bg-slate-900 text-stone-900 dark:text-stone-100 rounded-xs max-w-2xl w-full border border-[#D5C7B2] dark:border-slate-800 shadow-2xl overflow-hidden flex flex-col max-h-[80vh]">
         
-        {/* Search Header */}
-        <div className="p-4 border-b border-slate-200 dark:border-slate-800 flex items-center gap-3 bg-slate-50 dark:bg-slate-800">
-          <Search className="w-5 h-5 text-emerald-600" />
-          <input 
-            type="text" 
-            autoFocus
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="فتاویٰ، کتب یا خبریں تلاش کریں..."
-            className="flex-1 bg-transparent text-sm focus:outline-none font-urdu font-bold text-slate-900 dark:text-slate-100"
-          />
-          <button onClick={onClose} className="p-1 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700">
-            <X className="w-5 h-5 text-slate-500" />
+        {/* Search Header with Islamic geometric pattern */}
+        <div 
+          className="bg-[#3C2E21] text-white px-5 py-3.5 flex items-center justify-between border-b-2 border-[#B88A3B]"
+          style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg width='24' height='24' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23B88A3B' fill-opacity='0.15'%3E%3Cpath d='M12 0l12 12-12 12L0 12 12 0zm0 3.5L3.5 12 12 20.5 20.5 12 12 3.5z'/%3E%3C/g%3E%3C/svg%3E")`
+          }}
+        >
+          <div className="flex items-center gap-2.5 flex-1 mr-3">
+            <Search className="w-5 h-5 text-[#B88A3B] shrink-0" />
+            <input 
+              type="text" 
+              autoFocus
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="فتاویٰ، کتب یا خبریں تلاش کریں..."
+              className="w-full bg-transparent text-white placeholder-amber-200/60 text-sm sm:text-base focus:outline-none font-urdu font-bold"
+            />
+          </div>
+          <button 
+            onClick={onClose} 
+            className="p-1 rounded-xs bg-black/25 hover:bg-black/40 text-amber-200 transition-colors cursor-pointer"
+          >
+            <X className="w-5 h-5 text-[#B88A3B]" />
           </button>
         </div>
 
         {/* Search Results list */}
-        <div className="p-6 overflow-y-auto space-y-6">
+        <div className="p-5 sm:p-6 overflow-y-auto space-y-5 bg-[#FAF7F0] dark:bg-slate-900">
           
           {/* Fatwas */}
           {fatwas.length > 0 && (
             <div className="space-y-2">
-              <div className="text-xs font-bold text-emerald-800 dark:text-emerald-400 font-urdu flex items-center gap-1.5 border-b border-slate-100 dark:border-slate-800 pb-1">
-                <BookOpen className="w-4 h-4 text-emerald-600" />
+              <div className="text-xs font-bold text-[#5C4632] dark:text-amber-300 font-urdu flex items-center gap-1.5 border-b border-[#EADFCF] dark:border-slate-800 pb-1.5">
+                <BookOpen className="w-4 h-4 text-[#B88A3B]" />
                 <span>فتاویٰ جات (Fatwas)</span>
               </div>
               <div className="space-y-2">
@@ -69,13 +79,13 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({ isOpen, on
                   <div 
                     key={f.id}
                     onClick={() => { onNavigate('fatwas'); onClose(); }}
-                    className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 hover:bg-emerald-50 dark:hover:bg-slate-800 cursor-pointer transition-colors flex items-center justify-between"
+                    className="p-3 rounded-xs bg-white dark:bg-slate-800 border border-[#D5C7B2] dark:border-slate-700 hover:bg-[#EFE8DA] dark:hover:bg-slate-700/80 cursor-pointer transition-colors flex items-center justify-between shadow-2xs"
                   >
                     <div>
-                      <div className="text-xs font-mono text-emerald-700 font-bold">{f.fatwaNumber}</div>
-                      <div className="text-sm font-bold font-urdu text-slate-900 dark:text-slate-100">{f.title.ur}</div>
+                      <div className="text-xs font-mono text-[#8C6D37] dark:text-amber-300 font-bold">{f.fatwaNumber}</div>
+                      <div className="text-sm font-bold font-urdu text-[#2B1B0E] dark:text-stone-100">{f.title.ur}</div>
                     </div>
-                    <ChevronRight className="w-4 h-4 text-slate-400" />
+                    <ChevronRight className="w-4 h-4 text-[#B88A3B]" />
                   </div>
                 ))}
               </div>
@@ -85,8 +95,8 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({ isOpen, on
           {/* Books */}
           {books.length > 0 && (
             <div className="space-y-2">
-              <div className="text-xs font-bold text-slate-700 dark:text-slate-300 font-urdu flex items-center gap-1.5 border-b border-slate-100 dark:border-slate-800 pb-1">
-                <BookOpen className="w-4 h-4 text-slate-600" />
+              <div className="text-xs font-bold text-[#5C4632] dark:text-amber-300 font-urdu flex items-center gap-1.5 border-b border-[#EADFCF] dark:border-slate-800 pb-1.5">
+                <BookOpen className="w-4 h-4 text-[#B88A3B]" />
                 <span>کتب و مطبوعات (Digital Books)</span>
               </div>
               <div className="space-y-2">
@@ -94,14 +104,35 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({ isOpen, on
                   <div 
                     key={b.id}
                     onClick={() => { onNavigate('library'); onClose(); }}
-                    className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer transition-colors flex items-center justify-between"
+                    className="p-3 rounded-xs bg-white dark:bg-slate-800 border border-[#D5C7B2] dark:border-slate-700 hover:bg-[#EFE8DA] dark:hover:bg-slate-700/80 cursor-pointer transition-colors flex items-center justify-between shadow-2xs"
                   >
                     <div>
-                      <div className="text-xs font-urdu font-bold text-slate-900 dark:text-slate-100">{b.title.ur}</div>
-                      <div className="text-[11px] text-slate-500">{b.author}</div>
+                      <div className="text-xs font-urdu font-bold text-[#2B1B0E] dark:text-stone-100">{b.title.ur}</div>
+                      <div className="text-[11px] text-stone-500 dark:text-stone-400">{b.author}</div>
                     </div>
-                    <ChevronRight className="w-4 h-4 text-slate-400" />
+                    <ChevronRight className="w-4 h-4 text-[#B88A3B]" />
                   </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Quick Trail / Demo Keywords */}
+          {!query && (
+            <div className="p-4 bg-white dark:bg-slate-800/80 rounded-xs border border-[#D5C7B2] dark:border-slate-700 space-y-2.5">
+              <div className="text-xs font-bold text-stone-700 dark:text-stone-300 font-urdu">
+                مقبول تلاش (Popular Search Trails):
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {['نماز', 'زکوٰۃ', 'نکاح', 'روزہ', 'تفسیر', 'حدیث'].map((kw) => (
+                  <button
+                    key={kw}
+                    type="button"
+                    onClick={() => setQuery(kw)}
+                    className="px-2.5 py-1 text-xs bg-[#FAF7F0] hover:bg-[#EFE8DA] dark:bg-slate-700 text-[#5C4632] dark:text-amber-300 rounded-xs border border-[#D5C7B2] dark:border-slate-600 font-urdu font-bold transition-colors cursor-pointer"
+                  >
+                    {kw}
+                  </button>
                 ))}
               </div>
             </div>

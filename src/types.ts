@@ -43,6 +43,10 @@ export interface Fatwa {
   status: FatwaStatus;
   isFeatured?: boolean;
   views: number;
+  isAiTranslatedEn?: boolean;
+  isTranslationApproved?: boolean;
+  aiTranslatedEnAt?: string;
+  translationApprovedBy?: string;
 }
 
 export interface OnlineQuestion {
@@ -208,6 +212,11 @@ export interface SiteSettings {
   phoneSecondary: string;
   email: string;
   whatsappNumber: string;
+  notificationEmail?: string;
+  notificationWhatsApp?: string;
+  webhookUrl?: string;
+  enableEmailNotifications?: boolean;
+  enableWhatsAppNotifications?: boolean;
   address: string;
   city: string;
   visitorCount: number;

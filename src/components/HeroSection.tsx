@@ -394,23 +394,23 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
         </motion.div>
       </motion.div>
 
-      {/* 2. EXACT 6 PORTAL TILES: Initial Load Center-to-Left and Center-to-Right Split Animation */}
+      {/* 2. EXACT 6 PORTAL TILES: 2 per row on mobile screens (grid-cols-2), 3 per row on tablet/desktop (sm:grid-cols-3) */}
       <div 
-        className="grid grid-cols-3 gap-1.5 xs:gap-2.5 sm:gap-4 md:gap-5"
+        className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 xs:gap-3 sm:gap-4 md:gap-5"
       >
-        {/* Tile 1: بانیِ جامعہ و اکابرین (Left Column - moves from center towards left) */}
+        {/* Tile 1: بانیِ جامعہ و اکابرین */}
         <motion.div 
-          initial={{ opacity: 0, x: -60 }}
+          initial={{ opacity: 0, x: -40 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.85, ease: [0.25, 0.1, 0.25, 1] }}
           onClick={() => setCurrentTab('about')}
-          className="w-full min-h-[92px] xs:min-h-[110px] sm:min-h-0 sm:h-32 md:h-34 rounded-[2px] bg-gradient-to-b from-[#FFFFFF] via-[#FAF9F6] to-[#ECEAE4] hover:from-[#F5EDD6] hover:via-[#F5EDD6] hover:to-[#F5EDD6] hover:bg-[#F5EDD6] dark:from-[#151D2A] dark:via-[#151D2A] dark:to-[#151D2A] dark:hover:from-[#1E293B] dark:hover:via-[#1E293B] dark:hover:to-[#1E293B] dark:bg-[#151D2A] border border-[#D5D0C6] hover:border-[#D0C5A8] dark:border-slate-700 shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:shadow-md transition-all duration-700 ease-out cursor-pointer group overflow-hidden flex items-center justify-between py-1 xs:py-1.5 sm:py-0"
+          className="w-full min-h-[105px] xs:min-h-[115px] sm:min-h-[128px] sm:h-32 md:h-34 rounded-[3px] bg-gradient-to-b from-[#FFFFFF] via-[#FAF9F6] to-[#ECEAE4] hover:from-[#F7F1DF] hover:via-[#F7F1DF] hover:to-[#F7F1DF] hover:bg-[#F7F1DF] dark:from-[#151D2A] dark:via-[#151D2A] dark:to-[#151D2A] dark:hover:from-[#1E293B] dark:hover:via-[#1E293B] dark:hover:to-[#1E293B] dark:bg-[#151D2A] border border-[#B88A3B]/35 hover:border-[#B88A3B] dark:border-amber-700/40 dark:hover:border-[#B88A3B] shadow-[0_4px_14px_rgba(92,70,50,0.08),0_1px_3px_rgba(0,0,0,0.05)] hover:shadow-[0_10px_24px_rgba(184,138,59,0.18),0_4px_8px_rgba(0,0,0,0.08)] dark:shadow-[0_4px_14px_rgba(0,0,0,0.4)] dark:hover:shadow-[0_8px_24px_rgba(184,138,59,0.25)] hover:-translate-y-1.5 hover:scale-[1.01] transition-all duration-300 ease-out cursor-pointer group overflow-hidden flex items-center justify-between py-1 xs:py-1.5 sm:py-0"
           dir="ltr"
         >
           {/* Left Cream Curved Arc Container with Dark Icon */}
-          <div className="w-8 xs:w-14 sm:w-28 md:w-34 shrink-0 self-stretch bg-[#F5EDD6] dark:bg-[#1E293B] rounded-r-[32px] xs:rounded-r-[48px] sm:rounded-r-[70px] md:rounded-r-[80px] flex items-center justify-center border-r border-[#E3DCBF] dark:border-slate-700 group-hover:border-transparent transition-all duration-700 ease-out">
+          <div className="w-12 xs:w-14 sm:w-26 md:w-30 shrink-0 self-stretch bg-gradient-to-br from-[#F4E6C3] to-[#E9D5A4] dark:from-[#243044] dark:to-[#1E283A] group-hover:from-[#EBD399] group-hover:to-[#DFC27F] dark:group-hover:from-[#2D3C55] dark:group-hover:to-[#243044] rounded-r-[38px] xs:rounded-r-[48px] sm:rounded-r-[70px] md:rounded-r-[80px] flex items-center justify-center border-r border-[#DEC998] dark:border-amber-700/50 group-hover:border-[#B88A3B]/60 shadow-inner transition-all duration-300 ease-out">
             {/* Scholar Pen / Ornate Calligraphy Emblem SVG */}
-            <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 xs:w-8 xs:h-8 sm:w-14 sm:h-14 md:w-16 md:h-16 text-[#241F1A] dark:text-amber-300">
+            <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 xs:w-7 xs:h-7 sm:w-13 sm:h-13 md:w-15 md:h-15 text-[#241F1A] dark:text-amber-300">
               <path d="M32 6L28 22H36L32 6Z" fill="currentColor" />
               <path d="M32 22V32M32 32L31 34H33L32 32Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
               <path d="M22 36C22 34 26 33 32 33C38 33 42 34 42 36C42 40 37 42 32 42C27 42 22 40 22 36Z" fill="currentColor" />
@@ -421,28 +421,28 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
           </div>
 
           {/* Right Text Block */}
-          <div className="grow text-right pl-1 xs:pl-2 pr-1.5 xs:pr-3 sm:pr-6 py-1 space-y-0.5 sm:space-y-1" dir={language === 'en' ? 'ltr' : 'rtl'}>
-            <h3 className={`text-xs xs:text-sm sm:text-lg md:text-xl xl:text-[22px] font-bold text-[#1A1612] dark:text-white group-hover:text-[#5C4632] dark:group-hover:text-amber-300 transition-colors ${language === 'en' ? 'font-sans leading-tight' : 'font-urdu leading-[1.8]'}`}>
+          <div className="grow pl-0.5 xs:pl-1 pr-1 xs:pr-1.5 sm:pr-5 py-0.5 sm:py-1 space-y-0 sm:space-y-0.5 min-w-0 flex flex-col justify-center" dir={language === 'en' ? 'ltr' : 'rtl'}>
+            <h3 className={`text-center text-sm xs:text-base sm:text-lg md:text-xl xl:text-[22px] font-bold text-[#1A1612] dark:text-white group-hover:text-[#5C4632] dark:group-hover:text-amber-300 transition-colors whitespace-nowrap ${language === 'en' ? 'font-sans leading-tight' : 'font-urdu leading-[2.2] pt-1 sm:pt-1.5'}`}>
               {language === 'ar' ? 'مؤسس الجامعة' : language === 'en' ? 'Founder & Elders' : 'بانیِ جامعہ'}
             </h3>
-            <p className={`text-[10px] xs:text-xs sm:text-sm md:text-[15px] text-[#363028] dark:text-slate-300 line-clamp-1 xs:line-clamp-2 ${language === 'en' ? 'font-sans leading-snug' : 'font-urdu leading-[1.7]'}`}>
-              {language === 'ar' ? 'التعريف، والخدمات العلمية والدعوية' : language === 'en' ? 'Academic and regional services' : 'تعارف، علمی وعلاقائی خدمات'}
+            <p className={`text-right w-full text-[11px] xs:text-[12.5px] sm:text-sm md:text-[15px] text-[#363028] dark:text-slate-300 whitespace-nowrap overflow-visible ${language === 'en' ? 'font-sans leading-snug' : 'font-urdu leading-[1.9]'}`}>
+              {language === 'ar' ? 'التعريف والخدمات' : language === 'en' ? 'Founder & Services' : 'تعارف و خدمات'}
             </p>
           </div>
         </motion.div>
 
-        {/* Tile 2: تعارفِ جامعہ اسلامیہ (Center Column - expands from center) */}
+        {/* Tile 2: تعارفِ جامعہ اسلامیہ */}
         <motion.div 
           initial={{ opacity: 0, scale: 0.92, y: 15 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           transition={{ duration: 0.85, ease: [0.25, 0.1, 0.25, 1] }}
           onClick={() => setCurrentTab('about')}
-          className="w-full min-h-[92px] xs:min-h-[110px] sm:min-h-0 sm:h-32 md:h-34 rounded-[2px] bg-gradient-to-b from-[#FFFFFF] via-[#FAF9F6] to-[#ECEAE4] hover:from-[#F5EDD6] hover:via-[#F5EDD6] hover:to-[#F5EDD6] hover:bg-[#F5EDD6] dark:from-[#151D2A] dark:via-[#151D2A] dark:to-[#151D2A] dark:hover:from-[#1E293B] dark:hover:via-[#1E293B] dark:hover:to-[#1E293B] dark:bg-[#151D2A] border border-[#D5D0C6] hover:border-[#D0C5A8] dark:border-slate-700 shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:shadow-md transition-all duration-700 ease-out cursor-pointer group overflow-hidden flex items-center justify-between py-1 xs:py-1.5 sm:py-0"
+          className="w-full min-h-[105px] xs:min-h-[115px] sm:min-h-[128px] sm:h-32 md:h-34 rounded-[3px] bg-gradient-to-b from-[#FFFFFF] via-[#FAF9F6] to-[#ECEAE4] hover:from-[#F7F1DF] hover:via-[#F7F1DF] hover:to-[#F7F1DF] hover:bg-[#F7F1DF] dark:from-[#151D2A] dark:via-[#151D2A] dark:to-[#151D2A] dark:hover:from-[#1E293B] dark:hover:via-[#1E293B] dark:hover:to-[#1E293B] dark:bg-[#151D2A] border border-[#B88A3B]/35 hover:border-[#B88A3B] dark:border-amber-700/40 dark:hover:border-[#B88A3B] shadow-[0_4px_14px_rgba(92,70,50,0.08),0_1px_3px_rgba(0,0,0,0.05)] hover:shadow-[0_10px_24px_rgba(184,138,59,0.18),0_4px_8px_rgba(0,0,0,0.08)] dark:shadow-[0_4px_14px_rgba(0,0,0,0.4)] dark:hover:shadow-[0_8px_24px_rgba(184,138,59,0.25)] hover:-translate-y-1.5 hover:scale-[1.01] transition-all duration-300 ease-out cursor-pointer group overflow-hidden flex items-center justify-between py-1 xs:py-1.5 sm:py-0"
           dir="ltr"
         >
-          <div className="w-8 xs:w-14 sm:w-28 md:w-34 shrink-0 self-stretch bg-[#F5EDD6] dark:bg-[#1E293B] rounded-r-[32px] xs:rounded-r-[48px] sm:rounded-r-[70px] md:rounded-r-[80px] flex items-center justify-center border-r border-[#E3DCBF] dark:border-slate-700 group-hover:border-transparent transition-all duration-700 ease-out">
+          <div className="w-12 xs:w-14 sm:w-26 md:w-30 shrink-0 self-stretch bg-gradient-to-br from-[#F4E6C3] to-[#E9D5A4] dark:from-[#243044] dark:to-[#1E283A] group-hover:from-[#EBD399] group-hover:to-[#DFC27F] dark:group-hover:from-[#2D3C55] dark:group-hover:to-[#243044] rounded-r-[38px] xs:rounded-r-[48px] sm:rounded-r-[70px] md:rounded-r-[80px] flex items-center justify-center border-r border-[#DEC998] dark:border-amber-700/50 group-hover:border-[#B88A3B]/60 shadow-inner transition-all duration-300 ease-out">
             {/* Islamic 8-Point Geometric Rosette Medallion SVG */}
-            <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 xs:w-8 xs:h-8 sm:w-14 sm:h-14 md:w-16 md:h-16 text-[#241F1A] dark:text-amber-300">
+            <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 xs:w-7 xs:h-7 sm:w-13 sm:h-13 md:w-15 md:h-15 text-[#241F1A] dark:text-amber-300">
               <g fill="currentColor">
                 <rect x="18" y="18" width="28" height="28" rx="2" transform="rotate(0 32 32)" />
                 <rect x="18" y="18" width="28" height="28" rx="2" transform="rotate(45 32 32)" />
@@ -466,28 +466,28 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
             </svg>
           </div>
 
-          <div className="grow text-right pl-1 xs:pl-2 pr-1.5 xs:pr-3 sm:pr-6 py-1 space-y-0.5 sm:space-y-1" dir={language === 'en' ? 'ltr' : 'rtl'}>
-            <h3 className={`text-xs xs:text-sm sm:text-lg md:text-xl xl:text-[22px] font-bold text-[#1A1612] dark:text-white group-hover:text-[#5C4632] dark:group-hover:text-amber-300 transition-colors ${language === 'en' ? 'font-sans leading-tight' : 'font-urdu leading-[1.8]'}`}>
+          <div className="grow pl-0.5 xs:pl-1 pr-1 xs:pr-1.5 sm:pr-5 py-0.5 sm:py-1 space-y-0 sm:space-y-0.5 min-w-0 flex flex-col justify-center" dir={language === 'en' ? 'ltr' : 'rtl'}>
+            <h3 className={`text-center text-sm xs:text-base sm:text-lg md:text-xl xl:text-[22px] font-bold text-[#1A1612] dark:text-white group-hover:text-[#5C4632] dark:group-hover:text-amber-300 transition-colors whitespace-nowrap ${language === 'en' ? 'font-sans leading-tight' : 'font-urdu leading-[2.2] pt-1 sm:pt-1.5'}`}>
               {language === 'ar' ? 'التعريف بالجامعة' : language === 'en' ? 'About Jamia' : 'تعارفِ جامعہ اسلامیہ'}
             </h3>
-            <p className={`text-[10px] xs:text-xs sm:text-sm md:text-[15px] text-[#363028] dark:text-slate-300 line-clamp-1 xs:line-clamp-2 ${language === 'en' ? 'font-sans leading-snug' : 'font-urdu leading-[1.7]'}`}>
-              {language === 'ar' ? 'نبذة تعريفية شاملة عن الجامعة' : language === 'en' ? 'Introduction to Jamia at a glance' : 'جامعہ کا تعارف ایک نظر میں'}
+            <p className={`text-right w-full text-[11px] xs:text-[12.5px] sm:text-sm md:text-[15px] text-[#363028] dark:text-slate-300 whitespace-nowrap overflow-visible ${language === 'en' ? 'font-sans leading-snug' : 'font-urdu leading-[1.9]'}`}>
+              {language === 'ar' ? 'نبذة عن الجامعة' : language === 'en' ? 'Jamia at a Glance' : 'جامعہ کا مختصر تعارف'}
             </p>
           </div>
         </motion.div>
 
-        {/* Tile 3: دار الافتاء (Right Column - moves from center towards right) */}
+        {/* Tile 3: دار الافتاء */}
         <motion.div 
-          initial={{ opacity: 0, x: 60 }}
+          initial={{ opacity: 0, x: 40 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.85, ease: [0.25, 0.1, 0.25, 1] }}
           onClick={() => onOpenFatwaModal ? onOpenFatwaModal() : setCurrentTab('fatwa-new')}
-          className="w-full min-h-[92px] xs:min-h-[110px] sm:min-h-0 sm:h-32 md:h-34 rounded-[2px] bg-gradient-to-b from-[#FFFFFF] via-[#FAF9F6] to-[#ECEAE4] hover:from-[#F5EDD6] hover:via-[#F5EDD6] hover:to-[#F5EDD6] hover:bg-[#F5EDD6] dark:from-[#151D2A] dark:via-[#151D2A] dark:to-[#151D2A] dark:hover:from-[#1E293B] dark:hover:via-[#1E293B] dark:hover:to-[#1E293B] dark:bg-[#151D2A] border border-[#D5D0C6] hover:border-[#D0C5A8] dark:border-slate-700 shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:shadow-md transition-all duration-700 ease-out cursor-pointer group overflow-hidden flex items-center justify-between py-1 xs:py-1.5 sm:py-0"
+          className="w-full min-h-[105px] xs:min-h-[115px] sm:min-h-[128px] sm:h-32 md:h-34 rounded-[3px] bg-gradient-to-b from-[#FFFFFF] via-[#FAF9F6] to-[#ECEAE4] hover:from-[#F7F1DF] hover:via-[#F7F1DF] hover:to-[#F7F1DF] hover:bg-[#F7F1DF] dark:from-[#151D2A] dark:via-[#151D2A] dark:to-[#151D2A] dark:hover:from-[#1E293B] dark:hover:via-[#1E293B] dark:hover:to-[#1E293B] dark:bg-[#151D2A] border border-[#B88A3B]/35 hover:border-[#B88A3B] dark:border-amber-700/40 dark:hover:border-[#B88A3B] shadow-[0_4px_14px_rgba(92,70,50,0.08),0_1px_3px_rgba(0,0,0,0.05)] hover:shadow-[0_10px_24px_rgba(184,138,59,0.18),0_4px_8px_rgba(0,0,0,0.08)] dark:shadow-[0_4px_14px_rgba(0,0,0,0.4)] dark:hover:shadow-[0_8px_24px_rgba(184,138,59,0.25)] hover:-translate-y-1.5 hover:scale-[1.01] transition-all duration-300 ease-out cursor-pointer group overflow-hidden flex items-center justify-between py-1 xs:py-1.5 sm:py-0"
           dir="ltr"
         >
-          <div className="w-8 xs:w-14 sm:w-28 md:w-34 shrink-0 self-stretch bg-[#F5EDD6] dark:bg-[#1E293B] rounded-r-[32px] xs:rounded-r-[48px] sm:rounded-r-[70px] md:rounded-r-[80px] flex items-center justify-center border-r border-[#E3DCBF] dark:border-slate-700 group-hover:border-transparent transition-all duration-700 ease-out">
+          <div className="w-12 xs:w-14 sm:w-26 md:w-30 shrink-0 self-stretch bg-gradient-to-br from-[#F4E6C3] to-[#E9D5A4] dark:from-[#243044] dark:to-[#1E283A] group-hover:from-[#EBD399] group-hover:to-[#DFC27F] dark:group-hover:from-[#2D3C55] dark:group-hover:to-[#243044] rounded-r-[38px] xs:rounded-r-[48px] sm:rounded-r-[70px] md:rounded-r-[80px] flex items-center justify-center border-r border-[#DEC998] dark:border-amber-700/50 group-hover:border-[#B88A3B]/60 shadow-inner transition-all duration-300 ease-out">
             {/* 3 Isometric Stacked Books SVG */}
-            <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 xs:w-8 xs:h-8 sm:w-14 sm:h-14 md:w-16 md:h-16 text-[#241F1A] dark:text-amber-300">
+            <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 xs:w-7 xs:h-7 sm:w-13 sm:h-13 md:w-15 md:h-15 text-[#241F1A] dark:text-amber-300">
               <path d="M16 20L32 14L48 20L32 26L16 20Z" fill="currentColor" />
               <path d="M16 20V24L32 30L48 24V20L32 26L16 20Z" fill="#F5EDD6" className="dark:fill-[#1E293B]" stroke="currentColor" strokeWidth="1.5" />
               <path d="M16 24V27L32 33L48 27V24L32 30L16 24Z" fill="currentColor" />
@@ -498,28 +498,28 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
             </svg>
           </div>
 
-          <div className="grow text-right pl-1 xs:pl-2 pr-1.5 xs:pr-3 sm:pr-6 py-1 space-y-0.5 sm:space-y-1" dir={language === 'en' ? 'ltr' : 'rtl'}>
-            <h3 className={`text-xs xs:text-sm sm:text-lg md:text-xl xl:text-[22px] font-bold text-[#1A1612] dark:text-white group-hover:text-[#5C4632] dark:group-hover:text-amber-300 transition-colors ${language === 'en' ? 'font-sans leading-tight' : 'font-urdu leading-[1.8]'}`}>
+          <div className="grow pl-0.5 xs:pl-1 pr-0 xs:pr-0.5 sm:pr-2 py-0.5 sm:py-1 space-y-0 sm:space-y-0.5 min-w-0 flex flex-col justify-center" dir={language === 'en' ? 'ltr' : 'rtl'}>
+            <h3 className={`text-center text-sm xs:text-base sm:text-lg md:text-xl xl:text-[22px] font-bold text-[#1A1612] dark:text-white group-hover:text-[#5C4632] dark:group-hover:text-amber-300 transition-colors whitespace-nowrap ${language === 'en' ? 'font-sans leading-tight' : 'font-urdu leading-[2.2] pt-1 sm:pt-1.5'}`}>
               {language === 'ar' ? 'دار الإفتاء' : language === 'en' ? 'Darul Ifta' : 'دار الافتاء'}
             </h3>
-            <p className={`text-[10px] xs:text-xs sm:text-sm md:text-[15px] text-[#363028] dark:text-slate-300 line-clamp-1 xs:line-clamp-2 ${language === 'en' ? 'font-sans leading-snug' : 'font-urdu leading-[1.7]'}`}>
-              {language === 'ar' ? 'حل المسائل والفتاوى الشرعية' : language === 'en' ? 'Answers to your religious inquiries' : 'آپ کے مسائل اور ان کا حل'}
+            <p className={`text-right w-full pr-0 text-[11px] xs:text-[12.5px] sm:text-sm md:text-[15px] text-[#363028] dark:text-slate-300 whitespace-nowrap overflow-visible font-medium ${language === 'en' ? 'font-sans leading-snug' : 'font-urdu leading-[1.9]'}`}>
+              {language === 'ar' ? 'حل المسائل والفتاوى' : language === 'en' ? 'Answers to Inquiries' : 'آپ کے مسائل کا شرعی حل'}
             </p>
           </div>
         </motion.div>
 
-        {/* Tile 4: جرائد و رسائل (Left Column - moves from center towards left) */}
+        {/* Tile 4: جرائد و رسائل */}
         <motion.div 
-          initial={{ opacity: 0, x: -60 }}
+          initial={{ opacity: 0, x: -40 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.85, ease: [0.25, 0.1, 0.25, 1], delay: 0.08 }}
           onClick={() => setCurrentTab('library')}
-          className="w-full min-h-[92px] xs:min-h-[110px] sm:min-h-0 sm:h-32 md:h-34 rounded-[2px] bg-gradient-to-b from-[#FFFFFF] via-[#FAF9F6] to-[#ECEAE4] hover:from-[#F5EDD6] hover:via-[#F5EDD6] hover:to-[#F5EDD6] hover:bg-[#F5EDD6] dark:from-[#151D2A] dark:via-[#151D2A] dark:to-[#151D2A] dark:hover:from-[#1E293B] dark:hover:via-[#1E293B] dark:hover:to-[#1E293B] dark:bg-[#151D2A] border border-[#D5D0C6] hover:border-[#D0C5A8] dark:border-slate-700 shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:shadow-md transition-all duration-700 ease-out cursor-pointer group overflow-hidden flex items-center justify-between py-1 xs:py-1.5 sm:py-0"
+          className="w-full min-h-[105px] xs:min-h-[115px] sm:min-h-[128px] sm:h-32 md:h-34 rounded-[3px] bg-gradient-to-b from-[#FFFFFF] via-[#FAF9F6] to-[#ECEAE4] hover:from-[#F7F1DF] hover:via-[#F7F1DF] hover:to-[#F7F1DF] hover:bg-[#F7F1DF] dark:from-[#151D2A] dark:via-[#151D2A] dark:to-[#151D2A] dark:hover:from-[#1E293B] dark:hover:via-[#1E293B] dark:hover:to-[#1E293B] dark:bg-[#151D2A] border border-[#B88A3B]/35 hover:border-[#B88A3B] dark:border-amber-700/40 dark:hover:border-[#B88A3B] shadow-[0_4px_14px_rgba(92,70,50,0.08),0_1px_3px_rgba(0,0,0,0.05)] hover:shadow-[0_10px_24px_rgba(184,138,59,0.18),0_4px_8px_rgba(0,0,0,0.08)] dark:shadow-[0_4px_14px_rgba(0,0,0,0.4)] dark:hover:shadow-[0_8px_24px_rgba(184,138,59,0.25)] hover:-translate-y-1.5 hover:scale-[1.01] transition-all duration-300 ease-out cursor-pointer group overflow-hidden flex items-center justify-between py-1 xs:py-1.5 sm:py-0"
           dir="ltr"
         >
-          <div className="w-8 xs:w-14 sm:w-28 md:w-34 shrink-0 self-stretch bg-[#F5EDD6] dark:bg-[#1E293B] rounded-r-[32px] xs:rounded-r-[48px] sm:rounded-r-[70px] md:rounded-r-[80px] flex items-center justify-center border-r border-[#E3DCBF] dark:border-slate-700 group-hover:border-transparent transition-all duration-700 ease-out">
+          <div className="w-12 xs:w-14 sm:w-26 md:w-30 shrink-0 self-stretch bg-gradient-to-br from-[#F4E6C3] to-[#E9D5A4] dark:from-[#243044] dark:to-[#1E283A] group-hover:from-[#EBD399] group-hover:to-[#DFC27F] dark:group-hover:from-[#2D3C55] dark:group-hover:to-[#243044] rounded-r-[38px] xs:rounded-r-[48px] sm:rounded-r-[70px] md:rounded-r-[80px] flex items-center justify-center border-r border-[#DEC998] dark:border-amber-700/50 group-hover:border-[#B88A3B]/60 shadow-inner transition-all duration-300 ease-out">
             {/* Mosque Minaret + Open Quran Sun Rays SVG */}
-            <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 xs:w-8 xs:h-8 sm:w-14 sm:h-14 md:w-16 md:h-16 text-[#241F1A] dark:text-amber-300">
+            <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 xs:w-7 xs:h-7 sm:w-13 sm:h-13 md:w-15 md:h-15 text-[#241F1A] dark:text-amber-300">
               <path d="M22 8L20 16H24L22 8Z" fill="currentColor" />
               <rect x="19" y="16" width="6" height="4" fill="currentColor" />
               <rect x="20" y="20" width="4" height="18" fill="currentColor" stroke="currentColor" strokeWidth="0.5" />
@@ -531,28 +531,28 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
             </svg>
           </div>
 
-          <div className="grow text-right pl-1 xs:pl-2 pr-1.5 xs:pr-3 sm:pr-6 py-1 space-y-0.5 sm:space-y-1" dir={language === 'en' ? 'ltr' : 'rtl'}>
-            <h3 className={`text-xs xs:text-sm sm:text-lg md:text-xl xl:text-[22px] font-bold text-[#1A1612] dark:text-white group-hover:text-[#5C4632] dark:group-hover:text-amber-300 transition-colors ${language === 'en' ? 'font-sans leading-tight' : 'font-urdu leading-[1.8]'}`}>
+          <div className="grow pl-0.5 xs:pl-1 pr-1 xs:pr-1.5 sm:pr-5 py-0.5 sm:py-1 space-y-0 sm:space-y-0.5 min-w-0 flex flex-col justify-center" dir={language === 'en' ? 'ltr' : 'rtl'}>
+            <h3 className={`text-center text-sm xs:text-base sm:text-lg md:text-xl xl:text-[22px] font-bold text-[#1A1612] dark:text-white group-hover:text-[#5C4632] dark:group-hover:text-amber-300 transition-colors whitespace-nowrap ${language === 'en' ? 'font-sans leading-tight' : 'font-urdu leading-[2.2] pt-1 sm:pt-1.5'}`}>
               {language === 'ar' ? 'جرائد ومجلات' : language === 'en' ? 'Journals & Magazines' : 'جرائد و رسائل'}
             </h3>
-            <p className={`text-[10px] xs:text-xs sm:text-sm md:text-[15px] text-[#363028] dark:text-slate-300 line-clamp-1 xs:line-clamp-2 ${language === 'en' ? 'font-sans leading-snug' : 'font-urdu leading-[1.7]'}`}>
-              {language === 'ar' ? 'منبر القرآن الكريم والسنة النبوية' : language === 'en' ? 'Bearer of Quran and Sunnah teachings' : 'قرآن وسنت نبویہ کی تعلیمات کا علمبردار'}
+            <p className={`text-right w-full text-[11px] xs:text-[12.5px] sm:text-sm md:text-[15px] text-[#363028] dark:text-slate-300 whitespace-nowrap overflow-visible ${language === 'en' ? 'font-sans leading-snug' : 'font-urdu leading-[1.9]'}`}>
+              {language === 'ar' ? 'المجلات والبحوث' : language === 'en' ? 'Journals & Articles' : 'علمی و دعوتی رسائل'}
             </p>
           </div>
         </motion.div>
 
-        {/* Tile 5: کتابیں (Center Column - expands from center) */}
+        {/* Tile 5: کتابیں */}
         <motion.div 
           initial={{ opacity: 0, scale: 0.92, y: 15 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           transition={{ duration: 0.85, ease: [0.25, 0.1, 0.25, 1], delay: 0.08 }}
           onClick={() => setCurrentTab('library')}
-          className="w-full min-h-[92px] xs:min-h-[110px] sm:min-h-0 sm:h-32 md:h-34 rounded-[2px] bg-gradient-to-b from-[#FFFFFF] via-[#FAF9F6] to-[#ECEAE4] hover:from-[#F5EDD6] hover:via-[#F5EDD6] hover:to-[#F5EDD6] hover:bg-[#F5EDD6] dark:from-[#151D2A] dark:via-[#151D2A] dark:to-[#151D2A] dark:hover:from-[#1E293B] dark:hover:via-[#1E293B] dark:hover:to-[#1E293B] dark:bg-[#151D2A] border border-[#D5D0C6] hover:border-[#D0C5A8] dark:border-slate-700 shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:shadow-md transition-all duration-700 ease-out cursor-pointer group overflow-hidden flex items-center justify-between py-1 xs:py-1.5 sm:py-0"
+          className="w-full min-h-[105px] xs:min-h-[115px] sm:min-h-[128px] sm:h-32 md:h-34 rounded-[3px] bg-gradient-to-b from-[#FFFFFF] via-[#FAF9F6] to-[#ECEAE4] hover:from-[#F7F1DF] hover:via-[#F7F1DF] hover:to-[#F7F1DF] hover:bg-[#F7F1DF] dark:from-[#151D2A] dark:via-[#151D2A] dark:to-[#151D2A] dark:hover:from-[#1E293B] dark:hover:via-[#1E293B] dark:hover:to-[#1E293B] dark:bg-[#151D2A] border border-[#B88A3B]/35 hover:border-[#B88A3B] dark:border-amber-700/40 dark:hover:border-[#B88A3B] shadow-[0_4px_14px_rgba(92,70,50,0.08),0_1px_3px_rgba(0,0,0,0.05)] hover:shadow-[0_10px_24px_rgba(184,138,59,0.18),0_4px_8px_rgba(0,0,0,0.08)] dark:shadow-[0_4px_14px_rgba(0,0,0,0.4)] dark:hover:shadow-[0_8px_24px_rgba(184,138,59,0.25)] hover:-translate-y-1.5 hover:scale-[1.01] transition-all duration-300 ease-out cursor-pointer group overflow-hidden flex items-center justify-between py-1 xs:py-1.5 sm:py-0"
           dir="ltr"
         >
-          <div className="w-8 xs:w-14 sm:w-28 md:w-34 shrink-0 self-stretch bg-[#F5EDD6] dark:bg-[#1E293B] rounded-r-[32px] xs:rounded-r-[48px] sm:rounded-r-[70px] md:rounded-r-[80px] flex items-center justify-center border-r border-[#E3DCBF] dark:border-slate-700 group-hover:border-transparent transition-all duration-700 ease-out">
+          <div className="w-12 xs:w-14 sm:w-26 md:w-30 shrink-0 self-stretch bg-gradient-to-br from-[#F4E6C3] to-[#E9D5A4] dark:from-[#243044] dark:to-[#1E283A] group-hover:from-[#EBD399] group-hover:to-[#DFC27F] dark:group-hover:from-[#2D3C55] dark:group-hover:to-[#243044] rounded-r-[38px] xs:rounded-r-[48px] sm:rounded-r-[70px] md:rounded-r-[80px] flex items-center justify-center border-r border-[#DEC998] dark:border-amber-700/50 group-hover:border-[#B88A3B]/60 shadow-inner transition-all duration-300 ease-out">
             {/* Library Bookshelf Standing Vertical Books SVG */}
-            <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 xs:w-8 xs:h-8 sm:w-14 sm:h-14 md:w-16 md:h-16 text-[#241F1A] dark:text-amber-300">
+            <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 xs:w-7 xs:h-7 sm:w-13 sm:h-13 md:w-15 md:h-15 text-[#241F1A] dark:text-amber-300">
               <rect x="12" y="52" width="40" height="3" fill="currentColor" />
               <rect x="16" y="20" width="6" height="30" rx="1" fill="currentColor" />
               <rect x="17.5" y="24" width="3" height="2" fill="#F5EDD6" className="dark:fill-[#1E293B]" />
@@ -571,28 +571,28 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
             </svg>
           </div>
 
-          <div className="grow text-right pl-1 xs:pl-2 pr-1.5 xs:pr-3 sm:pr-6 py-1 space-y-0.5 sm:space-y-1" dir={language === 'en' ? 'ltr' : 'rtl'}>
-            <h3 className={`text-xs xs:text-sm sm:text-lg md:text-xl xl:text-[22px] font-bold text-[#1A1612] dark:text-white group-hover:text-[#5C4632] dark:group-hover:text-amber-300 transition-colors ${language === 'en' ? 'font-sans leading-tight' : 'font-urdu leading-[1.8]'}`}>
+          <div className="grow pl-0.5 xs:pl-1 pr-1 xs:pr-1.5 sm:pr-5 py-0.5 sm:py-1 space-y-0 sm:space-y-0.5 min-w-0 flex flex-col justify-center" dir={language === 'en' ? 'ltr' : 'rtl'}>
+            <h3 className={`text-center text-sm xs:text-base sm:text-lg md:text-xl xl:text-[22px] font-bold text-[#1A1612] dark:text-white group-hover:text-[#5C4632] dark:group-hover:text-amber-300 transition-colors whitespace-nowrap ${language === 'en' ? 'font-sans leading-tight' : 'font-urdu leading-[2.2] pt-1 sm:pt-1.5'}`}>
               {language === 'ar' ? 'الكتب والمؤلفات' : language === 'en' ? 'Books & Publications' : 'کتابیں'}
             </h3>
-            <p className={`text-[10px] xs:text-xs sm:text-sm md:text-[15px] text-[#363028] dark:text-slate-300 line-clamp-1 xs:line-clamp-2 ${language === 'en' ? 'font-sans leading-snug' : 'font-urdu leading-[1.7]'}`}>
-              {language === 'ar' ? 'مؤلفات علمية وإصلاحية نافعة' : language === 'en' ? 'Beneficial academic & spiritual books' : 'مفید علمی و اصلاحی کتابیں'}
+            <p className={`text-right w-full text-[11px] xs:text-[12.5px] sm:text-sm md:text-[15px] text-[#363028] dark:text-slate-300 whitespace-nowrap overflow-visible ${language === 'en' ? 'font-sans leading-snug' : 'font-urdu leading-[1.9]'}`}>
+              {language === 'ar' ? 'مؤلفات علمية وإصلاحية' : language === 'en' ? 'Islamic Publications' : 'مفید علمی و اصلاحی کتب'}
             </p>
           </div>
         </motion.div>
 
-        {/* Tile 6: رابطہ (Right Column - moves from center towards right) */}
+        {/* Tile 6: رابطہ */}
         <motion.div 
-          initial={{ opacity: 0, x: 60 }}
+          initial={{ opacity: 0, x: 40 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.85, ease: [0.25, 0.1, 0.25, 1], delay: 0.08 }}
           onClick={() => setCurrentTab('contact')}
-          className="w-full min-h-[92px] xs:min-h-[110px] sm:min-h-0 sm:h-32 md:h-34 rounded-[2px] bg-gradient-to-b from-[#FFFFFF] via-[#FAF9F6] to-[#ECEAE4] hover:from-[#F5EDD6] hover:via-[#F5EDD6] hover:to-[#F5EDD6] hover:bg-[#F5EDD6] dark:from-[#151D2A] dark:via-[#151D2A] dark:to-[#151D2A] dark:hover:from-[#1E293B] dark:hover:via-[#1E293B] dark:hover:to-[#1E293B] dark:bg-[#151D2A] border border-[#D5D0C6] hover:border-[#D0C5A8] dark:border-slate-700 shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:shadow-md transition-all duration-700 ease-out cursor-pointer group overflow-hidden flex items-center justify-between py-1 xs:py-1.5 sm:py-0"
+          className="w-full min-h-[105px] xs:min-h-[115px] sm:min-h-[128px] sm:h-32 md:h-34 rounded-[3px] bg-gradient-to-b from-[#FFFFFF] via-[#FAF9F6] to-[#ECEAE4] hover:from-[#F7F1DF] hover:via-[#F7F1DF] hover:to-[#F7F1DF] hover:bg-[#F7F1DF] dark:from-[#151D2A] dark:via-[#151D2A] dark:to-[#151D2A] dark:hover:from-[#1E293B] dark:hover:via-[#1E293B] dark:hover:to-[#1E293B] dark:bg-[#151D2A] border border-[#B88A3B]/35 hover:border-[#B88A3B] dark:border-amber-700/40 dark:hover:border-[#B88A3B] shadow-[0_4px_14px_rgba(92,70,50,0.08),0_1px_3px_rgba(0,0,0,0.05)] hover:shadow-[0_10px_24px_rgba(184,138,59,0.18),0_4px_8px_rgba(0,0,0,0.08)] dark:shadow-[0_4px_14px_rgba(0,0,0,0.4)] dark:hover:shadow-[0_8px_24px_rgba(184,138,59,0.25)] hover:-translate-y-1.5 hover:scale-[1.01] transition-all duration-300 ease-out cursor-pointer group overflow-hidden flex items-center justify-between py-1 xs:py-1.5 sm:py-0"
           dir="ltr"
         >
-          <div className="w-8 xs:w-14 sm:w-28 md:w-34 shrink-0 self-stretch bg-[#F5EDD6] dark:bg-[#1E293B] rounded-r-[32px] xs:rounded-r-[48px] sm:rounded-r-[70px] md:rounded-r-[80px] flex items-center justify-center border-r border-[#E3DCBF] dark:border-slate-700 group-hover:border-transparent transition-all duration-700 ease-out">
+          <div className="w-12 xs:w-14 sm:w-26 md:w-30 shrink-0 self-stretch bg-gradient-to-br from-[#F4E6C3] to-[#E9D5A4] dark:from-[#243044] dark:to-[#1E283A] group-hover:from-[#EBD399] group-hover:to-[#DFC27F] dark:group-hover:from-[#2D3C55] dark:group-hover:to-[#243044] rounded-r-[38px] xs:rounded-r-[48px] sm:rounded-r-[70px] md:rounded-r-[80px] flex items-center justify-center border-r border-[#DEC998] dark:border-amber-700/50 group-hover:border-[#B88A3B]/60 shadow-inner transition-all duration-300 ease-out">
             {/* Clipboard Notepad with Pen SVG */}
-            <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 xs:w-8 xs:h-8 sm:w-14 sm:h-14 md:w-16 md:h-16 text-[#241F1A] dark:text-amber-300">
+            <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 xs:w-7 xs:h-7 sm:w-13 sm:h-13 md:w-15 md:h-15 text-[#241F1A] dark:text-amber-300">
               <rect x="16" y="16" width="28" height="36" rx="2.5" fill="currentColor" />
               <rect x="22" y="11" width="16" height="8" rx="2" fill="currentColor" />
               <circle cx="30" cy="15" r="2" fill="#F5EDD6" className="dark:fill-[#1E293B]" />
@@ -611,12 +611,12 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
             </svg>
           </div>
 
-          <div className="grow text-right pl-1 xs:pl-2 pr-1.5 xs:pr-3 sm:pr-6 py-1 space-y-0.5 sm:space-y-1" dir={language === 'en' ? 'ltr' : 'rtl'}>
-            <h3 className={`text-xs xs:text-sm sm:text-lg md:text-xl xl:text-[22px] font-bold text-[#1A1612] dark:text-white group-hover:text-[#5C4632] dark:group-hover:text-amber-300 transition-colors ${language === 'en' ? 'font-sans leading-tight' : 'font-urdu leading-[1.8]'}`}>
+          <div className="grow pl-0.5 xs:pl-1 pr-1 xs:pr-1.5 sm:pr-5 py-0.5 sm:py-1 space-y-0 sm:space-y-0.5 min-w-0 flex flex-col justify-center" dir={language === 'en' ? 'ltr' : 'rtl'}>
+            <h3 className={`text-center text-sm xs:text-base sm:text-lg md:text-xl xl:text-[22px] font-bold text-[#1A1612] dark:text-white group-hover:text-[#5C4632] dark:group-hover:text-amber-300 transition-colors whitespace-nowrap ${language === 'en' ? 'font-sans leading-tight' : 'font-urdu leading-[2.2] pt-1 sm:pt-1.5'}`}>
               {language === 'ar' ? 'الاتصال والاستفسار' : language === 'en' ? 'Contact Us' : 'رابطہ'}
             </h3>
-            <p className={`text-[10px] xs:text-xs sm:text-sm md:text-[15px] text-[#363028] dark:text-slate-300 line-clamp-1 xs:line-clamp-2 ${language === 'en' ? 'font-sans leading-snug' : 'font-urdu leading-[1.7]'}`}>
-              {language === 'ar' ? 'للمعلومات والتواصل المباشر' : language === 'en' ? 'For inquiries and information' : 'برائے معلومات'}
+            <p className={`text-right w-full text-[11px] xs:text-[12.5px] sm:text-sm md:text-[15px] text-[#363028] dark:text-slate-300 whitespace-nowrap overflow-visible ${language === 'en' ? 'font-sans leading-snug' : 'font-urdu leading-[1.9]'}`}>
+              {language === 'ar' ? 'للمعلومات والتواصل' : language === 'en' ? 'Direct Inquiries' : 'برائے معلومات و رابطہ'}
             </p>
           </div>
         </motion.div>

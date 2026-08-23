@@ -24,6 +24,7 @@ import {
   BookingStatus
 } from '../../types';
 import { StorageService } from '../../services/storage';
+import { getOrTranslateFatwaEnglish, translateFatwaServerSide } from '../../services/fatwaTranslationService';
 import { useThemeLanguage } from '../../context/ThemeLanguageContext';
 import { 
   ShieldAlert, 
@@ -109,11 +110,17 @@ export const AdminDashboard: React.FC = () => {
   const [newFatwaNum, setNewFatwaNum] = useState('');
   const [newFatwaDate, setNewFatwaDate] = useState(new Date().toISOString().split('T')[0]);
   const [newFatwaTitleUr, setNewFatwaTitleUr] = useState('');
+  const [newFatwaTitleEn, setNewFatwaTitleEn] = useState('');
   const [newFatwaQuestionUr, setNewFatwaQuestionUr] = useState('');
+  const [newFatwaQuestionEn, setNewFatwaQuestionEn] = useState('');
   const [newFatwaAnswerUr, setNewFatwaAnswerUr] = useState('');
+  const [newFatwaAnswerEn, setNewFatwaAnswerEn] = useState('');
   const [newFatwaArabic, setNewFatwaArabic] = useState('');
   const [newFatwaCat, setNewFatwaCat] = useState<FatwaCategory>('General Fiqh');
   const [newFatwaMufti, setNewFatwaMufti] = useState('جامعہ اسلامیہ ایبٹ آباد');
+  const [newFatwaIsApproved, setNewFatwaIsApproved] = useState(false);
+  const [translatingFatwaId, setTranslatingFatwaId] = useState<string | null>(null);
+  const [isGeneratingTranslation, setIsGeneratingTranslation] = useState(false);
 
   // Answer Question Modal state
   const [replyText, setReplyText] = useState('');
@@ -224,11 +231,15 @@ export const AdminDashboard: React.FC = () => {
     setNewFatwaNum(`JIA-IFTA-2026-${Math.floor(1000 + Math.random() * 9000)}`);
     setNewFatwaDate(new Date().toISOString().split('T')[0]);
     setNewFatwaTitleUr('');
+    setNewFatwaTitleEn('');
     setNewFatwaQuestionUr('');
+    setNewFatwaQuestionEn('');
     setNewFatwaAnswerUr('');
+    setNewFatwaAnswerEn('');
     setNewFatwaArabic('');
     setNewFatwaCat('General Fiqh');
     setNewFatwaMufti('جامعہ اسلامیہ ایبٹ آباد');
+    setNewFatwaIsApproved(false);
     setShowAddFatwa(true);
   };
 
@@ -237,12 +248,59 @@ export const AdminDashboard: React.FC = () => {
     setNewFatwaNum(f.fatwaNumber || '');
     setNewFatwaDate(f.date || new Date().toISOString().split('T')[0]);
     setNewFatwaTitleUr(f.title?.ur || f.title?.en || '');
+    setNewFatwaTitleEn(f.title?.en || '');
     setNewFatwaQuestionUr(f.question?.ur || f.question?.en || '');
+    setNewFatwaQuestionEn(f.question?.en || '');
     setNewFatwaAnswerUr(f.answer?.ur || f.answer?.en || '');
+    setNewFatwaAnswerEn(f.answer?.en || '');
     setNewFatwaArabic(f.arabicText || '');
     setNewFatwaCat(f.category || 'General Fiqh');
     setNewFatwaMufti(f.muftiName || 'جامعہ اسلامیہ ایبٹ آباد');
+    setNewFatwaIsApproved(Boolean(f.isTranslationApproved));
     setShowAddFatwa(true);
+  };
+
+  const handleApproveTranslation = (f: Fatwa) => {
+    const updated: Fatwa = {
+      ...f,
+      isTranslationApproved: true,
+      translationApprovedBy: currentUser?.email || 'usamasiddique105@gmail.com',
+    };
+    StorageService.updateFatwa(updated);
+    refreshData();
+  };
+
+  const handleGenerateTranslationForFatwa = async (f: Fatwa) => {
+    setTranslatingFatwaId(f.id);
+    try {
+      await getOrTranslateFatwaEnglish(f, true);
+      refreshData();
+    } catch (e) {
+      console.error(e);
+      alert('ترجمہ حاصل کرنے میں مسئلہ پیش آیا۔');
+    } finally {
+      setTranslatingFatwaId(null);
+    }
+  };
+
+  const handleAutoTranslateInModal = async () => {
+    if (!newFatwaTitleUr || !newFatwaAnswerUr) {
+      alert('براہ کرم پہلے اردو عنوان اور جواب درج فرمائیں۔');
+      return;
+    }
+    setIsGeneratingTranslation(true);
+    try {
+      const res = await translateFatwaServerSide(newFatwaTitleUr, newFatwaQuestionUr, newFatwaAnswerUr);
+      setNewFatwaTitleEn(res.titleEn);
+      setNewFatwaQuestionEn(res.questionEn);
+      setNewFatwaAnswerEn(res.answerEn);
+      setNewFatwaIsApproved(true);
+    } catch (e) {
+      console.error(e);
+      alert('AI ترجمہ سروس سے رابطہ نہیں ہو سکا۔');
+    } finally {
+      setIsGeneratingTranslation(false);
+    }
   };
 
   const handleCreateFatwa = (e: React.FormEvent) => {
@@ -257,22 +315,24 @@ export const AdminDashboard: React.FC = () => {
         date: newFatwaDate || editingFatwa.date || new Date().toISOString().split('T')[0],
         title: { 
           ur: newFatwaTitleUr, 
-          en: editingFatwa.title?.en || newFatwaTitleUr, 
+          en: newFatwaTitleEn || editingFatwa.title?.en || newFatwaTitleUr, 
           ar: editingFatwa.title?.ar || newFatwaTitleUr 
         },
         question: { 
           ur: newFatwaQuestionUr || 'سوال', 
-          en: editingFatwa.question?.en || newFatwaQuestionUr, 
+          en: newFatwaQuestionEn || editingFatwa.question?.en || newFatwaQuestionUr, 
           ar: editingFatwa.question?.ar || newFatwaQuestionUr 
         },
         category: newFatwaCat,
         answer: { 
           ur: newFatwaAnswerUr, 
-          en: editingFatwa.answer?.en || newFatwaAnswerUr, 
+          en: newFatwaAnswerEn || editingFatwa.answer?.en || newFatwaAnswerUr, 
           ar: editingFatwa.answer?.ar || newFatwaAnswerUr 
         },
         arabicText: newFatwaArabic || undefined,
         muftiName: newFatwaMufti || editingFatwa.muftiName || 'جامعہ اسلامیہ ایبٹ آباد',
+        isTranslationApproved: newFatwaIsApproved,
+        translationApprovedBy: newFatwaIsApproved ? (currentUser?.email || 'usamasiddique105@gmail.com') : undefined,
       };
 
       StorageService.updateFatwa(updatedF);
@@ -281,15 +341,29 @@ export const AdminDashboard: React.FC = () => {
       const newF: Fatwa = {
         id: `fatwa-${Date.now()}`,
         fatwaNumber: newFatwaNum || `JIA-IFTA-2026-${Math.floor(1000 + Math.random() * 9000)}`,
-        title: { ur: newFatwaTitleUr, en: newFatwaTitleUr, ar: newFatwaTitleUr },
-        question: { ur: newFatwaQuestionUr || 'سوال', en: newFatwaQuestionUr, ar: newFatwaQuestionUr },
+        title: { 
+          ur: newFatwaTitleUr, 
+          en: newFatwaTitleEn || newFatwaTitleUr, 
+          ar: newFatwaTitleUr 
+        },
+        question: { 
+          ur: newFatwaQuestionUr || 'سوال', 
+          en: newFatwaQuestionEn || newFatwaQuestionUr, 
+          ar: newFatwaQuestionUr 
+        },
         category: newFatwaCat,
-        answer: { ur: newFatwaAnswerUr, en: newFatwaAnswerUr, ar: newFatwaAnswerUr },
+        answer: { 
+          ur: newFatwaAnswerUr, 
+          en: newFatwaAnswerEn || newFatwaAnswerUr, 
+          ar: newFatwaAnswerUr 
+        },
         arabicText: newFatwaArabic || undefined,
         date: newFatwaDate || new Date().toISOString().split('T')[0],
         muftiName: newFatwaMufti || 'جامعہ اسلامیہ ایبٹ آباد',
         status: 'Published',
-        views: 1
+        views: 1,
+        isTranslationApproved: newFatwaIsApproved,
+        translationApprovedBy: newFatwaIsApproved ? (currentUser?.email || 'usamasiddique105@gmail.com') : undefined,
       };
 
       StorageService.addFatwa(newF);
@@ -1335,16 +1409,36 @@ export const AdminDashboard: React.FC = () => {
           <div className="grid grid-cols-1 gap-3">
             {fatwas.map(f => (
               <div key={f.id} className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3 text-xs shadow-xs hover:border-[#B88A3B]/40 transition-colors">
-                <div className="space-y-1 max-w-2xl">
-                  <div className="flex items-center gap-2">
+                <div className="space-y-1.5 max-w-2xl">
+                  <div className="flex flex-wrap items-center gap-2">
                     <span className="font-mono font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded text-[11px]">{f.fatwaNumber}</span>
                     {f.category && (
                       <span className="text-[10px] bg-stone-100 dark:bg-slate-800 text-stone-600 dark:text-stone-300 px-2 py-0.5 rounded">
                         {f.category}
                       </span>
                     )}
+
+                    {/* Translation Status Badge */}
+                    {f.isTranslationApproved ? (
+                      <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800 flex items-center gap-1">
+                        <CheckCircle className="w-3 h-3" />
+                        <span>English ترجمہ تصدیق شدہ</span>
+                      </span>
+                    ) : f.isAiTranslatedEn ? (
+                      <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 dark:bg-amber-950/80 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-800 flex items-center gap-1">
+                        <Sparkles className="w-3 h-3 text-amber-600" />
+                        <span>خودکار AI ترجمہ (زیرِ جائزہ)</span>
+                      </span>
+                    ) : (
+                      <span className="px-2 py-0.5 rounded text-[10px] text-stone-500 bg-stone-100 dark:bg-slate-800">
+                        انگریزی ترجمہ نہیں
+                      </span>
+                    )}
                   </div>
                   <div className="font-bold text-sm text-slate-900 dark:text-slate-100 mt-0.5">{f.title.ur || f.title.en}</div>
+                  {f.title?.en && f.title?.en !== f.title?.ur && (
+                    <div className="text-[11px] text-stone-500 font-sans italic" dir="ltr">{f.title.en}</div>
+                  )}
                   {f.question?.ur && (
                     <p className="text-[11px] text-stone-500 line-clamp-1">
                       {f.question.ur}
@@ -1352,7 +1446,34 @@ export const AdminDashboard: React.FC = () => {
                   )}
                 </div>
 
-                <div className="flex items-center gap-1.5">
+                <div className="flex flex-wrap items-center gap-1.5">
+                  {/* Approve Translation 1-click button if AI translated and not approved */}
+                  {f.isAiTranslatedEn && !f.isTranslationApproved && (
+                    <button
+                      onClick={() => handleApproveTranslation(f)}
+                      className="px-2.5 py-1.5 bg-emerald-700 hover:bg-emerald-800 text-white font-bold rounded-lg flex items-center gap-1 text-[11px] shadow-2xs transition-colors"
+                      title="اس خودکار انگریزی ترجمہ کی توثیق کریں (Approve Translation)"
+                    >
+                      <CheckCircle className="w-3.5 h-3.5" />
+                      <span>ترجمہ تصدیق کریں</span>
+                    </button>
+                  )}
+
+                  {/* On-demand Gemini Translate button */}
+                  <button
+                    onClick={() => handleGenerateTranslationForFatwa(f)}
+                    disabled={translatingFatwaId === f.id}
+                    className="px-2.5 py-1.5 bg-purple-50 hover:bg-purple-100 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 font-bold rounded-lg flex items-center gap-1 text-[11px] border border-purple-200 dark:border-purple-800 transition-colors disabled:opacity-50"
+                    title="Gemini AI سے انگریزی ترجمہ تیار کریں"
+                  >
+                    {translatingFatwaId === f.id ? (
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    ) : (
+                      <Sparkles className="w-3.5 h-3.5 text-purple-600" />
+                    )}
+                    <span>{f.isAiTranslatedEn ? 'دوبارہ ترجمہ' : 'AI انگریزی ترجمہ'}</span>
+                  </button>
+
                   <button 
                     onClick={() => handleOpenEditFatwa(f)}
                     className="px-3 py-1.5 bg-blue-50 hover:bg-blue-100 dark:bg-blue-950/60 dark:hover:bg-blue-900/60 text-blue-700 dark:text-blue-300 font-bold rounded-lg flex items-center gap-1.5 transition-colors"
@@ -1417,7 +1538,7 @@ export const AdminDashboard: React.FC = () => {
             </div>
 
             <form onSubmit={handleCreateFatwa} className="space-y-3 text-xs">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div>
                   <label className="block font-bold mb-1 text-stone-700 dark:text-stone-300">فتویٰ نمبر</label>
                   <input 
@@ -1425,6 +1546,15 @@ export const AdminDashboard: React.FC = () => {
                     value={newFatwaNum}
                     onChange={(e) => setNewFatwaNum(e.target.value)}
                     className="w-full p-2.5 border border-stone-300 dark:border-slate-700 rounded-xl bg-slate-50 dark:bg-slate-800 text-stone-900 dark:text-white font-mono"
+                  />
+                </div>
+                <div>
+                  <label className="block font-bold mb-1 text-stone-700 dark:text-stone-300">تاریخِ اشاعت (Publication Date)</label>
+                  <input 
+                    type="date" 
+                    value={newFatwaDate}
+                    onChange={(e) => setNewFatwaDate(e.target.value)}
+                    className="w-full p-2.5 border border-stone-300 dark:border-slate-700 rounded-xl bg-slate-50 dark:bg-slate-800 text-stone-900 dark:text-white font-sans"
                   />
                 </div>
                 <div>
@@ -1488,6 +1618,74 @@ export const AdminDashboard: React.FC = () => {
                   placeholder="والدلیل علی ذلک:&#10;قال الله تعالى...&#10;وفي الدر المختار مع رد المحتار..."
                   className="w-full p-2.5 border border-stone-300 dark:border-slate-700 rounded-xl bg-slate-50 dark:bg-slate-800 text-stone-900 dark:text-white font-arabic"
                 ></textarea>
+              </div>
+
+              {/* English Translation Section */}
+              <div className="pt-3 border-t border-dashed border-stone-300 dark:border-slate-700 space-y-3 bg-amber-50/40 dark:bg-slate-800/40 p-3.5 rounded-xl">
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-stone-800 dark:text-amber-300 text-xs flex items-center gap-1.5">
+                    <Globe className="w-4 h-4 text-[#B88A3B]" />
+                    <span>انگریزی ترجمہ (English Translation - Optional / AI Auto)</span>
+                  </span>
+                  <button
+                    type="button"
+                    onClick={handleAutoTranslateInModal}
+                    disabled={isGeneratingTranslation}
+                    className="px-3 py-1 bg-purple-700 hover:bg-purple-800 text-white rounded-lg text-[11px] font-bold flex items-center gap-1 disabled:opacity-50"
+                  >
+                    {isGeneratingTranslation ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
+                    <span>Gemini AI سے ترجمہ جنریٹ کریں</span>
+                  </button>
+                </div>
+
+                <div>
+                  <label className="block font-bold mb-1 text-stone-700 dark:text-stone-300">English Title</label>
+                  <input
+                    type="text"
+                    dir="ltr"
+                    value={newFatwaTitleEn}
+                    onChange={(e) => setNewFatwaTitleEn(e.target.value)}
+                    placeholder="Ruling regarding..."
+                    className="w-full p-2 border border-stone-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-stone-900 dark:text-white font-sans text-xs"
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-bold mb-1 text-stone-700 dark:text-stone-300">English Question</label>
+                  <textarea
+                    rows={2}
+                    dir="ltr"
+                    value={newFatwaQuestionEn}
+                    onChange={(e) => setNewFatwaQuestionEn(e.target.value)}
+                    placeholder="Question in English..."
+                    className="w-full p-2 border border-stone-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-stone-900 dark:text-white font-sans text-xs"
+                  ></textarea>
+                </div>
+
+                <div>
+                  <label className="block font-bold mb-1 text-stone-700 dark:text-stone-300">English Answer</label>
+                  <textarea
+                    rows={3}
+                    dir="ltr"
+                    value={newFatwaAnswerEn}
+                    onChange={(e) => setNewFatwaAnswerEn(e.target.value)}
+                    placeholder="In the Name of Allah, the Most Gracious, the Most Merciful..."
+                    className="w-full p-2 border border-stone-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-stone-900 dark:text-white font-sans text-xs"
+                  ></textarea>
+                </div>
+
+                <div className="flex items-center gap-2 pt-1">
+                  <input
+                    type="checkbox"
+                    id="approve_en"
+                    checked={newFatwaIsApproved}
+                    onChange={(e) => setNewFatwaIsApproved(e.target.checked)}
+                    className="w-4 h-4 accent-emerald-700 rounded"
+                  />
+                  <label htmlFor="approve_en" className="font-bold text-stone-800 dark:text-stone-200 cursor-pointer">
+                    اس انگریزی ترجمہ کو دارالافتاء سے تصدیق شدہ (Verified & Approved) نشان زد کریں
+                  </label>
+                </div>
               </div>
 
               <div className="flex justify-end gap-2 pt-3 border-t border-stone-200 dark:border-slate-800">
@@ -1614,6 +1812,88 @@ export const AdminDashboard: React.FC = () => {
           <div>
             <label className="block text-xs font-bold mb-1">مرکزی پتہ (Address)</label>
             <input type="text" value={settings.address} onChange={(e) => setSettings({...settings, address: e.target.value})} className="w-full p-2 text-xs border rounded" />
+          </div>
+
+          {/* Notifications & Admin Alerts Settings */}
+          <div className="pt-4 border-t border-slate-200 dark:border-slate-800 space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-base font-bold text-[#5C4632] dark:text-amber-300 font-urdu">
+                مربوط الرٹس و نوٹیفکیشن سسٹم (فتاویٰ، داخلہ و آن لائن اکیڈمی)
+              </h3>
+              <span className="text-[11px] px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 font-sans font-bold">
+                Cloudflare Ready
+              </span>
+            </div>
+            <p className="text-xs text-stone-600 dark:text-stone-300">
+              جب کوئی سائل فتویٰ پوچھے، آن لائن داخلہ فارم پر کرے یا ۳ روزہ ٹرائل کلاس کے لیے درخواست دے تو خودکار نوٹیفکیشن درج ذیل ای میل اور واٹس ایپ پر ارسال ہوں گے:
+            </p>
+
+            <div className="p-4 bg-emerald-50/40 dark:bg-slate-800/40 rounded-2xl border border-emerald-200 dark:border-slate-700 space-y-4 text-xs">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block font-bold mb-1 text-stone-800 dark:text-stone-200">
+                    ایڈمن نوٹیفکیشن ای میل (Alerts Email) *
+                  </label>
+                  <input 
+                    type="email" 
+                    value={settings.notificationEmail || ''} 
+                    onChange={(e) => setSettings({...settings, notificationEmail: e.target.value})} 
+                    placeholder="usamasiddique105@gmail.com" 
+                    className="w-full p-2.5 border rounded-lg font-mono bg-white dark:bg-slate-900 focus:outline-none focus:border-emerald-600" 
+                  />
+                  <span className="text-[10px] text-stone-500">اس ای میل پر تمام فتاویٰ و داخلہ فارمز کی فوری نقل بذریعہ ای میل موصول ہوگی۔</span>
+                </div>
+
+                <div>
+                  <label className="block font-bold mb-1 text-stone-800 dark:text-stone-200">
+                    ایڈمن واٹس ایپ نمبر (Admin WhatsApp Number) *
+                  </label>
+                  <input 
+                    type="text" 
+                    value={settings.notificationWhatsApp || ''} 
+                    onChange={(e) => setSettings({...settings, notificationWhatsApp: e.target.value})} 
+                    placeholder="03489002496 یا 923489002496" 
+                    className="w-full p-2.5 border rounded-lg font-mono bg-white dark:bg-slate-900 focus:outline-none focus:border-emerald-600" 
+                  />
+                  <span className="text-[10px] text-stone-500">فارم جمع ہوتے ہی سائل اور ایڈمن کے لیے ون کلک واٹس ایپ لنک تیار ہوگا۔</span>
+                </div>
+              </div>
+
+              <div>
+                <label className="block font-bold mb-1 text-stone-800 dark:text-stone-200">
+                  اختیاری کلاؤڈ فلیئر ورکر / کسٹم ویب ہک یو آر ایل (Custom Webhook / Cloudflare Worker URL)
+                </label>
+                <input 
+                  type="url" 
+                  value={settings.webhookUrl || ''} 
+                  onChange={(e) => setSettings({...settings, webhookUrl: e.target.value})} 
+                  placeholder="https://my-worker.myname.workers.dev (اختیاری)" 
+                  className="w-full p-2.5 border rounded-lg font-mono bg-white dark:bg-slate-900 focus:outline-none focus:border-emerald-600" 
+                />
+              </div>
+
+              <div className="flex flex-wrap items-center gap-6 pt-1">
+                <label className="inline-flex items-center gap-2 cursor-pointer">
+                  <input 
+                    type="checkbox" 
+                    checked={settings.emailNotificationEnabled !== false} 
+                    onChange={(e) => setSettings({...settings, emailNotificationEnabled: e.target.checked})} 
+                    className="rounded text-emerald-600 w-4 h-4"
+                  />
+                  <span className="font-bold text-stone-700 dark:text-stone-200">ای میل الرٹس فعال رکھیں</span>
+                </label>
+
+                <label className="inline-flex items-center gap-2 cursor-pointer">
+                  <input 
+                    type="checkbox" 
+                    checked={settings.whatsappNotificationEnabled !== false} 
+                    onChange={(e) => setSettings({...settings, whatsappNotificationEnabled: e.target.checked})} 
+                    className="rounded text-emerald-600 w-4 h-4"
+                  />
+                  <span className="font-bold text-stone-700 dark:text-stone-200">واٹس ایپ نوٹیفکیشن لنکس فعال رکھیں</span>
+                </label>
+              </div>
+            </div>
           </div>
 
           {/* Bank Accounts Section in Admin */}
