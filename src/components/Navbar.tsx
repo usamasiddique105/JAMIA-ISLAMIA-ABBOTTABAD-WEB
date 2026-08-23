@@ -279,29 +279,27 @@ export const Navbar: React.FC<NavbarProps> = ({
         style={{ backgroundColor: '#242424', color: '#ffffff' }}
         dir="rtl"
       >
-        <div className="max-w-[1400px] mx-auto flex items-center justify-between gap-2 sm:gap-3 w-full min-h-[28px] sm:min-h-[32px] relative z-50">
+        <div className="max-w-[1400px] mx-auto flex items-center justify-between gap-2 sm:gap-3 w-full min-h-[30px] sm:min-h-[32px] relative z-50">
           
           {/* RIGHT SIDE (RTL): Hijri & Gregorian Date */}
           <div className="flex items-center gap-1 font-bold whitespace-nowrap shrink-0 text-white text-[10px] xs:text-xs sm:text-sm md:text-base leading-none py-0.5">
             {language === 'ar' ? (
-              <span className="text-xs sm:text-base md:text-lg inline-flex items-center gap-1 leading-none" style={{ fontFamily: "'Amiri', 'Noto Naskh Arabic', serif" }}>
-                <span>{todayDates.hijriFull}</span>
-                <span className="mx-0.5 opacity-70">•</span>
-                <span>{todayDates.gregorianFull}</span>
+              <span className="text-[11px] xs:text-xs sm:text-base md:text-lg inline-flex items-center gap-1 leading-none" style={{ fontFamily: "'Amiri', 'Noto Naskh Arabic', serif" }}>
+                <span className="text-amber-200 font-semibold">{todayDates.hijriFull}</span>
+                <span className="hidden xs:inline opacity-60">•</span>
+                <span className="hidden xs:inline opacity-90">{todayDates.gregorianFull}</span>
               </span>
             ) : language === 'en' ? (
-              <span className="font-sans text-xs sm:text-sm md:text-base inline-flex items-center gap-1.5 leading-none font-semibold">
-                <span>{todayDates.hijriFull}</span>
-                <span className="opacity-70">•</span>
-                <span>{todayDates.gregorianFull}</span>
+              <span className="font-sans text-[10px] xs:text-xs sm:text-sm md:text-base inline-flex items-center gap-1.5 leading-none font-semibold">
+                <span className="text-amber-200 font-bold">{todayDates.hijriFull}</span>
+                <span className="hidden xs:inline opacity-60">•</span>
+                <span className="hidden xs:inline opacity-90">{todayDates.gregorianFull}</span>
               </span>
             ) : (
               <span className="font-urdu text-[11px] xs:text-xs sm:text-base md:text-lg inline-flex items-center gap-0.5 leading-none">
-                <span>{todayDates.hijriDay}</span>
-                <span className="px-0.5">{todayDates.hijriMonth}</span>
-                <span>{todayDates.hijriYear}ھ</span>
-                <span className="mx-0.5 opacity-70 sm:mx-1">•</span>
-                <span className="inline">{todayDates.gregorianFull}</span>
+                <span className="text-amber-200 font-semibold">{todayDates.hijriDay} {todayDates.hijriMonth} {todayDates.hijriYear}ھ</span>
+                <span className="hidden xs:inline opacity-60 mx-1">•</span>
+                <span className="hidden xs:inline opacity-90">{todayDates.gregorianFull}</span>
               </span>
             )}
           </div>
@@ -316,16 +314,17 @@ export const Navbar: React.FC<NavbarProps> = ({
             </span>
           </div>
 
-          {/* LEFT SIDE (RTL): Language Selector & Login */}
-          <div className="flex items-center gap-1.5 sm:gap-3 shrink-0 relative z-50" dir="ltr">
+          {/* LEFT SIDE (RTL): Language Selector, Login & Theme Toggle */}
+          <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0 relative z-50" dir="ltr">
             {/* Language Selector Dropdown */}
             <div className="relative z-50">
               <button 
                 onClick={() => setShowLangMenu(!showLangMenu)}
-                className="flex items-center gap-1 bg-[#6B5138] hover:bg-[#5A432D] text-white px-2 sm:px-3 py-0.5 sm:py-1 rounded border border-[#85674B] text-[11px] xs:text-xs sm:text-sm font-bold transition-colors cursor-pointer shadow-xs"
+                className="h-6 sm:h-7 flex items-center gap-1 bg-[#6B5138] hover:bg-[#5A432D] text-white px-2 sm:px-3 rounded border border-[#85674B] text-[11px] xs:text-xs sm:text-sm font-bold transition-all cursor-pointer shadow-xs active:scale-95"
                 title="زبان تبدیل کریں / Select Language"
                 style={{ fontFamily: "'Noto Naskh Arabic', 'Amiri', sans-serif" }}
               >
+                <Globe className="w-3 h-3 text-amber-200 shrink-0" />
                 <span className="text-white font-medium">{language === 'ur' ? 'اردو' : language === 'ar' ? 'العربية' : 'English'}</span>
                 {showLangMenu ? (
                   <ChevronUp className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-white shrink-0" />
@@ -374,7 +373,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             {/* Login Button */}
             <button 
               onClick={() => setCurrentTab('results')} 
-              className="flex items-center gap-1 text-white hover:text-amber-200 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded text-[11px] xs:text-xs sm:text-sm font-bold transition-colors cursor-pointer bg-white/10 sm:bg-transparent"
+              className="h-6 sm:h-7 flex items-center gap-1 text-white hover:text-amber-200 px-2 sm:px-2.5 rounded border border-[#85674B]/70 sm:border-transparent text-[11px] xs:text-xs sm:text-sm font-bold transition-all cursor-pointer bg-[#6B5138]/60 hover:bg-[#6B5138] sm:bg-transparent active:scale-95"
               title={language === 'ar' ? 'تسجيل الدخول ونتائج الامتحانات' : language === 'en' ? 'Portal Login & Results' : 'آن لائن رزلٹ و پورٹل لاگ ان'}
             >
               <span className="text-white hover:text-amber-200">
@@ -385,10 +384,11 @@ export const Navbar: React.FC<NavbarProps> = ({
             {/* Dark/Light Mode Toggle */}
             <button 
               onClick={() => setDarkMode(!darkMode)}
-              className="p-1 rounded text-white hover:bg-white/10 transition-colors cursor-pointer shrink-0"
+              className="h-6 w-6 sm:h-7 sm:w-7 flex items-center justify-center rounded border border-[#85674B]/70 sm:border-transparent text-amber-200 hover:text-white bg-[#6B5138]/60 hover:bg-[#6B5138] sm:bg-transparent transition-all cursor-pointer shrink-0 active:scale-95"
               title="Toggle theme"
+              aria-label="Toggle dark/light mode"
             >
-              {darkMode ? <Sun className="w-3.5 h-3.5 text-white" /> : <Moon className="w-3.5 h-3.5 text-white" />}
+              {darkMode ? <Sun className="w-3.5 h-3.5" /> : <Moon className="w-3.5 h-3.5" />}
             </button>
           </div>
 
@@ -568,30 +568,31 @@ export const Navbar: React.FC<NavbarProps> = ({
 
           </div>
 
-          {/* MOBILE CONTROLS: SEARCH BUTTON & PROPER HAMBURGER MENU (☰) BUTTON */}
-          <div className="md:hidden flex items-center gap-1.5 sm:gap-2 shrink-0">
+          {/* MOBILE CONTROLS: UNIFIED SEARCH & HAMBURGER MENU BUTTONS */}
+          <div className="md:hidden flex items-center gap-2 shrink-0">
             {/* Mobile Search Button */}
             <button
               onClick={onOpenSearch}
-              className="p-2 text-stone-700 dark:text-stone-200 hover:text-[#B88A3B] hover:bg-stone-100 dark:hover:bg-slate-800 rounded-md transition-colors cursor-pointer"
+              className="h-8.5 w-8.5 xs:h-9 xs:w-9 flex items-center justify-center rounded-md bg-[#3C2E21] hover:bg-[#2C2016] text-amber-200 border border-[#B88A3B]/50 hover:border-[#B88A3B] shadow-xs transition-all cursor-pointer active:scale-95"
               title={language === 'ar' ? 'بحث' : language === 'en' ? 'Search' : 'تلاش کریں'}
+              aria-label="Search"
             >
-              <Search className="w-5 h-5" />
+              <Search className="w-4.5 h-4.5 text-amber-200" />
             </button>
 
             {/* Mobile Hamburger Toggle Button (☰) */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 bg-[#3C2E21] hover:bg-[#2C2016] text-white border border-[#B88A3B]/40 rounded-md font-urdu font-bold text-xs xs:text-sm shadow-xs transition-colors cursor-pointer active:scale-95"
+              className="h-8.5 xs:h-9 flex items-center gap-1.5 px-2.5 xs:px-3 bg-[#3C2E21] hover:bg-[#2C2016] text-white border border-[#B88A3B]/50 hover:border-[#B88A3B] rounded-md font-urdu font-bold text-xs xs:text-sm shadow-xs transition-all cursor-pointer active:scale-95"
               title={language === 'ar' ? 'فتح القائمة' : language === 'en' ? 'Open Menu' : 'مینو کھولیں'}
               aria-label="Toggle Navigation Menu"
             >
               {mobileMenuOpen ? (
-                <X className="w-5 h-5 text-amber-200" />
+                <X className="w-4.5 h-4.5 text-amber-200" />
               ) : (
-                <Menu className="w-5 h-5 text-amber-200" />
+                <Menu className="w-4.5 h-4.5 text-amber-200" />
               )}
-              <span className="hidden xs:inline text-white leading-none">
+              <span className="text-white leading-none">
                 {mobileMenuOpen 
                   ? (language === 'ar' ? 'إغلاق' : language === 'en' ? 'Close' : 'بند کریں') 
                   : (language === 'ar' ? 'القائمة' : language === 'en' ? 'Menu' : 'مینو')}
