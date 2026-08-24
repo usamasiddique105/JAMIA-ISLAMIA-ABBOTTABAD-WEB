@@ -1,6 +1,0 @@
-{
-  "name": "Jamia Islamia Abbottabad",
-  "description": "Official website and administration CMS portal for Jamia Islamia Abbottabad, Pakistan. Features Darul Ifta online fatwa center, academic departments, examination results, media library, and donation system.",
-  "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
-}
