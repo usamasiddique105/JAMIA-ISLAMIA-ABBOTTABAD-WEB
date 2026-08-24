@@ -1,0 +1,137 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && 
+        request.auth.token.email == 'usamasiddique105@gmail.com';
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function isValidQuestion(data) {
+      return data.keys().hasAll(['id', 'questionerName', 'questionerEmail', 'category', 'subject', 'question', 'submissionDate', 'isAnswered']) &&
+        data.id is string && data.id.size() <= 128 &&
+        data.questionerName is string && data.questionerName.size() <= 150 &&
+        data.questionerEmail is string && data.questionerEmail.size() <= 150 &&
+        data.subject is string && data.subject.size() <= 300 &&
+        data.question is string && data.question.size() <= 10000 &&
+        data.isAnswered is bool;
+    }
+
+    function isValidBooking(data) {
+      return data.keys().hasAll(['id', 'studentName', 'phone', 'course', 'date', 'status']) &&
+        data.id is string && data.id.size() <= 128 &&
+        data.studentName is string && data.studentName.size() <= 150 &&
+        data.phone is string && data.phone.size() <= 50 &&
+        data.course is string && data.course.size() <= 200 &&
+        data.status is string && data.status.size() <= 50;
+    }
+
+    function isValidDonation(data) {
+      return data.keys().hasAll(['id', 'donorName', 'fundType', 'amount', 'currency', 'paymentMethod', 'transactionRef', 'date', 'status']) &&
+        data.id is string && data.id.size() <= 128 &&
+        data.donorName is string && data.donorName.size() <= 150 &&
+        data.fundType is string && data.fundType.size() <= 100 &&
+        data.amount is number && data.amount > 0 &&
+        data.paymentMethod is string && data.paymentMethod.size() <= 100;
+    }
+
+    function isValidVisitor(data) {
+      return data.keys().hasAll(['id', 'page', 'timestamp']) &&
+        data.id is string && data.id.size() <= 128 &&
+        data.page is string && data.page.size() <= 100 &&
+        data.timestamp is string && data.timestamp.size() <= 100;
+    }
+
+    // 1. Fatwas Collection (Public read, Admin write)
+    match /fatwas/{fatwaId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // 2. Online Questions / Istifta (Public submit, Admin manage)
+    match /online_questions/{questionId} {
+      allow create: if isValidId(questionId) && isValidQuestion(request.resource.data);
+      allow read, update, delete: if isAdmin();
+    }
+
+    // 3. Online Class Bookings & Admissions (Public submit, Admin manage)
+    match /class_bookings/{bookingId} {
+      allow create: if isValidId(bookingId) && isValidBooking(request.resource.data);
+      allow read, update, delete: if isAdmin();
+    }
+
+    // 4. Exam Results (Public read, Admin write)
+    match /exam_results/{resultId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // 5. Academic Departments (Public read, Admin write)
+    match /departments/{departmentId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // 6. Faculty & Shuyookh (Public read, Admin write)
+    match /faculty/{facultyId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // 7. Library Publications & Books (Public read, Admin write)
+    match /books/{bookId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // 8. Media Gallery (Public read, Admin write)
+    match /media/{mediaId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // 9. News & Announcements (Public read, Admin write)
+    match /news/{newsId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // 10. Donations & Zakat Records (Public create receipt, Admin manage)
+    match /donations/{donationId} {
+      allow create: if isValidId(donationId) && isValidDonation(request.resource.data);
+      allow read, update, delete: if isAdmin();
+    }
+
+    // 11. Site Settings (Public read, Admin write)
+    match /site_settings/{settingId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // 12. Real Site Visitors & Analytics (Public log visit, Admin read & clear)
+    match /site_visitors/{visitorId} {
+      allow create: if isValidId(visitorId) && isValidVisitor(request.resource.data);
+      allow read, update, delete: if isAdmin();
+    }
+
+    // 13. Test Connection Collection
+    match /test/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Default deny catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
