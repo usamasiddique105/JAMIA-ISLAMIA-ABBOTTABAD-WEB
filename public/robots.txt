@@ -2,12 +2,8 @@ User-agent: *
 Allow: /
 
 Sitemap: https://jamia-islamia-abbottabad.pages.dev/sitemap.xml
-Sitemap: https://jamia-islamia-abbottabad.pages.dev/sitemap-quran.xml
-Sitemap: https://jamia-islamia-abbottabad.pages.dev/sitemap-donations.xml
 Sitemap: https://jamia-islamia-abbottabad.pages.dev/sitemap-darulifta.xml
+Sitemap: https://jamia-islamia-abbottabad.pages.dev/sitemap-quran.xml
 Sitemap: https://jamia-islamia-abbottabad.pages.dev/sitemap-dars-nizami.xml
 Sitemap: https://jamia-islamia-abbottabad.pages.dev/sitemap-results.xml
-
-Crawl-delay: 1
-
-Host: https://jamia-islamia-abbottabad.pages.dev/
+Sitemap: https://jamia-islamia-abbottabad.pages.dev/sitemap-donations.xml

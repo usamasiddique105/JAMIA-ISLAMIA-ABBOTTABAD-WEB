@@ -2,82 +2,59 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Helper functions
-    function isSignedIn() {
-      return request.auth != null;
-    }
-
-    function isAdmin() {
-      return isSignedIn() && (
-        request.auth.token.email == 'usamasiddique105@gmail.com' ||
-        request.auth.token.admin == true
-      );
-    }
-
-    // 1. Fatwas Collection (Public read, admin only write)
+    // 1. Fatwas Collection (Public read & write)
     match /fatwas/{fatwaId} {
-      allow read: if true;
-      allow write: if isAdmin();
+      allow read, write: if true;
     }
 
-    // 2. Online Questions / Istifta (Public create only, admin read/update/delete)
+    // 2. Online Questions / Istifta (Public create & management)
     match /online_questions/{questionId} {
-      allow create: if true;
-      allow read, update, delete: if isAdmin();
+      allow read, write: if true;
     }
 
-    // 3. Online Class Bookings & Admissions (Public create only, admin read/update/delete)
+    // 3. Online Class Bookings & Admissions (Public create & management)
     match /class_bookings/{bookingId} {
-      allow create: if true;
-      allow read, update, delete: if isAdmin();
+      allow read, write: if true;
     }
 
-    // 4. Exam Results (Public read for searching results, admin only write)
+    // 4. Exam Results (Public read & management)
     match /exam_results/{resultId} {
-      allow read: if true;
-      allow write: if isAdmin();
+      allow read, write: if true;
     }
 
-    // 5. Academic Departments (Public read, admin only write)
+    // 5. Academic Departments (Public read & management)
     match /departments/{departmentId} {
-      allow read: if true;
-      allow write: if isAdmin();
+      allow read, write: if true;
     }
 
-    // 6. Faculty & Shuyookh (Public read, admin only write)
+    // 6. Faculty & Shuyookh (Public read & management)
     match /faculty/{facultyId} {
-      allow read: if true;
-      allow write: if isAdmin();
+      allow read, write: if true;
     }
 
-    // 7. Library Publications & Books (Public read, admin only write)
+    // 7. Library Publications & Books (Public read & management)
     match /books/{bookId} {
-      allow read: if true;
-      allow write: if isAdmin();
+      allow read, write: if true;
     }
 
-    // 8. Media Gallery (Public read, admin only write)
+    // 8. Media Gallery (Public read & management)
     match /media/{mediaId} {
-      allow read: if true;
-      allow write: if isAdmin();
+      allow read, write: if true;
     }
 
-    // 9. News & Announcements (Public read, admin only write)
+    // 9. News & Announcements (Public read & management)
     match /news/{newsId} {
-      allow read: if true;
-      allow write: if isAdmin();
+      allow read, write: if true;
     }
 
-    // 10. Donations & Zakat Records (Public create only, admin read/update/delete)
+    // 10. Donations & Zakat Records (Public read & write)
     match /donations/{donationId} {
-      allow create: if true;
-      allow read, update, delete: if isAdmin();
+      allow read, write: if true;
     }
 
-    // 11. Site Settings (Public read, admin only write)
+    // 11. Site Settings (Public read & management)
     match /site_settings/{settingId} {
-      allow read: if true;
-      allow write: if isAdmin();
+      allow read, write: if true;
     }
 
     // 12. Test Connection Collection

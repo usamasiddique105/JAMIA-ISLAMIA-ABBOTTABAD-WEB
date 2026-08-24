@@ -1333,6 +1333,14 @@ export const AdminDashboard: React.FC = () => {
                 </div>
               </div>
             ))}
+
+            {questions.length === 0 && (
+              <div className="text-center py-12 bg-stone-50 dark:bg-slate-800/40 rounded-2xl border border-dashed border-stone-300 dark:border-slate-700">
+                <MessageSquare className="w-12 h-12 mx-auto text-stone-400 mb-2" />
+                <p className="text-sm font-bold text-stone-600 dark:text-stone-300">کوئی آن لائن سوال موجود نہیں ہے۔</p>
+                <p className="text-xs text-stone-400 mt-1">جب کوئی سائل فتویٰ فارم جمع کرے گا تو وہ یہاں دکھائی دے گا۔</p>
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -2091,6 +2099,14 @@ export const AdminDashboard: React.FC = () => {
                 </div>
               </div>
             ))}
+
+            {donations.length === 0 && (
+              <div className="text-center py-12 bg-stone-50 dark:bg-slate-800/40 rounded-2xl border border-dashed border-stone-300 dark:border-slate-700">
+                <Heart className="w-12 h-12 mx-auto text-stone-400 mb-2" />
+                <p className="text-sm font-bold text-stone-600 dark:text-stone-300">کوئی عطیہ ریکارڈ موجود نہیں ہے۔</p>
+                <p className="text-xs text-stone-400 mt-1">جب کوئی عطیہ دہندہ رسید یا فارم جمع کرے گا تو وہ یہاں دکھائی دے گا۔</p>
+              </div>
+            )}
           </div>
         </div>
       )}

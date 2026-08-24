@@ -64,11 +64,8 @@ function sanitizeForFirestore<T>(data: T): T {
 function getLocalItem<T>(key: string, defaultValue: T): T {
   try {
     const raw = localStorage.getItem(key);
-    if (!raw) return defaultValue;
+    if (raw === null || raw === undefined) return defaultValue;
     const parsed = JSON.parse(raw) as T;
-    if (Array.isArray(parsed) && parsed.length === 0 && Array.isArray(defaultValue) && defaultValue.length > 0) {
-      return defaultValue;
-    }
     return parsed;
   } catch (e) {
     console.error(`Error reading ${key} from local fallback:`, e);
@@ -115,14 +112,28 @@ export class FirestoreAdapter implements IDatabaseService {
     if (this.isInitialized) return;
     this.isInitialized = true;
 
-    // --- PUBLIC COLLECTIONS (allow read: if true;) ---
-
     // 1. Fatwas
     this.subscribeCollection<Fatwa>(
       DB_COLLECTIONS.FATWAS,
       STORAGE_KEYS.FATWAS,
       INITIAL_FATWAS,
       (items) => { this.fatwas = items; }
+    );
+
+    // 2. Questions / Istifta
+    this.subscribeCollection<OnlineQuestion>(
+      DB_COLLECTIONS.QUESTIONS,
+      STORAGE_KEYS.QUESTIONS,
+      INITIAL_ONLINE_QUESTIONS,
+      (items) => { this.questions = items; }
+    );
+
+    // 3. Class Bookings & Admissions
+    this.subscribeCollection<ClassBooking>(
+      DB_COLLECTIONS.BOOKINGS,
+      STORAGE_KEYS.BOOKINGS,
+      INITIAL_CLASS_BOOKINGS,
+      (items) => { this.bookings = items; }
     );
 
     // 4. Results
@@ -173,6 +184,14 @@ export class FirestoreAdapter implements IDatabaseService {
       (items) => { this.news = items; }
     );
 
+    // 10. Donations
+    this.subscribeCollection<DonationRecord>(
+      DB_COLLECTIONS.DONATIONS,
+      STORAGE_KEYS.DONATIONS,
+      INITIAL_DONATIONS,
+      (items) => { this.donations = items; }
+    );
+
     // 11. Site Settings (Single document 'general')
     try {
       const settingsDocRef = doc(db, DB_COLLECTIONS.SETTINGS, 'general');
@@ -182,8 +201,8 @@ export class FirestoreAdapter implements IDatabaseService {
           this.settings = data;
           setLocalItem(STORAGE_KEYS.SETTINGS, data);
           this.notifyUpdate(DB_COLLECTIONS.SETTINGS);
-        } else if (auth?.currentUser?.email === 'usamasiddique105@gmail.com') {
-          // Seed initial site settings only if authenticated as admin
+        } else {
+          // Seed initial site settings
           this.saveSiteSettings(this.settings);
         }
       }, (error) => {
@@ -194,54 +213,6 @@ export class FirestoreAdapter implements IDatabaseService {
     } catch (e) {
       console.warn('Error setting up settings listener:', e);
     }
-
-    // Listen to Firebase Auth state to dynamically subscribe to Admin-Only collections
-    if (auth) {
-      onAuthStateChanged(auth, (user) => {
-        const isAdmin = Boolean(user && user.email === 'usamasiddique105@gmail.com');
-        this.toggleAdminListeners(isAdmin);
-      });
-    }
-  }
-
-  private toggleAdminListeners(isAdmin: boolean) {
-    // Clean up existing admin listeners
-    this.adminUnsubscribers.forEach(unsub => {
-      try { unsub(); } catch (e) {}
-    });
-    this.adminUnsubscribers = [];
-
-    if (!isAdmin) {
-      return;
-    }
-
-    // Subscribe to Admin-Only collections
-    // 2. Questions
-    const unsubQuestions = this.subscribeCollection<OnlineQuestion>(
-      DB_COLLECTIONS.QUESTIONS,
-      STORAGE_KEYS.QUESTIONS,
-      INITIAL_ONLINE_QUESTIONS,
-      (items) => { this.questions = items; }
-    );
-    if (unsubQuestions) this.adminUnsubscribers.push(unsubQuestions);
-
-    // 3. Bookings
-    const unsubBookings = this.subscribeCollection<ClassBooking>(
-      DB_COLLECTIONS.BOOKINGS,
-      STORAGE_KEYS.BOOKINGS,
-      INITIAL_CLASS_BOOKINGS,
-      (items) => { this.bookings = items; }
-    );
-    if (unsubBookings) this.adminUnsubscribers.push(unsubBookings);
-
-    // 10. Donations
-    const unsubDonations = this.subscribeCollection<DonationRecord>(
-      DB_COLLECTIONS.DONATIONS,
-      STORAGE_KEYS.DONATIONS,
-      INITIAL_DONATIONS,
-      (items) => { this.donations = items; }
-    );
-    if (unsubDonations) this.adminUnsubscribers.push(unsubDonations);
   }
 
   private subscribeCollection<T extends { id: string }>(
@@ -254,12 +225,10 @@ export class FirestoreAdapter implements IDatabaseService {
       const colRef = collection(db, colName);
       const unsub = onSnapshot(colRef, (snapshot) => {
         if (snapshot.empty) {
-          // If Firestore collection is empty, seed it with current in-memory / local data only if admin
-          if (auth?.currentUser?.email === 'usamasiddique105@gmail.com') {
-            const currentData = getLocalItem<T[]>(storageKey, initialData);
-            if (currentData && currentData.length > 0) {
-              this.seedCollection(colName, currentData);
-            }
+          // If Firestore collection is empty, seed it with current in-memory / local data
+          const currentData = getLocalItem<T[]>(storageKey, initialData);
+          if (currentData && currentData.length > 0) {
+            this.seedCollection(colName, currentData);
           }
           return;
         }

@@ -28,26 +28,23 @@ import { IDatabaseService } from './dbInterface';
 
 export const STORAGE_KEYS = {
   FATWAS: 'jia_fatwas_v5',
-  QUESTIONS: 'jia_questions_v2',
-  BOOKINGS: 'jia_class_bookings_v1',
+  QUESTIONS: 'jia_questions_v3',
+  BOOKINGS: 'jia_class_bookings_v2',
   RESULTS: 'jia_exam_results_v1',
   DEPARTMENTS: 'jia_departments_v4',
   FACULTY: 'jia_faculty_v1',
   BOOKS: 'jia_books_v3',
   MEDIA: 'jia_media_v2',
   NEWS: 'jia_news_v1',
-  DONATIONS: 'jia_donations_v1',
+  DONATIONS: 'jia_donations_v2',
   SETTINGS: 'jia_settings_v3',
 };
 
 function getItem<T>(key: string, defaultValue: T): T {
   try {
     const data = localStorage.getItem(key);
-    if (!data) return defaultValue;
+    if (data === null || data === undefined) return defaultValue;
     const parsed = JSON.parse(data) as T;
-    if (Array.isArray(parsed) && parsed.length === 0 && Array.isArray(defaultValue) && defaultValue.length > 0) {
-      return defaultValue;
-    }
     return parsed;
   } catch (e) {
     console.error(`Error reading ${key} from localStorage:`, e);
