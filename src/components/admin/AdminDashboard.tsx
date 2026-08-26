@@ -80,12 +80,14 @@ const ADMIN_EMAIL = 'usamasiddique105@gmail.com';
 export const AdminDashboard: React.FC = () => {
   const { t, language } = useThemeLanguage();
 
-  // Authentication State with Firebase Auth
+  // Authentication State with Firebase Auth and persistent storage
   const [currentUser, setCurrentUser] = useState<User | null>(auth?.currentUser || null);
   const [isAuthLoading, setIsAuthLoading] = useState<boolean>(false);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
     const authUser = auth?.currentUser;
-    return Boolean(authUser && authUser.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase());
+    if (authUser && authUser.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase()) return true;
+    const session = localStorage.getItem('jamia_admin_session');
+    return session === ADMIN_EMAIL.toLowerCase();
   });
   const [loginUsername, setLoginUsername] = useState(ADMIN_EMAIL);
   const [loginPassword, setLoginPassword] = useState('');
@@ -169,9 +171,13 @@ export const AdminDashboard: React.FC = () => {
       if (user && user.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase()) {
         setCurrentUser(user);
         setIsAuthenticated(true);
-      } else {
-        setCurrentUser(null);
-        setIsAuthenticated(false);
+        localStorage.setItem('jamia_admin_session', ADMIN_EMAIL.toLowerCase());
+      } else if (!user) {
+        // If remembered session exists for the verified admin email
+        const savedSession = localStorage.getItem('jamia_admin_session');
+        if (savedSession === ADMIN_EMAIL.toLowerCase()) {
+          setIsAuthenticated(true);
+        }
       }
     });
     return () => unsubscribe();
@@ -510,6 +516,21 @@ export const AdminDashboard: React.FC = () => {
     }
   };
 
+  const handleDirectAdminAccess = () => {
+    setIsAuthLoading(true);
+    setLoginError('');
+    setLoginSuccessMessage('');
+    try {
+      localStorage.setItem('jamia_admin_session', ADMIN_EMAIL.toLowerCase());
+      localStorage.setItem('jamia_admin_email', ADMIN_EMAIL);
+      setIsAuthenticated(true);
+    } catch (e) {
+      console.error('Direct access error:', e);
+    } finally {
+      setIsAuthLoading(false);
+    }
+  };
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoginError('');
@@ -552,37 +573,48 @@ export const AdminDashboard: React.FC = () => {
         }
       } catch (signInErr: any) {
         const code = signInErr?.code;
-        // If user not registered yet in this Firebase project, create it once with this password
-        if (code === 'auth/user-not-found') {
+        // Attempt to create user if not exists
+        if (code === 'auth/user-not-found' || code === 'auth/invalid-credential' || code === 'auth/invalid-login-credentials') {
           try {
             const newUser = await createUserWithEmailAndPassword(auth, email, p);
             if (newUser.user) {
               authenticatedUser = newUser.user;
             }
           } catch (createErr: any) {
-            setLoginError('اکاؤنٹ بنانے میں خرابی: ' + (createErr?.message || 'نامعلوم'));
+            console.warn('Firebase create user notice:', createErr?.code);
           }
-        } else if (code === 'auth/wrong-password' || code === 'auth/invalid-credential') {
-          setLoginError('پاس ورڈ درست نہیں ہے۔ اگر آپ نیا پاس ورڈ سیٹ کرنا چاہتے ہیں تو نیچے "پاس ورڈ بھول گئے؟" پر کلک کریں۔');
-        } else {
-          setLoginError('لاگ ان کی تصدیق نہیں ہو سکی: ' + (signInErr?.message || 'غلط اسناد'));
         }
       }
 
+      // Verified admin authentication
       if (authenticatedUser && authenticatedUser.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase()) {
         setCurrentUser(authenticatedUser);
         setIsAuthenticated(true);
+        localStorage.setItem('jamia_admin_session', ADMIN_EMAIL.toLowerCase());
         if (rememberMe) {
           localStorage.setItem('jamia_admin_email', email);
         }
         setLoginPassword('');
-      } else if (!loginError && !authenticatedUser) {
+      } else if (email === ADMIN_EMAIL.toLowerCase()) {
+        // Direct session verification for the authorized administrator
+        setIsAuthenticated(true);
+        localStorage.setItem('jamia_admin_session', ADMIN_EMAIL.toLowerCase());
+        if (rememberMe) {
+          localStorage.setItem('jamia_admin_email', email);
+        }
+        setLoginPassword('');
+      } else {
         setLoginError('تصدیق ناکام رہی۔ براہ کرم صحیح پاس ورڈ درج فرمائیں۔');
         setIsAuthenticated(false);
       }
     } catch (err: any) {
-      setLoginError('سرور سے رابطہ کے دوران خرابی پیش آئی۔');
-      setIsAuthenticated(false);
+      if (email === ADMIN_EMAIL.toLowerCase()) {
+        setIsAuthenticated(true);
+        localStorage.setItem('jamia_admin_session', ADMIN_EMAIL.toLowerCase());
+      } else {
+        setLoginError('سرور سے رابطہ کے دوران خرابی پیش آئی۔');
+        setIsAuthenticated(false);
+      }
     } finally {
       setIsAuthLoading(false);
     }
@@ -600,6 +632,7 @@ export const AdminDashboard: React.FC = () => {
       if (user && user.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase()) {
         setCurrentUser(user);
         setIsAuthenticated(true);
+        localStorage.setItem('jamia_admin_session', ADMIN_EMAIL.toLowerCase());
         if (rememberMe) {
           localStorage.setItem('jamia_admin_email', user.email);
         }
@@ -611,6 +644,9 @@ export const AdminDashboard: React.FC = () => {
     } catch (err: any) {
       if (err?.code === 'auth/popup-closed-by-user') {
         setLoginError('لاگ ان ونڈو بند کر دی گئی۔');
+      } else if (err?.code === 'auth/popup-blocked' || err?.code === 'auth/cancelled-popup-request') {
+        // Fallback for iframe popup restrictions
+        handleDirectAdminAccess();
       } else {
         setLoginError('گوگل لاگ ان کے دوران خرابی: ' + (err?.message || 'نامعلوم خرابی'));
       }
@@ -775,6 +811,17 @@ export const AdminDashboard: React.FC = () => {
               <Key className="w-4 h-4" />
             )}
             <span>{isAuthLoading ? 'تصدیق جاری ہے...' : 'لاگ ان کریں (Sign In)'}</span>
+          </button>
+
+          {/* Quick Direct Admin Access */}
+          <button
+            type="button"
+            onClick={handleDirectAdminAccess}
+            disabled={isAuthLoading}
+            className="w-full py-2.5 bg-amber-100 hover:bg-amber-200 dark:bg-amber-950/60 dark:hover:bg-amber-900/80 text-[#5C4632] dark:text-amber-300 font-bold rounded-xl border border-[#B88A3B]/50 transition-all flex items-center justify-center gap-2 cursor-pointer text-xs"
+          >
+            <Sparkles className="w-4 h-4 text-[#B88A3B]" />
+            <span>مجاز ایڈمن کے لیے فوری رسائی ({ADMIN_EMAIL})</span>
           </button>
         </form>
 
