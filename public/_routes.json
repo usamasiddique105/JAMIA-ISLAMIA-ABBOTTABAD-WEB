@@ -3,22 +3,5 @@
   "include": [
     "/api/*"
   ],
-  "exclude": [
-    "/sitemap.xml",
-    "/sitemap-darulifta.xml",
-    "/sitemap-quran.xml",
-    "/sitemap-dars-nizami.xml",
-    "/sitemap-results.xml",
-    "/sitemap-donations.xml",
-    "/robots.txt",
-    "/favicon.ico",
-    "/assets/*",
-    "/fonts/*",
-    "/images/*",
-    "/*.png",
-    "/*.jpg",
-    "/*.jpeg",
-    "/*.webp",
-    "/*.svg"
-  ]
+  "exclude": []
 }
