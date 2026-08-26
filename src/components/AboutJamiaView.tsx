@@ -542,10 +542,10 @@ export const AboutJamiaView: React.FC<AboutJamiaViewProps> = ({
                 <div className={`space-y-6 ${textFontClass}`}>
                   <p className={`text-base sm:text-lg lg:text-xl text-stone-800 dark:text-stone-200 ${lineSpacingClass} text-justify`}>
                     {isAr 
-                      ? 'ترتبط الجامعة الإسلامية بأيبت آباد رسمياً بـ "وفاق المدارس العربية بباكستان"، وتقدم برامج دراسية متكاملة تمتد من المرحلة الابتدائية مروراً بدورة الحديث الشريف وانتهاءً بأقسام التخصص العالي.'
+                      ? 'ترتبط الجامعة الإسلامية بأيبت آباد رسمياً بـ "وفاق المدارس العربية بباكستان" (رقم الإلحاق: 08-04-09345، رقم التسجيل: 1454/5/5183)، وتقدم برامج دراسية متكاملة تمتد من المرحلة الابتدائية مروراً بدورة الحديث الشريف وانتهاءً بأقسام التخصص العالي.'
                       : isEn 
-                      ? 'Jamia Islamia Abbottabad is officially affiliated with Wifaqul Madaris Al-Arabia Pakistan, offering a comprehensive curriculum from foundational levels to Dawrah Hadith and Postgraduate Specializations.'
-                      : 'جامعہ اسلامیہ ایبٹ آباد وفاق المدارس العربیہ پاکستان سے باقاعدہ الحاق شدہ ہے، اور یہاں درجہ ابتدائیہ سے لے کر دورۂ حدیث شریف اور تخصص تک مکمل تعلیم دی جاتی ہے۔'}
+                      ? 'Jamia Islamia Abbottabad is officially affiliated with Wifaqul Madaris Al-Arabia Pakistan (Affiliation No: 08-04-09345, Registration No: 1454/5/5183), offering a comprehensive curriculum from foundational levels to Dawrah Hadith and Postgraduate Specializations.'
+                      : 'جامعہ اسلامیہ ایبٹ آباد وفاق المدارس العربیہ پاکستان سے باقاعدہ الحاق شدہ ہے (الحاق نمبر: 08-04-09345، رجسٹریشن نمبر: 1454/5/5183)، اور یہاں درجہ ابتدائیہ سے لے کر دورۂ حدیث شریف اور تخصص تک مکمل تعلیم دی جاتی ہے۔'}
                   </p>
 
                   <div className="space-y-3">

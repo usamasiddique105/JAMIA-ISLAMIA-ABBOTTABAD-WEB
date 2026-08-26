@@ -238,6 +238,8 @@ export interface SiteSettings {
   enableWhatsAppNotifications?: boolean;
   address: string;
   city: string;
+  registrationNumber?: string;
+  affiliationNumber?: string;
   visitorCount: number;
   heroAnnouncement: LocalizedString;
   bankDetails: {

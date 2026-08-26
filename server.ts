@@ -154,6 +154,25 @@ You are an expert Islamic jurist and Arabic/Urdu-to-English scholarly translator
     }
   });
 
+  // Sitemap & SEO files explicit routes
+  app.get(["/sitemap.xml", "/sitemap-*.xml"], (req, res, next) => {
+    const fileName = req.path.replace(/^\/+/, '');
+    const filePath = path.join(process.cwd(), process.env.NODE_ENV === "production" ? "dist" : "public", fileName);
+    res.setHeader("Content-Type", "application/xml; charset=utf-8");
+    res.setHeader("X-Robots-Tag", "all");
+    res.sendFile(filePath, (err) => {
+      if (err) next();
+    });
+  });
+
+  app.get("/robots.txt", (req, res, next) => {
+    const filePath = path.join(process.cwd(), process.env.NODE_ENV === "production" ? "dist" : "public", "robots.txt");
+    res.setHeader("Content-Type", "text/plain; charset=utf-8");
+    res.sendFile(filePath, (err) => {
+      if (err) next();
+    });
+  });
+
   // Vite middleware for development vs static build for production
   if (process.env.NODE_ENV !== "production") {
     const vite = await createViteServer({

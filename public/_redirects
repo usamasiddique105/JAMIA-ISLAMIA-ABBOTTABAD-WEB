@@ -1,1 +1,17 @@
-/*    /index.html   200
+# Cloudflare Pages Static Sitemap & Robots Passthrough
+/sitemap.xml             /sitemap.xml             200
+/sitemap-darulifta.xml   /sitemap-darulifta.xml   200
+/sitemap-quran.xml       /sitemap-quran.xml       200
+/sitemap-dars-nizami.xml /sitemap-dars-nizami.xml 200
+/sitemap-results.xml     /sitemap-results.xml     200
+/sitemap-donations.xml   /sitemap-donations.xml   200
+/robots.txt              /robots.txt              200
+/favicon.ico             /favicon.ico             200
+
+# Handle duplicate slash requests
+//sitemap.xml            /sitemap.xml             301!
+//robots.txt             /robots.txt              301!
+
+# SPA Fallback for dynamic application routes
+/*                       /index.html              200
+

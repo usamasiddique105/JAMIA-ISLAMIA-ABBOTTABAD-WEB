@@ -66,9 +66,9 @@ export const ContactFAQView: React.FC = () => {
         en: 'Are Jamia certificates accredited by Wifaqul Madaris and HEC?'
       },
       a: {
-        ur: 'جی ہاں، جامعہ اسلامیہ ایبٹ آباد وفاق المدارس العربیہ پاکستان سے الحاق شدہ ہے اور اس کی تمام اسناد اعلیٰ تعلیم کمیشن (HEC) سے ایم اے اور بی اے کے مساوی تسلیم شدہ ہیں۔',
-        ar: 'نعم، الجامعة الإسلامية بأيبت آباد مسجلة رسمياً تحت مظلة وفاق المدارس العربية بباكستان، وجميع شهاداتها معترف بها ومعادلة لشهادات البكالوريوس والماجستير من هيئة التعليم العالي (HEC).',
-        en: 'Yes, Jamia Islamia Abbottabad is officially affiliated with Wifaqul Madaris Al-Arabia Pakistan, and its certificates are formally recognized as equivalent to MA/BA degrees by the Higher Education Commission (HEC).'
+        ur: 'جی ہاں، جامعہ اسلامیہ ایبٹ آباد وفاق المدارس العربیہ پاکستان سے باقاعدہ الحاق شدہ ہے (الحاق نمبر: 08-04-09345، رجسٹریشن نمبر: 1454/5/5183) اور اس کی تمام اسناد اعلیٰ تعلیم کمیشن (HEC) سے ایم اے اور بی اے کے مساوی تسلیم شدہ ہیں۔',
+        ar: 'نعم، الجامعة الإسلامية بأيبت آباد مسجلة رسمياً تحت مظلة وفاق المدارس العربية بباكستان (رقم الإلحاق: 08-04-09345، رقم التسجيل: 1454/5/5183)، وجميع شهاداتها معترف بها ومعادلة لشهادات البكالوريوس والماجستير من هيئة التعليم العالي (HEC).',
+        en: 'Yes, Jamia Islamia Abbottabad is officially affiliated with Wifaqul Madaris Al-Arabia Pakistan (Affiliation No: 08-04-09345, Registration No: 1454/5/5183), and its certificates are formally recognized as equivalent to MA/BA degrees by the Higher Education Commission (HEC).'
       }
     },
     {

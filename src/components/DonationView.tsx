@@ -109,9 +109,9 @@ export const DonationView: React.FC<DonationViewProps> = ({ setCurrentTab }) => 
   return (
     <div className="w-full space-y-6 font-sans select-text" dir="rtl">
       
-      {/* 1. TOP CLASSICAL HEADER BANNER (Matching Screenshot Exactly) */}
+      {/* 1. TOP CLASSICAL HEADER BANNER (Centered Elegant Layout) */}
       <div 
-        className="w-full rounded-2xl border border-[#D5C29E] dark:border-[#5C4632] px-6 sm:px-10 py-6 sm:py-8 shadow-xs flex flex-row items-center justify-between transition-colors"
+        className="w-full rounded-2xl border border-[#D5C29E] dark:border-[#5C4632] px-4 py-4 sm:py-5 sm:px-8 shadow-xs flex flex-col items-center justify-center text-center transition-colors gap-2"
         style={{
           backgroundColor: '#F5EFE0',
           backgroundImage: `
@@ -121,28 +121,28 @@ export const DonationView: React.FC<DonationViewProps> = ({ setCurrentTab }) => 
           backgroundRepeat: 'repeat'
         }}
       >
-        {/* Right Title (In RTL: Far Right) */}
-        <div className="text-right">
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-black font-urdu text-[#3D2817] dark:text-[#3D2817] tracking-normal leading-tight">
-            طریقہ تعاون
-          </h1>
-          <p className="text-xs sm:text-sm font-urdu text-[#7A5835] mt-1 font-semibold">
-            جامعہ اسلامیہ ایبٹ آباد - شعبہ زکوٰۃ، صدقات و عطیات
-          </p>
-        </div>
+        {/* 1. Top Heading: طریقہ تعاون */}
+        <h1 className="text-2xl sm:text-3xl md:text-4xl font-black font-urdu text-[#3D2817] dark:text-[#3D2817] tracking-normal leading-tight">
+          طریقہ تعاون
+        </h1>
 
-        {/* Left Calligraphy Logo (In RTL: Far Left) */}
-        <div className="text-left">
+        {/* 2. Middle: Calligraphy Logo */}
+        <div className="flex items-center justify-center my-0.5">
           <img 
             src={JAMIA_HEADER_LOGO_DATA_URI || headerLogoCalligraphy} 
             alt="الجامعۃ الاسلامیۃ ایبٹ آباد" 
-            className="h-12 sm:h-16 md:h-20 w-auto object-contain max-w-[200px] sm:max-w-[280px] opacity-90 drop-shadow-xs"
+            className="h-10 sm:h-12 md:h-14 w-auto object-contain max-w-[200px] sm:max-w-[260px] opacity-90 drop-shadow-xs"
             onError={(e) => {
               const target = e.currentTarget;
               target.src = JAMIA_HEADER_LOGO_DATA_URI || '/jamia_logo_calligraphy_transparent.png';
             }}
           />
         </div>
+
+        {/* 3. Below Logo: Subtitle */}
+        <p className="text-xs sm:text-sm font-urdu text-[#7A5835] font-semibold leading-relaxed">
+          جامعہ اسلامیہ ایبٹ آباد - شعبہ زکوٰۃ، صدقات و عطیات
+        </p>
       </div>
 
       {/* 2. MAIN 2-COLUMN LAYOUT (Content on Right, Sidebar on Left matching Screenshot) */}
@@ -152,9 +152,9 @@ export const DonationView: React.FC<DonationViewProps> = ({ setCurrentTab }) => 
         <div className="lg:col-span-8 space-y-6">
           
           {/* Institutional Statement Box */}
-          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-stone-200 dark:border-slate-800 p-6 sm:p-8 shadow-xs space-y-4 text-stone-800 dark:text-stone-200">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-stone-200 dark:border-slate-800 p-5 sm:p-8 shadow-xs space-y-4 text-stone-800 dark:text-stone-200">
             
-            <div className="font-urdu text-sm sm:text-base md:text-lg leading-[2.3] text-stone-800 dark:text-stone-200 space-y-3.5 text-justify">
+            <div className="font-urdu text-sm sm:text-base md:text-lg leading-[2.2] text-stone-800 dark:text-stone-200 space-y-3.5 text-right sm:text-justify">
               <p>
                 جامعہ ایک مرکزی دینی تعلیمی ادارہ ہے۔ اس کی کوئی مستقل آمدنی نہیں، نہ ہی حکومت کی جانب سے کوئی مالی امداد حاصل کی جاتی ہے، بلکہ تمام تر امور محض اللہ تعالیٰ کی توفیق اور اہلِ خیر و مخلص حضرات کے مالی تعاون سے انجام پاتے ہیں۔
               </p>

@@ -8,8 +8,11 @@ service cloud.firestore {
     }
 
     function isAdmin() {
-      return isSignedIn() && 
-        request.auth.token.email == 'usamasiddique105@gmail.com';
+      return isSignedIn() && (
+        request.auth.token.admin == true ||
+        (request.auth.token.email is string && request.auth.token.email.lower() == 'usamasiddique105@gmail.com') ||
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+      );
     }
 
     function isValidId(id) {
