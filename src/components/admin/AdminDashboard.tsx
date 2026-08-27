@@ -72,7 +72,10 @@ import {
   MapPin,
   TrendingUp,
   Compass,
-  Radio
+  Radio,
+  Download,
+  Upload,
+  Database
 } from 'lucide-react';
 
 const ADMIN_EMAIL = 'usamasiddique105@gmail.com';
@@ -507,6 +510,86 @@ export const AdminDashboard: React.FC = () => {
     e.preventDefault();
     StorageService.saveSiteSettings(settings);
     alert('جامعہ اسلامیہ ایبٹ آباد کی ویب سائٹ سیٹنگز محفوظ ہو گئیں!');
+  };
+
+  // Full Database Backup Export (JSON)
+  const handleExportFullBackup = () => {
+    try {
+      const backupData = {
+        meta: {
+          organization: 'جامعہ اسلامیہ ایبٹ آباد (Jamia Islamia Abbottabad)',
+          portal: 'https://jamia-islamia-abbottabad.pages.dev',
+          exportDate: new Date().toISOString(),
+          version: '2026.1'
+        },
+        fatwas: StorageService.getFatwas(),
+        questions: StorageService.getQuestions(),
+        classBookings: StorageService.getClassBookings(),
+        examResults: StorageService.getExamResults(),
+        departments: StorageService.getDepartments(),
+        faculty: StorageService.getFaculty(),
+        books: StorageService.getBooks(),
+        media: StorageService.getMedia(),
+        news: StorageService.getNews(),
+        donations: StorageService.getDonations(),
+        settings: StorageService.getSiteSettings(),
+        visitors: StorageService.getVisitors()
+      };
+
+      const jsonStr = JSON.stringify(backupData, null, 2);
+      const blob = new Blob([jsonStr], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `Jamia_Islamia_Abbottabad_Full_Backup_${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch (err: any) {
+      alert('بیک اپ ایکسپورٹ کرنے میں خرابی: ' + (err?.message || 'نامعلوم'));
+    }
+  };
+
+  // Full Database Backup Restore (JSON)
+  const handleImportFullBackup = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const content = event.target?.result as string;
+        const data = JSON.parse(content);
+
+        if (!data || typeof data !== 'object') {
+          alert('منتخب کردہ بیک اپ فائل کا فارمیٹ درست نہیں ہے۔');
+          return;
+        }
+
+        if (confirm('کیا آپ واقعی یہ بیک اپ بحال کرنا چاہتے ہیں؟ اس سے موجودہ ڈیٹا فائل کے ڈیٹا کے ساتھ اپڈیٹ ہو جائے گا۔')) {
+          if (Array.isArray(data.fatwas)) StorageService.saveFatwas(data.fatwas);
+          if (Array.isArray(data.questions)) StorageService.saveQuestions(data.questions);
+          if (Array.isArray(data.classBookings)) StorageService.saveClassBookings(data.classBookings);
+          if (Array.isArray(data.examResults)) StorageService.saveExamResults(data.examResults);
+          if (Array.isArray(data.departments)) StorageService.saveDepartments(data.departments);
+          if (Array.isArray(data.faculty)) StorageService.saveFaculty(data.faculty);
+          if (Array.isArray(data.books)) StorageService.saveBooks(data.books);
+          if (Array.isArray(data.media)) StorageService.saveMedia(data.media);
+          if (Array.isArray(data.news)) StorageService.saveNews(data.news);
+          if (Array.isArray(data.donations)) StorageService.saveDonations(data.donations);
+          if (data.settings && typeof data.settings === 'object') StorageService.saveSiteSettings(data.settings);
+
+          refreshData();
+          alert('بیک اپ کامیابی کے ساتھ بحال (Restore) ہو گیا!');
+        }
+      } catch (err: any) {
+        alert('بیک اپ بحال کرنے میں خرابی: ' + (err?.message || 'نامعلوم'));
+      }
+    };
+    reader.readAsText(file);
+    // Reset file input
+    e.target.value = '';
   };
 
   const handleResetData = () => {
@@ -2256,10 +2339,60 @@ export const AdminDashboard: React.FC = () => {
               </div>
             </div>
 
+            {/* Complete Data Backup & Restore (کلاؤڈ فلیئر و مکمل ڈیٹا بیک اپ) */}
+            <div className="p-5 bg-stone-100/70 dark:bg-slate-800/60 rounded-2xl border border-stone-300 dark:border-slate-700 space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Database className="w-5 h-5 text-[#B88A3B]" />
+                  <h4 className="font-bold text-sm text-[#5C4632] dark:text-amber-300 font-urdu">
+                    جامعہ اسلامیہ ڈیٹا بیس کا مکمل بیک اپ اور بحالی (Backup & Restore)
+                  </h4>
+                </div>
+                <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-900 dark:bg-amber-950 dark:text-amber-300 font-bold">
+                  محفوظ ڈیٹا فائل (JSON)
+                </span>
+              </div>
+              
+              <p className="text-xs text-stone-600 dark:text-stone-300">
+                یہاں سے آپ تمام فتاویٰ، سائلین کے سوالات، داخلہ فارمز، امتحانی نتائج، کتب، خبریں، عطیات اور سیٹنگز پر مشتمل مکمل ڈیٹا کی سنگل فائل ڈاؤن لوڈ کر سکتے ہیں اور بوقت ضرورت ایک کلک میں بحال (Restore) کر سکتے ہیں:
+              </p>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                {/* Export Button */}
+                <button
+                  type="button"
+                  onClick={handleExportFullBackup}
+                  className="p-3 bg-white dark:bg-slate-900 hover:bg-amber-50 dark:hover:bg-slate-800 border border-amber-300 dark:border-slate-700 rounded-xl text-xs font-bold text-[#5C4632] dark:text-amber-300 flex items-center justify-center gap-2 transition-all shadow-sm cursor-pointer"
+                >
+                  <Download className="w-4 h-4 text-emerald-600" />
+                  <span>تمام ڈیٹا کا بیک اپ ڈاؤن لوڈ کریں (Download Backup)</span>
+                </button>
+
+                {/* Import/Restore Button */}
+                <label className="p-3 bg-white dark:bg-slate-900 hover:bg-blue-50 dark:hover:bg-slate-800 border border-blue-300 dark:border-slate-700 rounded-xl text-xs font-bold text-[#5C4632] dark:text-blue-300 flex items-center justify-center gap-2 transition-all shadow-sm cursor-pointer">
+                  <Upload className="w-4 h-4 text-blue-600" />
+                  <span>بیک اپ فائل اپلوڈ و بحال کریں (Restore Backup)</span>
+                  <input
+                    type="file"
+                    accept=".json"
+                    onChange={handleImportFullBackup}
+                    className="hidden"
+                  />
+                </label>
+              </div>
+            </div>
+
           </div>
 
-          <div className="flex justify-end">
-            <button type="submit" className="px-6 py-2.5 bg-emerald-800 text-amber-200 font-bold text-xs rounded-xl shadow-md flex items-center gap-2">
+          <div className="flex flex-wrap items-center justify-between gap-4 pt-2">
+            <button 
+              type="button" 
+              onClick={handleResetData} 
+              className="px-4 py-2 bg-stone-200 dark:bg-slate-800 hover:bg-red-100 dark:hover:bg-red-950 text-stone-700 dark:text-stone-300 hover:text-red-700 dark:hover:text-red-300 text-xs rounded-xl font-bold transition-colors"
+            >
+              ابتدائی ڈیٹا پر ری سیٹ کریں (Reset to Defaults)
+            </button>
+            <button type="submit" className="px-6 py-2.5 bg-emerald-800 hover:bg-emerald-900 text-amber-200 font-bold text-xs rounded-xl shadow-md flex items-center gap-2 cursor-pointer transition-all">
               <Save className="w-4 h-4" />
               <span>سیٹنگز محفوظ کریں (Save Settings)</span>
             </button>
