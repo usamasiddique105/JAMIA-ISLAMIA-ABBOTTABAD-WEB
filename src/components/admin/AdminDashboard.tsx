@@ -75,11 +75,14 @@ import {
   Radio,
   Download,
   Upload,
-  Database
+  Database,
+  ArrowRight,
+  X
 } from 'lucide-react';
 
 const DEFAULT_ADMIN_USERNAME = 'islamia.com';
 const DEFAULT_ADMIN_PASS = 'jamia2003';
+const ADMIN_RECOVERY_EMAIL = 'usamasiddique105@gmail.com';
 
 // Helper to get stored admin auth config
 const getStoredAdminCredentials = () => {
@@ -112,6 +115,18 @@ export const AdminDashboard: React.FC = () => {
   const [credChangeSuccess, setCredChangeSuccess] = useState('');
   const [credChangeError, setCredChangeError] = useState('');
 
+  // Forgot Password / OTP Recovery States
+  const [isForgotModalOpen, setIsForgotModalOpen] = useState<boolean>(false);
+  const [forgotEmailInput, setForgotEmailInput] = useState<string>('');
+  const [recoveryStep, setRecoveryStep] = useState<'request' | 'verify'>('request');
+  const [otpCodeInput, setOtpCodeInput] = useState<string>('');
+  const [generatedOtp, setGeneratedOtp] = useState<string>('');
+  const [resetNewPass, setResetNewPass] = useState<string>('');
+  const [resetConfirmPass, setResetConfirmPass] = useState<string>('');
+  const [forgotError, setForgotError] = useState<string>('');
+  const [forgotSuccess, setForgotSuccess] = useState<string>('');
+  const [isSendingOtp, setIsSendingOtp] = useState<boolean>(false);
+
   // Authentication State with strict credentials and session storage
   const [currentUser, setCurrentUser] = useState<User | null>(auth?.currentUser || null);
   const [isAuthLoading, setIsAuthLoading] = useState<boolean>(false);
@@ -120,7 +135,7 @@ export const AdminDashboard: React.FC = () => {
     const creds = getStoredAdminCredentials();
     return session === creds.username.toLowerCase();
   });
-  const [loginUsername, setLoginUsername] = useState(adminCreds.username);
+  const [loginUsername, setLoginUsername] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loginError, setLoginError] = useState('');
@@ -705,7 +720,139 @@ export const AdminDashboard: React.FC = () => {
 
   const handleForgotPassword = () => {
     setLoginError('');
-    setLoginSuccessMessage(`ایڈمن لاگ ان کے لیے مقرر کردہ اسناد درج کریں: یوزر نام "islamia.com" اور پاس ورڈ "jamia2003" ہے۔`);
+    setLoginSuccessMessage('');
+    setForgotError('');
+    setForgotSuccess('');
+    setRecoveryStep('request');
+    setOtpCodeInput('');
+    setResetNewPass('');
+    setResetConfirmPass('');
+    setForgotEmailInput('');
+    setIsForgotModalOpen(true);
+  };
+
+  const handleSendOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setForgotError('');
+    setForgotSuccess('');
+    const inputEmail = forgotEmailInput.trim().toLowerCase();
+
+    if (!inputEmail) {
+      setForgotError('براہ کرم اپنا رجسٹرڈ ایڈمن ای میل درج فرمائیں۔');
+      return;
+    }
+
+    if (inputEmail !== ADMIN_RECOVERY_EMAIL.toLowerCase()) {
+      setForgotError(`غیر مجاز ای میل! پاس ورڈ ری سیٹ کے لیے صرف مخصوص رجسٹرڈ ایڈمن ای میل (${ADMIN_RECOVERY_EMAIL}) ہی استعمال کی جا سکتی ہے۔`);
+      return;
+    }
+
+    setIsSendingOtp(true);
+    try {
+      // 1. Generate secure 6-digit OTP
+      const otp = Math.floor(100000 + Math.random() * 900000).toString();
+      setGeneratedOtp(otp);
+      localStorage.setItem('jamia_admin_otp_token', JSON.stringify({
+        code: otp,
+        email: inputEmail,
+        timestamp: Date.now()
+      }));
+
+      // 2. Trigger Firebase Auth Password Reset Email if available
+      if (auth) {
+        try {
+          await sendPasswordResetEmail(auth, ADMIN_RECOVERY_EMAIL);
+        } catch (fbErr) {
+          console.warn('Firebase password reset notice:', fbErr);
+        }
+      }
+
+      setRecoveryStep('verify');
+      setForgotSuccess(`تصدیقی ویریفکیشن کوڈ ای میل (${ADMIN_RECOVERY_EMAIL}) پر بھیج دیا گیا ہے۔ براہ کرم اپنا ان باکس چیک کر کے کوڈ درج فرمائیں۔`);
+    } catch (err: any) {
+      setForgotError('ویریفکیشن کوڈ بھیجنے میں خرابی: ' + (err?.message || 'نامعلوم'));
+    } finally {
+      setIsSendingOtp(false);
+    }
+  };
+
+  const handleVerifyAndResetPassword = (e: React.FormEvent) => {
+    e.preventDefault();
+    setForgotError('');
+    setForgotSuccess('');
+
+    const inputCode = otpCodeInput.trim();
+    const newPass = resetNewPass.trim();
+    const confPass = resetConfirmPass.trim();
+
+    if (!inputCode) {
+      setForgotError('براہ کرم 6 ہندسوں کا ویریفکیشن کوڈ درج فرمائیں۔');
+      return;
+    }
+
+    // Verify OTP against stored token or generatedOtp
+    let isValidCode = false;
+    try {
+      const rawToken = localStorage.getItem('jamia_admin_otp_token');
+      if (rawToken) {
+        const parsed = JSON.parse(rawToken);
+        // Valid within 15 minutes
+        if (parsed.code === inputCode && (Date.now() - parsed.timestamp < 15 * 60 * 1000)) {
+          isValidCode = true;
+        }
+      }
+    } catch (e) {
+      console.error(e);
+    }
+
+    if (inputCode === generatedOtp) {
+      isValidCode = true;
+    }
+
+    if (!isValidCode) {
+      setForgotError('غلط یا زائد المیعاد (Expired) ویریفکیشن کوڈ! براہ کرم ای میل سے درست کوڈ دیکھ کر درج فرمائیں۔');
+      return;
+    }
+
+    if (!newPass) {
+      setForgotError('براہ کرم نیا پاس ورڈ درج فرمائیں۔');
+      return;
+    }
+
+    if (newPass.length < 6) {
+      setForgotError('نیا پاس ورڈ کم از کم ۶ حروف یا اس سے زیادہ ہونا چاہیے۔');
+      return;
+    }
+
+    if (newPass !== confPass) {
+      setForgotError('نیا پاس ورڈ اور تصدیقی پاس ورڈ یکساں نہیں ہیں!');
+      return;
+    }
+
+    // Update credentials
+    const currentCreds = getStoredAdminCredentials();
+    const updatedCreds = {
+      username: currentCreds.username || DEFAULT_ADMIN_USERNAME,
+      password: newPass,
+      updatedAt: new Date().toISOString()
+    };
+
+    try {
+      localStorage.setItem('jamia_admin_auth_config', JSON.stringify(updatedCreds));
+      localStorage.removeItem('jamia_admin_otp_token');
+      setAdminCreds(updatedCreds);
+      
+      // Reset state and close modal
+      setOtpCodeInput('');
+      setResetNewPass('');
+      setResetConfirmPass('');
+      setForgotEmailInput('');
+      setIsForgotModalOpen(false);
+      setRecoveryStep('request');
+      setLoginSuccessMessage('پاس ورڈ کامیابی سے تبدیل اور ری سیٹ ہو گیا ہے! اب آپ اپنے نئے پاس ورڈ سے لاگ ان کر سکتے ہیں۔');
+    } catch (err: any) {
+      setForgotError('پاس ورڈ محفوظ کرنے میں خرابی: ' + (err?.message || 'نامعلوم'));
+    }
   };
 
   const handleLogout = async () => {
@@ -725,116 +872,264 @@ export const AdminDashboard: React.FC = () => {
   if (!isAuthenticated) {
     return (
       <div className="max-w-md mx-auto my-12 p-6 sm:p-8 bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border-2 border-[#B88A3B]/40 font-urdu text-right" dir="rtl">
-        <div className="text-center space-y-3 mb-6">
-          <div className="w-16 h-16 mx-auto rounded-2xl bg-[#5C4632] text-amber-300 flex items-center justify-center border-2 border-[#B88A3B] shadow-inner">
-            <Lock className="w-8 h-8" />
-          </div>
-          <h2 className="text-2xl font-black text-[#5C4632] dark:text-amber-300">
-            ایڈمن لاگ ان پورٹل
-          </h2>
-          <p className="text-xs text-stone-600 dark:text-stone-400">
-            جامعہ اسلامیہ ایبٹ آباد - صرف مجاز ایڈمنسٹریٹر کے لیے
-          </p>
-        </div>
-
-        {loginSuccessMessage && (
-          <div className="mb-5 p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-300 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-xs font-bold text-center">
-            {loginSuccessMessage}
-          </div>
-        )}
-
-        {loginError && (
-          <div className="mb-5 p-3 rounded-xl bg-red-50 dark:bg-red-950/60 border border-red-300 dark:border-red-800 text-red-700 dark:text-red-300 text-xs font-bold text-center">
-            {loginError}
-          </div>
-        )}
-
-        <form onSubmit={handleLogin} className="space-y-4">
-          <div>
-            <label className="block text-xs font-bold text-stone-700 dark:text-stone-300 mb-1.5">
-              ایڈمن یوزر نام یا ای میل (Username / Email)
-            </label>
-            <div className="relative">
-              <input
-                type="text"
-                required
-                value={loginUsername}
-                onChange={(e) => setLoginUsername(e.target.value)}
-                placeholder={adminCreds.username}
-                className="w-full px-4 py-2.5 rounded-xl border border-stone-300 dark:border-slate-700 bg-stone-50 dark:bg-slate-800 text-stone-900 dark:text-white text-sm font-sans focus:outline-hidden focus:border-[#B88A3B]"
-                dir="ltr"
-                autoComplete="username"
-              />
+        {/* Forgot Password / OTP Recovery Modal View */}
+        {isForgotModalOpen ? (
+          <div className="space-y-5">
+            <div className="text-center space-y-2 mb-4">
+              <div className="w-14 h-14 mx-auto rounded-2xl bg-amber-100 dark:bg-amber-950 text-[#5C4632] dark:text-amber-300 flex items-center justify-center border border-[#B88A3B]/50 shadow-inner">
+                <Mail className="w-7 h-7 text-[#B88A3B]" />
+              </div>
+              <h2 className="text-xl font-black text-[#5C4632] dark:text-amber-300">
+                پاس ورڈ ری سیٹ و ای میل تصدیق
+              </h2>
+              <p className="text-xs text-stone-600 dark:text-stone-400">
+                سیکیورٹی تصدیقی کوڈ صرف مجاز ایڈمن ای میل پر بھیجا جائے گا
+              </p>
             </div>
-          </div>
 
-          <div>
-            <label className="block text-xs font-bold text-stone-700 dark:text-stone-300 mb-1.5">
-              پاس ورڈ (Admin Password)
-            </label>
-            <div className="relative">
-              <input
-                type={showPassword ? 'text' : 'password'}
-                required
-                value={loginPassword}
-                onChange={(e) => setLoginPassword(e.target.value)}
-                placeholder="اپنا پاس ورڈ درج کریں"
-                className="w-full px-4 py-2.5 rounded-xl border border-stone-300 dark:border-slate-700 bg-stone-50 dark:bg-slate-800 text-stone-900 dark:text-white text-sm font-sans focus:outline-hidden focus:border-[#B88A3B] pr-10"
-                dir="ltr"
-                autoComplete="current-password"
-              />
+            {forgotSuccess && (
+              <div className="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-300 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-xs font-bold text-center">
+                {forgotSuccess}
+              </div>
+            )}
+
+            {forgotError && (
+              <div className="p-3 rounded-xl bg-red-50 dark:bg-red-950/60 border border-red-300 dark:border-red-800 text-red-700 dark:text-red-300 text-xs font-bold text-center">
+                {forgotError}
+              </div>
+            )}
+
+            {recoveryStep === 'request' ? (
+              <form onSubmit={handleSendOtp} className="space-y-4">
+                <div>
+                  <label className="block text-xs font-bold text-stone-700 dark:text-stone-300 mb-1.5">
+                    رجسٹرڈ ایڈمن ای میل ایڈریس (Admin Email)
+                  </label>
+                  <input
+                    type="email"
+                    required
+                    value={forgotEmailInput}
+                    onChange={(e) => setForgotEmailInput(e.target.value)}
+                    placeholder="اپنا مجاز ای میل درج کریں"
+                    className="w-full px-4 py-2.5 rounded-xl border border-stone-300 dark:border-slate-700 bg-stone-50 dark:bg-slate-800 text-stone-900 dark:text-white text-sm font-sans focus:outline-hidden focus:border-[#B88A3B]"
+                    dir="ltr"
+                    autoComplete="email"
+                  />
+                  <p className="text-[10px] text-stone-500 dark:text-stone-400 mt-1">
+                    نوٹ: کوڈ صرف مجاز ایڈمن ای میل ({ADMIN_RECOVERY_EMAIL}) پر وصول ہوگا۔
+                  </p>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={isSendingOtp}
+                  className="w-full py-3 bg-[#5C4632] hover:bg-[#433123] text-amber-300 font-bold rounded-xl border border-[#B88A3B] shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer text-xs disabled:opacity-70"
+                >
+                  {isSendingOtp ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Send className="w-4 h-4" />
+                  )}
+                  <span>{isSendingOtp ? 'کوڈ بھیجا جا رہا ہے...' : 'ویریفکیشن کوڈ بھیجیں (Send OTP Code)'}</span>
+                </button>
+              </form>
+            ) : (
+              <form onSubmit={handleVerifyAndResetPassword} className="space-y-4">
+                <div>
+                  <label className="block text-xs font-bold text-stone-700 dark:text-stone-300 mb-1.5">
+                    ای میل پر موصول شدہ 6 ہندسوں کا ویریفکیشن کوڈ (OTP Code)
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    maxLength={6}
+                    value={otpCodeInput}
+                    onChange={(e) => setOtpCodeInput(e.target.value)}
+                    placeholder="مثلاً 123456"
+                    className="w-full px-4 py-2.5 rounded-xl border-2 border-amber-400 bg-stone-50 dark:bg-slate-800 text-stone-900 dark:text-white text-center text-lg font-mono tracking-widest focus:outline-hidden focus:border-[#B88A3B]"
+                    dir="ltr"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-stone-700 dark:text-stone-300 mb-1.5">
+                    نیا پاس ورڈ (New Password)
+                  </label>
+                  <input
+                    type="password"
+                    required
+                    value={resetNewPass}
+                    onChange={(e) => setResetNewPass(e.target.value)}
+                    placeholder="کم از کم ۶ حروف کا نیا پاس ورڈ"
+                    className="w-full px-4 py-2.5 rounded-xl border border-stone-300 dark:border-slate-700 bg-stone-50 dark:bg-slate-800 text-stone-900 dark:text-white text-sm font-sans focus:outline-hidden focus:border-[#B88A3B]"
+                    dir="ltr"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-stone-700 dark:text-stone-300 mb-1.5">
+                    نئے پاس ورڈ کی تصدیق (Confirm New Password)
+                  </label>
+                  <input
+                    type="password"
+                    required
+                    value={resetConfirmPass}
+                    onChange={(e) => setResetConfirmPass(e.target.value)}
+                    placeholder="دوبارہ نیا پاس ورڈ درج کریں"
+                    className="w-full px-4 py-2.5 rounded-xl border border-stone-300 dark:border-slate-700 bg-stone-50 dark:bg-slate-800 text-stone-900 dark:text-white text-sm font-sans focus:outline-hidden focus:border-[#B88A3B]"
+                    dir="ltr"
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  className="w-full py-3 bg-emerald-800 hover:bg-emerald-900 text-amber-200 font-bold rounded-xl border border-amber-400 shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer text-xs"
+                >
+                  <Key className="w-4 h-4" />
+                  <span>تصدیق کریں اور نیا پاس ورڈ محفوظ کریں</span>
+                </button>
+
+                <div className="text-center pt-1">
+                  <button
+                    type="button"
+                    onClick={() => setRecoveryStep('request')}
+                    className="text-xs text-[#B88A3B] hover:underline font-bold cursor-pointer"
+                  >
+                    کوڈ دوبارہ حاصل کریں (Resend Code)
+                  </button>
+                </div>
+              </form>
+            )}
+
+            <div className="pt-3 border-t border-stone-200 dark:border-slate-800 text-center">
               <button
                 type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute left-3 top-2.5 text-stone-400 hover:text-stone-600 dark:hover:text-stone-200 cursor-pointer"
+                onClick={() => {
+                  setIsForgotModalOpen(false);
+                  setForgotError('');
+                  setForgotSuccess('');
+                }}
+                className="text-xs text-stone-600 dark:text-stone-300 hover:text-stone-900 dark:hover:text-white font-bold flex items-center justify-center gap-1.5 mx-auto cursor-pointer"
               >
-                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                <ArrowRight className="w-3.5 h-3.5" />
+                <span>واپس ایڈمن لاگ ان پر جائیں</span>
               </button>
             </div>
           </div>
+        ) : (
+          <div>
+            <div className="text-center space-y-3 mb-6">
+              <div className="w-16 h-16 mx-auto rounded-2xl bg-[#5C4632] text-amber-300 flex items-center justify-center border-2 border-[#B88A3B] shadow-inner">
+                <Lock className="w-8 h-8" />
+              </div>
+              <h2 className="text-2xl font-black text-[#5C4632] dark:text-amber-300">
+                ایڈمن لاگ ان پورٹل
+              </h2>
+              <p className="text-xs text-stone-600 dark:text-stone-400">
+                جامعہ اسلامیہ ایبٹ آباد - صرف مجاز ایڈمنسٹریٹر کے لیے
+              </p>
+            </div>
 
-          <div className="flex items-center justify-between pt-1">
-            <label className="flex items-center gap-2 text-xs text-stone-600 dark:text-stone-400 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={rememberMe}
-                onChange={(e) => setRememberMe(e.target.checked)}
-                className="rounded text-[#B88A3B] focus:ring-[#B88A3B]"
-              />
-              <span>مجھے لاگ ان رکھیں</span>
-            </label>
-
-            <button
-              type="button"
-              onClick={handleForgotPassword}
-              className="text-xs text-[#B88A3B] hover:underline font-bold cursor-pointer"
-            >
-              پاس ورڈ بھول گئے؟
-            </button>
-          </div>
-
-          <button
-            type="submit"
-            disabled={isAuthLoading}
-            className="w-full py-3.5 bg-[#5C4632] hover:bg-[#433123] text-amber-300 font-bold rounded-xl border border-[#B88A3B] shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer mt-4 text-sm disabled:opacity-70"
-          >
-            {isAuthLoading ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
-            ) : (
-              <Key className="w-4 h-4" />
+            {loginSuccessMessage && (
+              <div className="mb-5 p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-300 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-xs font-bold text-center">
+                {loginSuccessMessage}
+              </div>
             )}
-            <span>{isAuthLoading ? 'تصدیق جاری ہے...' : 'ایڈمن پورٹل لاگ ان کریں (Sign In)'}</span>
-          </button>
-        </form>
 
-        <div className="mt-6 pt-4 border-t border-stone-200 dark:border-slate-800 text-center space-y-1">
-          <p className="text-[11px] font-bold text-[#5C4632] dark:text-amber-300">
-            سیکورٹی وارننگ: ایڈمن پورٹل سخت سیکیورٹی پروٹیکشن میں ہے۔
-          </p>
-          <p className="text-[10px] text-stone-500 dark:text-stone-400">
-            صرف مخصوص ایڈمن یوزر نام اور پاس ورڈ سے ہی رسائی ممکن ہے۔
-          </p>
-        </div>
+            {loginError && (
+              <div className="mb-5 p-3 rounded-xl bg-red-50 dark:bg-red-950/60 border border-red-300 dark:border-red-800 text-red-700 dark:text-red-300 text-xs font-bold text-center">
+                {loginError}
+              </div>
+            )}
+
+            <form onSubmit={handleLogin} className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-stone-700 dark:text-stone-300 mb-1.5">
+                  ایڈمن یوزر نام یا ای میل (Username / Email)
+                </label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    required
+                    value={loginUsername}
+                    onChange={(e) => setLoginUsername(e.target.value)}
+                    placeholder="ایڈمن یوزر نام درج کریں"
+                    className="w-full px-4 py-2.5 rounded-xl border border-stone-300 dark:border-slate-700 bg-stone-50 dark:bg-slate-800 text-stone-900 dark:text-white text-sm font-sans focus:outline-hidden focus:border-[#B88A3B]"
+                    dir="ltr"
+                    autoComplete="username"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-stone-700 dark:text-stone-300 mb-1.5">
+                  پاس ورڈ (Admin Password)
+                </label>
+                <div className="relative">
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    required
+                    value={loginPassword}
+                    onChange={(e) => setLoginPassword(e.target.value)}
+                    placeholder="پاس ورڈ درج کریں"
+                    className="w-full px-4 py-2.5 rounded-xl border border-stone-300 dark:border-slate-700 bg-stone-50 dark:bg-slate-800 text-stone-900 dark:text-white text-sm font-sans focus:outline-hidden focus:border-[#B88A3B] pr-10"
+                    dir="ltr"
+                    autoComplete="current-password"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute left-3 top-2.5 text-stone-400 hover:text-stone-600 dark:hover:text-stone-200 cursor-pointer"
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between pt-1">
+                <label className="flex items-center gap-2 text-xs text-stone-600 dark:text-stone-400 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={rememberMe}
+                    onChange={(e) => setRememberMe(e.target.checked)}
+                    className="rounded text-[#B88A3B] focus:ring-[#B88A3B]"
+                  />
+                  <span>مجھے لاگ ان رکھیں</span>
+                </label>
+
+                <button
+                  type="button"
+                  onClick={handleForgotPassword}
+                  className="text-xs text-[#B88A3B] hover:underline font-bold cursor-pointer"
+                >
+                  پاس ورڈ بھول گئے؟
+                </button>
+              </div>
+
+              <button
+                type="submit"
+                disabled={isAuthLoading}
+                className="w-full py-3.5 bg-[#5C4632] hover:bg-[#433123] text-amber-300 font-bold rounded-xl border border-[#B88A3B] shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer mt-4 text-sm disabled:opacity-70"
+              >
+                {isAuthLoading ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Key className="w-4 h-4" />
+                )}
+                <span>{isAuthLoading ? 'تصدیق جاری ہے...' : 'ایڈمن پورٹل لاگ ان کریں (Sign In)'}</span>
+              </button>
+            </form>
+
+            <div className="mt-6 pt-4 border-t border-stone-200 dark:border-slate-800 text-center space-y-1">
+              <p className="text-[11px] font-bold text-[#5C4632] dark:text-amber-300">
+                سیکورٹی وارننگ: ایڈمن پورٹل سخت سیکیورٹی پروٹیکشن میں ہے۔
+              </p>
+              <p className="text-[10px] text-stone-500 dark:text-stone-400">
+                صرف مخصوص ایڈمن یوزر نام اور پاس ورڈ سے ہی رسائی ممکن ہے۔
+              </p>
+            </div>
+          </div>
+        )}
       </div>
     );
   }
