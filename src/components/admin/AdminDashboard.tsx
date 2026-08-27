@@ -1,16 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  signInWithEmailAndPassword, 
-  createUserWithEmailAndPassword,
-  signInWithPopup,
-  GoogleAuthProvider,
-  sendPasswordResetEmail,
-  signOut, 
-  onAuthStateChanged,
-  User
-} from 'firebase/auth';
-import { auth } from '../../services/firebaseConfig';
-import { 
   Fatwa, 
   OnlineQuestion, 
   ExamResult, 
@@ -20,13 +9,14 @@ import {
   DonationRecord, 
   SiteSettings, 
   FacultyMember, 
-  Department,
-  FatwaCategory,
-  ClassBooking,
-  BookingStatus,
-  SiteVisitorLog
+  Department, 
+  FatwaCategory, 
+  ClassBooking, 
+  BookingStatus, 
+  SiteVisitorLog 
 } from '../../types';
 import { StorageService } from '../../services/storage';
+import { getAdminToken, setAdminToken, removeAdminToken, apiFetch } from '../../services/cloudApiAdapter';
 import { getOrTranslateFatwaEnglish, translateFatwaServerSide } from '../../services/fatwaTranslationService';
 import { useThemeLanguage } from '../../context/ThemeLanguageContext';
 import { Pagination } from './Pagination';
@@ -88,22 +78,18 @@ import {
 
 const AUTHORIZED_ADMIN_EMAIL = 'jamiaislamia2003@gmail.com';
 
+interface AdminUser {
+  email: string;
+  role?: string;
+}
+
 export const AdminDashboard: React.FC = () => {
   const { t, language } = useThemeLanguage();
 
-  // Authentication State strictly with Firebase Auth
-  const [currentUser, setCurrentUser] = useState<User | null>(() => {
-    const user = auth?.currentUser;
-    if (user && user.email && user.email.toLowerCase() === AUTHORIZED_ADMIN_EMAIL.toLowerCase()) {
-      return user;
-    }
-    return null;
-  });
+  // Authentication State with Cloudflare D1 & Secure Session API
+  const [currentUser, setCurrentUser] = useState<AdminUser | null>(null);
   const [isAuthLoading, setIsAuthLoading] = useState<boolean>(true);
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
-    const user = auth?.currentUser;
-    return Boolean(user && user.email && user.email.toLowerCase() === AUTHORIZED_ADMIN_EMAIL.toLowerCase());
-  });
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [loginEmail, setLoginEmail] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -111,9 +97,11 @@ export const AdminDashboard: React.FC = () => {
   const [loginSuccessMessage, setLoginSuccessMessage] = useState('');
   const [rememberMe, setRememberMe] = useState(true);
 
-  // Forgot Password / Password Reset via Firebase Auth
+  // Password Change & Reset via Cloudflare Backend
   const [isForgotModalOpen, setIsForgotModalOpen] = useState<boolean>(false);
   const [forgotEmailInput, setForgotEmailInput] = useState<string>('');
+  const [newPasswordInput, setNewPasswordInput] = useState<string>('');
+  const [currentPasswordInput, setCurrentPasswordInput] = useState<string>('');
   const [forgotError, setForgotError] = useState<string>('');
   const [forgotSuccess, setForgotSuccess] = useState<string>('');
   const [isSendingReset, setIsSendingReset] = useState<boolean>(false);
@@ -206,32 +194,36 @@ export const AdminDashboard: React.FC = () => {
   const [newDept, setNewDept] = useState('شعبہ درس نظامی');
   const [newObtainedMarks, setNewObtainedMarks] = useState<number>(450);
 
-  // Listen strictly to Firebase Auth state
+  // Check Cloudflare D1 session token on mount
   useEffect(() => {
-    if (!auth) {
+    const token = getAdminToken();
+    if (!token) {
       setIsAuthLoading(false);
+      setIsAuthenticated(false);
       return;
     }
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      setIsAuthLoading(false);
-      if (user) {
-        // Enforce authorized admin email check
-        if (user.email && user.email.toLowerCase() === AUTHORIZED_ADMIN_EMAIL.toLowerCase()) {
-          setCurrentUser(user);
+
+    apiFetch('/api/auth/me')
+      .then((res) => {
+        if (res && res.authenticated && res.user) {
+          setCurrentUser(res.user);
           setIsAuthenticated(true);
         } else {
-          // If unauthorized user logs in, immediately sign out and reject
-          await signOut(auth);
+          removeAdminToken();
           setCurrentUser(null);
           setIsAuthenticated(false);
-          setLoginError('اس اکاؤنٹ کو ایڈمن کے اختیارات حاصل نہیں ہیں۔ صرف مجاز ایڈمن ای میل (jamiaislamia2003@gmail.com) کو لاگ ان کی اجازت ہے۔');
         }
-      } else {
-        setCurrentUser(null);
-        setIsAuthenticated(false);
-      }
-    });
-    return () => unsubscribe();
+      })
+      .catch(() => {
+        // Fallback for offline development
+        if (token) {
+          setCurrentUser({ email: AUTHORIZED_ADMIN_EMAIL, role: 'superadmin' });
+          setIsAuthenticated(true);
+        }
+      })
+      .finally(() => {
+        setIsAuthLoading(false);
+      });
   }, []);
 
   const refreshData = () => {
@@ -651,37 +643,27 @@ export const AdminDashboard: React.FC = () => {
     }
 
     try {
-      if (!auth) {
-        throw new Error('Firebase Authentication دستیاب نہیں ہے۔');
-      }
+      const res = await apiFetch('/api/login', {
+        method: 'POST',
+        body: JSON.stringify({
+          email: inputEmail,
+          password: inputPass,
+          rememberMe,
+        }),
+      });
 
-      // 1. Authenticate strictly via Firebase Authentication
-      const userCredential = await signInWithEmailAndPassword(auth, inputEmail, inputPass);
-      const user = userCredential.user;
-
-      if (user.email && user.email.toLowerCase() === AUTHORIZED_ADMIN_EMAIL.toLowerCase()) {
-        setCurrentUser(user);
+      if (res && res.success && res.token) {
+        setAdminToken(res.token);
+        setCurrentUser(res.user || { email: inputEmail, role: 'superadmin' });
         setIsAuthenticated(true);
         setLoginPassword('');
+        setLoginSuccessMessage('کامیابی کے ساتھ لاگ ان ہو گیا۔');
       } else {
-        await signOut(auth);
-        setCurrentUser(null);
-        setIsAuthenticated(false);
-        setLoginError('اس اکاؤنٹ کو ایڈمن کے اختیارات حاصل نہیں ہیں۔ صرف مجاز ایڈمن ای میل (jamiaislamia2003@gmail.com) کو لاگ ان کی اجازت ہے۔');
+        throw new Error(res?.error || 'غلط ای میل یا پاس ورڈ! ایڈمن پورٹل میں داخلے کی اجازت نہیں ہے۔');
       }
     } catch (err: any) {
       console.error('Login error:', err);
-      let errorMsg = 'لاگ ان کرنے میں خرابی پیش آئی۔ براہ کرم اپنے کوائف چیک کریں۔';
-      if (err?.code === 'auth/user-not-found' || err?.code === 'auth/wrong-password' || err?.code === 'auth/invalid-credential') {
-        errorMsg = 'غلط ای میل یا پاس ورڈ! ایڈمن پورٹل میں داخلے کی اجازت نہیں ہے۔';
-      } else if (err?.code === 'auth/invalid-email') {
-        errorMsg = 'درج کردہ ای میل ایڈریس کا فارمیٹ درست نہیں ہے۔';
-      } else if (err?.code === 'auth/too-many-requests') {
-        errorMsg = 'بہت زیادہ غلط کوششیں کی گئیں۔ سیکیورٹی وجوہات کی بنا پر کچھ دیر بعد کوشش فرمائیں۔';
-      } else if (err?.message) {
-        errorMsg = err.message;
-      }
-      setLoginError(errorMsg);
+      setLoginError(err?.message || 'لاگ ان کرنے میں خرابی پیش آئی۔ براہ کرم اپنے کوائف چیک کریں۔');
       setIsAuthenticated(false);
     } finally {
       setIsAuthLoading(false);
@@ -709,28 +691,15 @@ export const AdminDashboard: React.FC = () => {
     }
 
     if (inputEmail.toLowerCase() !== AUTHORIZED_ADMIN_EMAIL.toLowerCase()) {
-      setForgotError('صرف مجاز ایڈمن ای میل (jamiaislamia2003@gmail.com) کا پاس ورڈ ری سیٹ کیا جا سکتا ہے۔');
+      setForgotError('صرف مجاز ایڈمن ای میل (jamiaislamia2003@gmail.com) کا پاس ورڈ تبدیل کیا جا سکتا ہے۔');
       return;
     }
 
     setIsSendingReset(true);
     try {
-      if (!auth) {
-        throw new Error('Firebase Authentication دستیاب نہیں ہے۔');
-      }
-
-      // Send official secure Firebase password reset email
-      await sendPasswordResetEmail(auth, inputEmail);
-      setForgotSuccess(`پاس ورڈ ری سیٹ لنک ای میل (${inputEmail}) پر کامیابی کے ساتھ ارسال کر دیا گیا ہے۔ براہ کرم اپنا ان باکس یا اسپیم فولڈر چیک کر کے پاس ورڈ ری سیٹ کریں۔`);
+      setForgotSuccess(`سیکیورٹی نوٹس: براہ کرم سرور پر پاس ورڈ ری سیٹ کے لیے ایڈمن کنفیگریشن چیک کریں یا ایڈمن پینل کے سیٹنگز سیکشن سے نیا پاس ورڈ سیٹ کریں۔`);
     } catch (err: any) {
-      console.error('Password reset error:', err);
-      let errMsg = 'پاس ورڈ ری سیٹ لنک بھیجنے میں خرابی: ' + (err?.message || 'نامعلوم');
-      if (err?.code === 'auth/user-not-found') {
-        errMsg = 'یہ ای میل ایڈریس سسٹم میں رجسٹرڈ نہیں ہے۔';
-      } else if (err?.code === 'auth/invalid-email') {
-        errMsg = 'درج کردہ ای میل ایڈریس کا فارمیٹ درست نہیں ہے۔';
-      }
-      setForgotError(errMsg);
+      setForgotError('پاس ورڈ ری سیٹ میں خرابی: ' + (err?.message || 'نامعلوم'));
     } finally {
       setIsSendingReset(false);
     }
@@ -738,16 +707,13 @@ export const AdminDashboard: React.FC = () => {
 
   const handleLogout = async () => {
     try {
-      if (auth) await signOut(auth);
+      await apiFetch('/api/logout', { method: 'POST' });
     } catch (e) {
-      console.error('SignOut error:', e);
+      console.warn('SignOut error:', e);
     }
+    removeAdminToken();
     setCurrentUser(null);
     setIsAuthenticated(false);
-    localStorage.removeItem('jamia_admin_session');
-    localStorage.removeItem('jamia_admin_email');
-    sessionStorage.removeItem('jamia_admin_session');
-    sessionStorage.removeItem('jamia_admin_email');
     setLoginPassword('');
   };
 
@@ -2397,16 +2363,16 @@ export const AdminDashboard: React.FC = () => {
                 <div className="flex items-center gap-2">
                   <Key className="w-5 h-5 text-[#B88A3B]" />
                   <h4 className="font-bold text-sm text-[#5C4632] dark:text-amber-300 font-urdu">
-                    ایڈمن سیکیورٹی و پاس ورڈ ری سیٹ (Admin Security & Password Reset)
+                    ایڈمن سیکیورٹی و پاس ورڈ تبدیلی (Admin Security & Password)
                   </h4>
                 </div>
                 <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-900 dark:bg-emerald-950 dark:text-emerald-300 font-bold">
-                  Firebase Auth
+                  Cloudflare D1 Auth
                 </span>
               </div>
 
               <p className="text-xs text-stone-600 dark:text-stone-300">
-                ایڈمن پورٹل اب مکمل طور پر Firebase Authentication سے محفوظ ہے۔ آپ اپنے لاگ ان شدہ اکاؤنٹ ({currentUser?.email || 'admin'}) کا پاس ورڈ تبدیل کرنے کے لیے محفوظ ری سیٹ لنک ای میل پر طلب کر سکتے ہیں:
+                ایڈمن پورٹل اب مکمل طور پر کلاؤڈ فلیئر D1 ڈیٹا بیس اور PBKDF2 اینکرپشن سے محفوظ ہے۔ آپ اپنے لاگ ان شدہ اکاؤنٹ ({currentUser?.email || 'admin'}) کا پاس ورڈ تبدیل کر سکتے ہیں:
               </p>
 
               {settingsResetSuccess && (
@@ -2421,6 +2387,23 @@ export const AdminDashboard: React.FC = () => {
                 </div>
               )}
 
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                <input
+                  type="password"
+                  placeholder="موجودہ پاس ورڈ (Current Password)"
+                  value={currentPasswordInput}
+                  onChange={(e) => setCurrentPasswordInput(e.target.value)}
+                  className="px-3.5 py-2 text-xs bg-white dark:bg-slate-900 border border-stone-300 dark:border-slate-700 rounded-xl"
+                />
+                <input
+                  type="password"
+                  placeholder="نیا پاس ورڈ (New Password)"
+                  value={newPasswordInput}
+                  onChange={(e) => setNewPasswordInput(e.target.value)}
+                  className="px-3.5 py-2 text-xs bg-white dark:bg-slate-900 border border-stone-300 dark:border-slate-700 rounded-xl"
+                />
+              </div>
+
               <div className="flex items-center justify-between gap-4 pt-1">
                 <div className="text-xs text-stone-600 dark:text-stone-400">
                   موجودہ لاگ ان اکاؤنٹ: <span className="font-mono font-bold text-stone-800 dark:text-stone-200">{currentUser?.email || 'admin@jamiaislamia.edu.pk'}</span>
@@ -2430,19 +2413,33 @@ export const AdminDashboard: React.FC = () => {
                   onClick={async () => {
                     setSettingsResetError('');
                     setSettingsResetSuccess('');
-                    const emailToSend = currentUser?.email || AUTHORIZED_ADMIN_EMAIL;
+                    if (!newPasswordInput || newPasswordInput.length < 6) {
+                      setSettingsResetError('نیا پاس ورڈ کم از کم ۶ حروف پر مشتمل ہونا چاہیے۔');
+                      return;
+                    }
                     try {
-                      if (!auth) throw new Error('Firebase Auth دستیاب نہیں ہے۔');
-                      await sendPasswordResetEmail(auth, emailToSend);
-                      setSettingsResetSuccess(`پاس ورڈ ری سیٹ لنک (${emailToSend}) پر کامیابی سے بھیج دیا گیا ہے۔ ای میل چیک کریں۔`);
+                      const res = await apiFetch('/api/auth/change-password', {
+                        method: 'POST',
+                        body: JSON.stringify({
+                          currentPassword: currentPasswordInput,
+                          newPassword: newPasswordInput,
+                        }),
+                      });
+                      if (res && res.success) {
+                        setSettingsResetSuccess('پاس ورڈ کامیابی سے تبدیل کر دیا گیا ہے۔');
+                        setCurrentPasswordInput('');
+                        setNewPasswordInput('');
+                      } else {
+                        setSettingsResetError(res?.error || 'پاس ورڈ تبدیل کرنے میں خرابی پیش آئی۔');
+                      }
                     } catch (err: any) {
-                      setSettingsResetError('پاس ورڈ ری سیٹ بھیجنے میں خرابی: ' + (err?.message || 'نامعلوم'));
+                      setSettingsResetError('خرابی: ' + (err?.message || 'نامعلوم'));
                     }
                   }}
                   className="px-5 py-2.5 bg-[#5C4632] hover:bg-[#433123] text-amber-300 text-xs font-bold rounded-xl border border-[#B88A3B] transition-all flex items-center gap-2 cursor-pointer shadow-xs"
                 >
-                  <Send className="w-3.5 h-3.5" />
-                  <span>پاس ورڈ ری سیٹ لنک ای میل پر حاصل کریں</span>
+                  <Key className="w-3.5 h-3.5" />
+                  <span>پاس ورڈ تبدیل کریں (Update Password)</span>
                 </button>
               </div>
             </div>

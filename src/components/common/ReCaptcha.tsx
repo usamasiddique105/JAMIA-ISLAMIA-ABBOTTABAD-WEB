@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { ShieldCheck, RefreshCw, AlertCircle } from 'lucide-react';
+import { ShieldCheck, RefreshCw } from 'lucide-react';
 import { useThemeLanguage } from '../../context/ThemeLanguageContext';
-import firebaseConfig from '../../../firebase-applet-config.json';
 
 declare global {
   interface Window {
@@ -32,7 +31,7 @@ interface ReCaptchaProps {
   theme?: 'light' | 'dark';
 }
 
-// Official Google reCAPTCHA v2 test site key (always passes and renders the official Google widget on all domains/localhost)
+// Official Google reCAPTCHA v2 test site key
 const DEFAULT_GOOGLE_RECAPTCHA_TEST_KEY = '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI';
 
 export const ReCaptcha: React.FC<ReCaptchaProps> = ({
@@ -51,10 +50,9 @@ export const ReCaptcha: React.FC<ReCaptchaProps> = ({
   const [num2, setNum2] = useState<number>(() => Math.floor(Math.random() * 8) + 2);
   const [fallbackVerified, setFallbackVerified] = useState<boolean>(false);
 
-  // Determine active site key
+  // Determine active site key from environment variable
   const siteKey =
     import.meta.env.VITE_RECAPTCHA_SITE_KEY ||
-    (firebaseConfig as Record<string, unknown>)?.recaptchaSiteKey ||
     DEFAULT_GOOGLE_RECAPTCHA_TEST_KEY;
 
   const currentTheme: 'light' | 'dark' = isDarkMode ? 'dark' : (theme === 'dark' ? 'dark' : 'light');
@@ -67,7 +65,6 @@ export const ReCaptcha: React.FC<ReCaptchaProps> = ({
       if (!isMounted || !containerRef.current || !window.grecaptcha?.render) return;
 
       try {
-        // Clear previous rendered widget if any
         containerRef.current.innerHTML = '';
         const id = window.grecaptcha.render(containerRef.current, {
           sitekey: String(siteKey),
@@ -99,7 +96,6 @@ export const ReCaptcha: React.FC<ReCaptchaProps> = ({
       }
     };
 
-    // If script is already loaded and ready
     if (window.grecaptcha && typeof window.grecaptcha.render === 'function') {
       window.grecaptcha.ready(renderWidget);
       return () => {
@@ -107,14 +103,12 @@ export const ReCaptcha: React.FC<ReCaptchaProps> = ({
       };
     }
 
-    // Define global callback for Google API script
     window.onJamiaRecaptchaLoad = () => {
       if (isMounted && window.grecaptcha) {
         window.grecaptcha.ready(renderWidget);
       }
     };
 
-    // Check if script tag is already in DOM
     const SCRIPT_ID = 'google-recaptcha-script';
     let scriptTag = document.getElementById(SCRIPT_ID) as HTMLScriptElement | null;
 
@@ -134,7 +128,6 @@ export const ReCaptcha: React.FC<ReCaptchaProps> = ({
       document.head.appendChild(scriptTag);
     }
 
-    // Safety timeout in case of blocked network
     timeoutId = setTimeout(() => {
       if (isMounted && !widgetIdRef.current && (!window.grecaptcha || !containerRef.current?.hasChildNodes())) {
         setIsLoading(false);
@@ -166,13 +159,11 @@ export const ReCaptcha: React.FC<ReCaptchaProps> = ({
 
   return (
     <div className={`my-2 ${className}`} dir="ltr">
-      {/* Official Google reCAPTCHA Render Target */}
       <div 
         ref={containerRef} 
         className="min-h-[78px] flex items-center justify-start overflow-hidden rounded-md"
       />
 
-      {/* Loading state indicator while Google script loads */}
       {isLoading && !loadError && (
         <div className="flex items-center gap-2.5 p-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 text-xs w-full max-w-sm">
           <RefreshCw className="w-4 h-4 animate-spin text-[#4285F4]" />
@@ -180,7 +171,6 @@ export const ReCaptcha: React.FC<ReCaptchaProps> = ({
         </div>
       )}
 
-      {/* Transparent Fallback Challenge if Google script is unreachable (e.g. offline/restricted sandbox) */}
       {loadError && !fallbackVerified && (
         <div className="p-3.5 rounded-xl border border-amber-300 dark:border-amber-700 bg-amber-50/80 dark:bg-slate-800 text-slate-800 dark:text-slate-100 space-y-2.5 max-w-sm shadow-xs text-right" dir="rtl">
           <div className="flex items-center gap-2 text-xs font-bold text-amber-900 dark:text-amber-300">

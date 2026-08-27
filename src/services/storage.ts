@@ -13,20 +13,16 @@ import {
   SiteVisitorLog
 } from '../types';
 import { IDatabaseService, DB_COLLECTIONS } from './dbInterface';
-import { LocalStorageAdapter, STORAGE_KEYS } from './localStorageAdapter';
-import { FirestoreAdapter } from './firestoreAdapter';
-import { isFirebaseConfigured } from './firebaseConfig';
+import { CloudApiAdapter, D1_STORAGE_KEYS } from './cloudApiAdapter';
 
-// Active adapter dynamically selects Cloud Firestore when configured, falling back seamlessly to LocalStorage
-const currentAdapter: IDatabaseService = isFirebaseConfigured()
-  ? new FirestoreAdapter()
-  : new LocalStorageAdapter();
+// Primary Cloudflare D1 & SQL API adapter
+const currentAdapter: IDatabaseService = new CloudApiAdapter();
 
 export const StorageService = {
   // Collection & Storage Keys Metadata
   collections: DB_COLLECTIONS,
-  storageKeys: STORAGE_KEYS,
-  isCloudReady: isFirebaseConfigured,
+  storageKeys: D1_STORAGE_KEYS,
+  isCloudReady: () => true,
 
   // Fatwas
   getFatwas: (): Fatwa[] => currentAdapter.getFatwas() as Fatwa[],
