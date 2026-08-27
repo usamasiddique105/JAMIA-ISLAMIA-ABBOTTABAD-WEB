@@ -233,7 +233,7 @@ export const NotificationService = {
       const emailBody: Record<string, string> = {
         _subject: `[جامعہ اسلامیہ الرٹ] ${payload.title} - ${payload.senderName}`,
         _template: 'table',
-        _captcha: 'false',
+        _captcha: 'true',
         'نوعیت': payload.title,
         'نام': payload.senderName,
         'ای میل': payload.senderEmail,

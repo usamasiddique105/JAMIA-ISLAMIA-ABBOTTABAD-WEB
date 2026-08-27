@@ -469,6 +469,31 @@ export class FirestoreAdapter implements IDatabaseService {
     this.notifyUpdate(DB_COLLECTIONS.DEPARTMENTS);
     await this.seedCollection(DB_COLLECTIONS.DEPARTMENTS, data);
   }
+  async addDepartment(dept: Department): Promise<void> {
+    this.departments = [dept, ...this.departments.filter(d => d.id !== dept.id)];
+    setLocalItem(STORAGE_KEYS.DEPARTMENTS, this.departments);
+    this.notifyUpdate(DB_COLLECTIONS.DEPARTMENTS);
+    try {
+      const docRef = doc(db, DB_COLLECTIONS.DEPARTMENTS, dept.id);
+      await setDoc(docRef, sanitizeForFirestore(dept), { merge: true });
+    } catch (error) {
+      console.warn(`Notice saving department ${dept.id} to cloud Firestore:`, error);
+    }
+  }
+  async updateDepartment(dept: Department): Promise<void> {
+    await this.addDepartment(dept);
+  }
+  async deleteDepartment(id: string): Promise<void> {
+    this.departments = this.departments.filter(d => d.id !== id);
+    setLocalItem(STORAGE_KEYS.DEPARTMENTS, this.departments);
+    this.notifyUpdate(DB_COLLECTIONS.DEPARTMENTS);
+    try {
+      const docRef = doc(db, DB_COLLECTIONS.DEPARTMENTS, id);
+      await deleteDoc(docRef);
+    } catch (error) {
+      console.warn(`Notice deleting department ${id} from cloud Firestore:`, error);
+    }
+  }
 
   // --- Faculty ---
   getFaculty(): FacultyMember[] {
@@ -479,6 +504,31 @@ export class FirestoreAdapter implements IDatabaseService {
     setLocalItem(STORAGE_KEYS.FACULTY, data);
     this.notifyUpdate(DB_COLLECTIONS.FACULTY);
     await this.seedCollection(DB_COLLECTIONS.FACULTY, data);
+  }
+  async addFaculty(member: FacultyMember): Promise<void> {
+    this.faculty = [member, ...this.faculty.filter(f => f.id !== member.id)];
+    setLocalItem(STORAGE_KEYS.FACULTY, this.faculty);
+    this.notifyUpdate(DB_COLLECTIONS.FACULTY);
+    try {
+      const docRef = doc(db, DB_COLLECTIONS.FACULTY, member.id);
+      await setDoc(docRef, sanitizeForFirestore(member), { merge: true });
+    } catch (error) {
+      console.warn(`Notice saving faculty ${member.id} to cloud Firestore:`, error);
+    }
+  }
+  async updateFaculty(member: FacultyMember): Promise<void> {
+    await this.addFaculty(member);
+  }
+  async deleteFaculty(id: string): Promise<void> {
+    this.faculty = this.faculty.filter(f => f.id !== id);
+    setLocalItem(STORAGE_KEYS.FACULTY, this.faculty);
+    this.notifyUpdate(DB_COLLECTIONS.FACULTY);
+    try {
+      const docRef = doc(db, DB_COLLECTIONS.FACULTY, id);
+      await deleteDoc(docRef);
+    } catch (error) {
+      console.warn(`Notice deleting faculty ${id} from cloud Firestore:`, error);
+    }
   }
 
   // --- Books ---
@@ -501,6 +551,20 @@ export class FirestoreAdapter implements IDatabaseService {
       await setDoc(docRef, sanitizeForFirestore(book), { merge: true });
     } catch (error) {
       console.warn(`Notice saving book ${book.id} to cloud Firestore:`, error);
+    }
+  }
+  async updateBook(book: PublicationBook): Promise<void> {
+    await this.addBook(book);
+  }
+  async deleteBook(id: string): Promise<void> {
+    this.books = this.books.filter(b => b.id !== id);
+    setLocalItem(STORAGE_KEYS.BOOKS, this.books);
+    this.notifyUpdate(DB_COLLECTIONS.BOOKS);
+    try {
+      const docRef = doc(db, DB_COLLECTIONS.BOOKS, id);
+      await deleteDoc(docRef);
+    } catch (error) {
+      console.warn(`Notice deleting book ${id} from cloud Firestore:`, error);
     }
   }
 
@@ -526,6 +590,20 @@ export class FirestoreAdapter implements IDatabaseService {
       console.warn(`Notice saving media item ${mediaItem.id} to cloud Firestore:`, error);
     }
   }
+  async updateMedia(mediaItem: MediaItem): Promise<void> {
+    await this.addMedia(mediaItem);
+  }
+  async deleteMedia(id: string): Promise<void> {
+    this.media = this.media.filter(m => m.id !== id);
+    setLocalItem(STORAGE_KEYS.MEDIA, this.media);
+    this.notifyUpdate(DB_COLLECTIONS.MEDIA);
+    try {
+      const docRef = doc(db, DB_COLLECTIONS.MEDIA, id);
+      await deleteDoc(docRef);
+    } catch (error) {
+      console.warn(`Notice deleting media ${id} from cloud Firestore:`, error);
+    }
+  }
 
   // --- News ---
   getNews(): NewsItem[] {
@@ -547,6 +625,20 @@ export class FirestoreAdapter implements IDatabaseService {
       await setDoc(docRef, sanitizeForFirestore(newsItem), { merge: true });
     } catch (error) {
       console.warn(`Notice saving news ${newsItem.id} to cloud Firestore:`, error);
+    }
+  }
+  async updateNews(newsItem: NewsItem): Promise<void> {
+    await this.addNews(newsItem);
+  }
+  async deleteNews(id: string): Promise<void> {
+    this.news = this.news.filter(n => n.id !== id);
+    setLocalItem(STORAGE_KEYS.NEWS, this.news);
+    this.notifyUpdate(DB_COLLECTIONS.NEWS);
+    try {
+      const docRef = doc(db, DB_COLLECTIONS.NEWS, id);
+      await deleteDoc(docRef);
+    } catch (error) {
+      console.warn(`Notice deleting news ${id} from cloud Firestore:`, error);
     }
   }
 

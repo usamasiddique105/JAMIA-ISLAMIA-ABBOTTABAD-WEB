@@ -3,6 +3,7 @@ import { FatwaCategory, OnlineQuestion } from '../types';
 import { StorageService } from '../services/storage';
 import { NotificationService } from '../services/notificationService';
 import { useThemeLanguage } from '../context/ThemeLanguageContext';
+import { ReCaptcha } from './common/ReCaptcha';
 import { X, Send, Sparkles, CheckCircle2, Shield, Lock, MessageCircle, Mail } from 'lucide-react';
 
 interface FatwaSubmissionModalProps {
@@ -36,12 +37,17 @@ export const FatwaSubmissionModal: React.FC<FatwaSubmissionModalProps> = ({ isOp
   const [submittedQuestion, setSubmittedQuestion] = useState<OnlineQuestion | null>(null);
   const [whatsappUrl, setWhatsappUrl] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
 
   if (!isOpen) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim() || !email.trim() || !question.trim()) return;
+    if (!captchaToken) {
+      alert('براہ کرم روبوٹ نہ ہونے کی تصدیق (reCAPTCHA) مکمل فرمائیں۔');
+      return;
+    }
 
     setIsSubmitting(true);
     const newQuestion: OnlineQuestion = {
@@ -276,6 +282,11 @@ export const FatwaSubmissionModal: React.FC<FatwaSubmissionModalProps> = ({ isOp
                 <span>آپ کا سوال مکمل راز داری میں رکھا جائے گا اور مفتیانِ کرام خود جائزہ لیں گے۔</span>
               </div>
 
+              {/* Google reCAPTCHA Bot Protection */}
+              <div className="pt-1 flex justify-center">
+                <ReCaptcha onChange={setCaptchaToken} />
+              </div>
+
               <div className="pt-2 flex justify-end items-center gap-2.5">
                 <button 
                   type="button" 
@@ -286,10 +297,15 @@ export const FatwaSubmissionModal: React.FC<FatwaSubmissionModalProps> = ({ isOp
                 </button>
                 <button 
                   type="submit"
-                  className="px-6 py-2 rounded-lg bg-[#0B5D3B] hover:bg-[#08482D] text-white text-xs font-bold shadow-xs flex items-center gap-2 transition-all cursor-pointer"
+                  disabled={!captchaToken || isSubmitting}
+                  className={`px-6 py-2 rounded-lg text-white text-xs font-bold shadow-xs flex items-center gap-2 transition-all ${
+                    !captchaToken || isSubmitting
+                      ? 'bg-stone-400 cursor-not-allowed opacity-70'
+                      : 'bg-[#0B5D3B] hover:bg-[#08482D] cursor-pointer'
+                  }`}
                 >
                   <Send className="w-3.5 h-3.5 rotate-180" />
-                  <span>اپنا سوال جمع کریں</span>
+                  <span>{isSubmitting ? 'ارسال ہو رہا ہے...' : 'اپنا سوال جمع کریں'}</span>
                 </button>
               </div>
 

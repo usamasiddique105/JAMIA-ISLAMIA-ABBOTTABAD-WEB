@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { FundType, DonationRecord, SiteSettings } from '../types';
 import { StorageService } from '../services/storage';
 import { useThemeLanguage } from '../context/ThemeLanguageContext';
+import { ReCaptcha } from './common/ReCaptcha';
 import headerLogoCalligraphy from '../assets/images/jamia_logo_calligraphy_transparent.png';
 import { JAMIA_HEADER_LOGO_DATA_URI } from '../assets/logoBase64';
 import { 
@@ -58,6 +59,7 @@ export const DonationView: React.FC<DonationViewProps> = ({ setCurrentTab }) => 
   const [customAmount, setCustomAmount] = useState<string>('');
   const [paymentMethod, setPaymentMethod] = useState<'Bank Transfer' | 'EasyPaisa'>('Bank Transfer');
   const [submittedReceipt, setSubmittedReceipt] = useState<DonationRecord | null>(null);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
 
   useEffect(() => {
     setSettings(StorageService.getSiteSettings());
@@ -77,6 +79,10 @@ export const DonationView: React.FC<DonationViewProps> = ({ setCurrentTab }) => 
     e.preventDefault();
     const finalAmount = customAmount ? Number(customAmount) : amount;
     if (!donorName || !finalAmount || finalAmount <= 0) return;
+    if (!captchaToken) {
+      alert('براہ کرم روبوٹ نہ ہونے کی تصدیق (reCAPTCHA) مکمل فرمائیں۔');
+      return;
+    }
 
     const record: DonationRecord = {
       id: `don-${Date.now()}`,
@@ -395,9 +401,19 @@ export const DonationView: React.FC<DonationViewProps> = ({ setCurrentTab }) => 
                     </div>
                   </div>
 
+                  {/* Google reCAPTCHA */}
+                  <div className="pt-1 flex justify-center">
+                    <ReCaptcha onChange={setCaptchaToken} />
+                  </div>
+
                   <button
                     type="submit"
-                    className="w-full py-2.5 bg-[#5C4632] hover:bg-[#433123] text-amber-200 font-bold text-xs sm:text-sm rounded-xl transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer mt-2"
+                    disabled={!captchaToken}
+                    className={`w-full py-2.5 text-amber-200 font-bold text-xs sm:text-sm rounded-xl transition-all shadow-xs flex items-center justify-center gap-2 mt-2 ${
+                      !captchaToken 
+                        ? 'bg-stone-400 dark:bg-slate-700 text-stone-200 cursor-not-allowed opacity-70' 
+                        : 'bg-[#5C4632] hover:bg-[#433123] cursor-pointer'
+                    }`}
                   >
                     <Send className="w-4 h-4" />
                     <span>ادائیگی کی اطلاع درج کریں (Submit Receipt)</span>

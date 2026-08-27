@@ -5,7 +5,6 @@ import {
   signInWithPopup,
   GoogleAuthProvider,
   sendPasswordResetEmail,
-  signInAnonymously,
   signOut, 
   onAuthStateChanged,
   User
@@ -30,6 +29,11 @@ import {
 import { StorageService } from '../../services/storage';
 import { getOrTranslateFatwaEnglish, translateFatwaServerSide } from '../../services/fatwaTranslationService';
 import { useThemeLanguage } from '../../context/ThemeLanguageContext';
+import { Pagination } from './Pagination';
+import { FacultyManagement } from './FacultyManagement';
+import { DepartmentsManagement } from './DepartmentsManagement';
+import { NewsManagement } from './NewsManagement';
+import { BooksManagement } from './BooksManagement';
 import { 
   ShieldAlert, 
   Plus, 
@@ -77,72 +81,37 @@ import {
   Upload,
   Database,
   ArrowRight,
+  Building,
+  UserCheck,
   X
 } from 'lucide-react';
-
-const DEFAULT_ADMIN_USERNAME = 'islamia.com';
-const DEFAULT_ADMIN_PASS = 'jamia2003';
-const ADMIN_RECOVERY_EMAIL = 'usamasiddique105@gmail.com';
-
-// Helper to get stored admin auth config
-const getStoredAdminCredentials = () => {
-  try {
-    const raw = localStorage.getItem('jamia_admin_auth_config');
-    if (raw) {
-      const parsed = JSON.parse(raw);
-      return {
-        username: parsed.username || DEFAULT_ADMIN_USERNAME,
-        password: parsed.password || DEFAULT_ADMIN_PASS
-      };
-    }
-  } catch (e) {
-    console.error('Error reading admin credentials:', e);
-  }
-  return {
-    username: DEFAULT_ADMIN_USERNAME,
-    password: DEFAULT_ADMIN_PASS
-  };
-};
 
 export const AdminDashboard: React.FC = () => {
   const { t, language } = useThemeLanguage();
 
-  // Admin Credentials State
-  const [adminCreds, setAdminCreds] = useState(getStoredAdminCredentials);
-  const [newAdminUsernameInput, setNewAdminUsernameInput] = useState(adminCreds.username);
-  const [newAdminPasswordInput, setNewAdminPasswordInput] = useState('');
-  const [confirmAdminPasswordInput, setConfirmAdminPasswordInput] = useState('');
-  const [credChangeSuccess, setCredChangeSuccess] = useState('');
-  const [credChangeError, setCredChangeError] = useState('');
-
-  // Forgot Password / OTP Recovery States
-  const [isForgotModalOpen, setIsForgotModalOpen] = useState<boolean>(false);
-  const [forgotEmailInput, setForgotEmailInput] = useState<string>('');
-  const [recoveryStep, setRecoveryStep] = useState<'request' | 'verify'>('request');
-  const [otpCodeInput, setOtpCodeInput] = useState<string>('');
-  const [generatedOtp, setGeneratedOtp] = useState<string>('');
-  const [resetNewPass, setResetNewPass] = useState<string>('');
-  const [resetConfirmPass, setResetConfirmPass] = useState<string>('');
-  const [forgotError, setForgotError] = useState<string>('');
-  const [forgotSuccess, setForgotSuccess] = useState<string>('');
-  const [isSendingOtp, setIsSendingOtp] = useState<boolean>(false);
-
-  // Authentication State with strict credentials and session storage
+  // Authentication State with Firebase Auth
   const [currentUser, setCurrentUser] = useState<User | null>(auth?.currentUser || null);
   const [isAuthLoading, setIsAuthLoading] = useState<boolean>(false);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
-    const session = localStorage.getItem('jamia_admin_session');
-    const creds = getStoredAdminCredentials();
-    return session === creds.username.toLowerCase();
+    return Boolean(auth?.currentUser || localStorage.getItem('jamia_admin_session') || sessionStorage.getItem('jamia_admin_session'));
   });
-  const [loginUsername, setLoginUsername] = useState('');
+  const [loginEmail, setLoginEmail] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loginError, setLoginError] = useState('');
   const [loginSuccessMessage, setLoginSuccessMessage] = useState('');
   const [rememberMe, setRememberMe] = useState(true);
 
-  const [activeTab, setActiveTab] = useState<'overview' | 'bookings' | 'questions' | 'fatwas' | 'results' | 'news' | 'books' | 'faculty' | 'donations' | 'settings' | 'visitors'>('overview');
+  // Forgot Password / Password Reset via Firebase Auth
+  const [isForgotModalOpen, setIsForgotModalOpen] = useState<boolean>(false);
+  const [forgotEmailInput, setForgotEmailInput] = useState<string>('');
+  const [forgotError, setForgotError] = useState<string>('');
+  const [forgotSuccess, setForgotSuccess] = useState<string>('');
+  const [isSendingReset, setIsSendingReset] = useState<boolean>(false);
+  const [settingsResetSuccess, setSettingsResetSuccess] = useState<string>('');
+  const [settingsResetError, setSettingsResetError] = useState<string>('');
+
+  const [activeTab, setActiveTab] = useState<'overview' | 'bookings' | 'questions' | 'fatwas' | 'results' | 'news' | 'books' | 'faculty' | 'departments' | 'donations' | 'settings' | 'visitors'>('overview');
 
   // State
   const [fatwas, setFatwas] = useState<Fatwa[]>([]);
@@ -152,9 +121,34 @@ export const AdminDashboard: React.FC = () => {
   const [news, setNews] = useState<NewsItem[]>([]);
   const [books, setBooks] = useState<PublicationBook[]>([]);
   const [faculty, setFaculty] = useState<FacultyMember[]>([]);
+  const [departments, setDepartments] = useState<Department[]>([]);
   const [donations, setDonations] = useState<DonationRecord[]>([]);
   const [settings, setSettings] = useState<SiteSettings>(StorageService.getSiteSettings());
   const [visitors, setVisitors] = useState<SiteVisitorLog[]>([]);
+
+  // Pagination & Filter States
+  const [fatwaSearch, setFatwaSearch] = useState('');
+  const [fatwaCatFilter, setFatwaCatFilter] = useState('all');
+  const [fatwaCurrentPage, setFatwaCurrentPage] = useState(1);
+  const fatwaPageSize = 10;
+
+  const [questionSearch, setQuestionSearch] = useState('');
+  const [questionStatusFilter, setQuestionStatusFilter] = useState('all');
+  const [questionCurrentPage, setQuestionCurrentPage] = useState(1);
+  const questionPageSize = 8;
+
+  const [bookingCurrentPage, setBookingCurrentPage] = useState(1);
+  const bookingPageSize = 8;
+
+  const [resultSearch, setResultSearch] = useState('');
+  const [resultCurrentPage, setResultCurrentPage] = useState(1);
+  const resultPageSize = 10;
+
+  const [donationCurrentPage, setDonationCurrentPage] = useState(1);
+  const donationPageSize = 10;
+
+  const [visitorCurrentPage, setVisitorCurrentPage] = useState(1);
+  const visitorPageSize = 15;
 
   // Visitors Analytics Filters
   const [visitorTimeFilter, setVisitorTimeFilter] = useState<'daily' | 'weekly' | 'monthly' | 'all'>('daily');
@@ -165,8 +159,6 @@ export const AdminDashboard: React.FC = () => {
   const [showAddFatwa, setShowAddFatwa] = useState(false);
   const [editingFatwa, setEditingFatwa] = useState<Fatwa | null>(null);
   const [showAddResult, setShowAddResult] = useState(false);
-  const [showAddNews, setShowAddNews] = useState(false);
-  const [showAddBook, setShowAddBook] = useState(false);
   const [selectedQuestion, setSelectedQuestion] = useState<OnlineQuestion | null>(null);
   
   // Booking Management State
@@ -205,28 +197,21 @@ export const AdminDashboard: React.FC = () => {
   const [newDept, setNewDept] = useState('شعبہ درس نظامی');
   const [newObtainedMarks, setNewObtainedMarks] = useState<number>(450);
 
-  // New News state
-  const [newNewsTitle, setNewNewsTitle] = useState('');
-  const [newNewsContent, setNewNewsContent] = useState('');
-  const [newNewsCategory, setNewNewsCategory] = useState<'News' | 'Announcement' | 'Event' | 'Admission'>('News');
-
-  // Listen to Firebase Auth state or persistent session
+  // Listen to Firebase Auth state
   useEffect(() => {
-    const creds = getStoredAdminCredentials();
-    const savedSession = localStorage.getItem('jamia_admin_session') || sessionStorage.getItem('jamia_admin_session');
-    if (savedSession && savedSession.toLowerCase() === creds.username.toLowerCase()) {
-      setIsAuthenticated(true);
-    }
-  }, []);
-
-  useEffect(() => {
-    refreshData();
-    window.addEventListener('storage', refreshData);
-    window.addEventListener('jamia_db_updated', refreshData);
-    return () => {
-      window.removeEventListener('storage', refreshData);
-      window.removeEventListener('jamia_db_updated', refreshData);
-    };
+    if (!auth) return;
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setCurrentUser(user);
+        setIsAuthenticated(true);
+      } else {
+        const savedSession = localStorage.getItem('jamia_admin_session') || sessionStorage.getItem('jamia_admin_session');
+        if (!savedSession) {
+          setIsAuthenticated(false);
+        }
+      }
+    });
+    return () => unsubscribe();
   }, []);
 
   const refreshData = () => {
@@ -237,10 +222,21 @@ export const AdminDashboard: React.FC = () => {
     setNews(StorageService.getNews());
     setBooks(StorageService.getBooks());
     setFaculty(StorageService.getFaculty());
+    setDepartments(StorageService.getDepartments());
     setDonations(StorageService.getDonations());
     setSettings(StorageService.getSiteSettings());
     setVisitors(StorageService.getVisitors());
   };
+
+  useEffect(() => {
+    refreshData();
+    window.addEventListener('storage', refreshData);
+    window.addEventListener('jamia_db_updated', refreshData);
+    return () => {
+      window.removeEventListener('storage', refreshData);
+      window.removeEventListener('jamia_db_updated', refreshData);
+    };
+  }, []);
 
   // Booking Handlers
   const handleOpenBookingReply = (booking: ClassBooking) => {
@@ -519,25 +515,6 @@ export const AdminDashboard: React.FC = () => {
     refreshData();
   };
 
-  // Create News
-  const handleCreateNews = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newNewsTitle || !newNewsContent) return;
-
-    const newN: NewsItem = {
-      id: `news-${Date.now()}`,
-      title: { ur: newNewsTitle, en: newNewsTitle, ar: newNewsTitle },
-      content: { ur: newNewsContent, en: newNewsContent, ar: newNewsContent },
-      date: new Date().toISOString().split('T')[0],
-      category: newNewsCategory,
-      isPinned: false
-    };
-
-    StorageService.addNews(newN);
-    setShowAddNews(false);
-    refreshData();
-  };
-
   // Save Site Settings
   const handleSaveSettings = (e: React.FormEvent) => {
     e.preventDefault();
@@ -638,83 +615,52 @@ export const AdminDashboard: React.FC = () => {
     setLoginSuccessMessage('');
     setIsAuthLoading(true);
 
-    const rawInput = loginUsername.trim().toLowerCase();
+    const inputEmail = loginEmail.trim();
     const inputPass = loginPassword.trim();
-    const currentCreds = getStoredAdminCredentials();
 
-    if (!rawInput || !inputPass) {
-      setLoginError('براہ کرم یوزر نام اور پاس ورڈ دونوں درج فرمائیں۔');
+    if (!inputEmail || !inputPass) {
+      setLoginError('براہ کرم ایڈمن ای میل اور پاس ورڈ دونوں درج فرمائیں۔');
       setIsAuthLoading(false);
       return;
     }
-
-    // 1. Strict verification: must match currentCreds username (default islamia.com) and password (default jamia2003)
-    const isUserMatch = rawInput === currentCreds.username.toLowerCase() || rawInput === 'islamia.com';
-    const isPassMatch = inputPass === currentCreds.password || inputPass === 'jamia2003';
-
-    if (isUserMatch && isPassMatch) {
-      setIsAuthenticated(true);
-      if (rememberMe) {
-        localStorage.setItem('jamia_admin_session', currentCreds.username.toLowerCase());
-      } else {
-        sessionStorage.setItem('jamia_admin_session', currentCreds.username.toLowerCase());
-      }
-      setLoginPassword('');
-      setIsAuthLoading(false);
-      return;
-    }
-
-    // If credentials do not match, STRICTLY REJECT
-    setLoginError('غلط یوزر نام یا پاس ورڈ! رسائی سختی سے مسترد کر دی گئی ہے۔ ایڈمن پورٹل صرف مخصوص اسناد (islamia.com) کے ذریعے ہی کھولا جا سکتا ہے۔');
-    setIsAuthenticated(false);
-    setIsAuthLoading(false);
-  };
-
-  // Handler to update Admin Username & Password
-  const handleChangeAdminCredentials = (e: React.FormEvent) => {
-    e.preventDefault();
-    setCredChangeError('');
-    setCredChangeSuccess('');
-
-    const newU = newAdminUsernameInput.trim();
-    const newP = newAdminPasswordInput.trim();
-    const confP = confirmAdminPasswordInput.trim();
-
-    if (!newU) {
-      setCredChangeError('براہ کرم نیا یوزر نام یا ای میل درج فرمائیں۔');
-      return;
-    }
-
-    if (!newP) {
-      setCredChangeError('براہ کرم نیا پاس ورڈ درج فرمائیں۔');
-      return;
-    }
-
-    if (newP.length < 6) {
-      setCredChangeError('پاس ورڈ کم از کم ۶ حروف پر مشتمل ہونا چاہیے۔');
-      return;
-    }
-
-    if (newP !== confP) {
-      setCredChangeError('پاس ورڈ اور تصدیقی پاس ورڈ یکساں نہیں ہیں!');
-      return;
-    }
-
-    const newConfig = {
-      username: newU,
-      password: newP,
-      updatedAt: new Date().toISOString()
-    };
 
     try {
-      localStorage.setItem('jamia_admin_auth_config', JSON.stringify(newConfig));
-      localStorage.setItem('jamia_admin_session', newU.toLowerCase());
-      setAdminCreds(newConfig);
-      setNewAdminPasswordInput('');
-      setConfirmAdminPasswordInput('');
-      setCredChangeSuccess('ایڈمن لاگ ان یوزر نام اور نیا پاس ورڈ کامیابی سے تبدیل اور محفوظ ہو گئے!');
+      if (!auth) {
+        throw new Error('Firebase Authentication دستیاب نہیں ہے۔');
+      }
+
+      // 1. Authenticate via Firebase Authentication
+      const userCredential = await signInWithEmailAndPassword(auth, inputEmail, inputPass);
+      const user = userCredential.user;
+
+      setCurrentUser(user);
+      setIsAuthenticated(true);
+
+      if (rememberMe) {
+        localStorage.setItem('jamia_admin_session', user.email || inputEmail);
+        localStorage.setItem('jamia_admin_email', user.email || inputEmail);
+      } else {
+        sessionStorage.setItem('jamia_admin_session', user.email || inputEmail);
+        sessionStorage.setItem('jamia_admin_email', user.email || inputEmail);
+      }
+
+      setLoginPassword('');
     } catch (err: any) {
-      setCredChangeError('محفوظ کرنے میں خرابی: ' + (err?.message || 'نامعلوم'));
+      console.error('Login error:', err);
+      let errorMsg = 'لاگ ان کرنے میں خرابی پیش آئی۔ براہ کرم اپنے کوائف چیک کریں۔';
+      if (err?.code === 'auth/user-not-found' || err?.code === 'auth/wrong-password' || err?.code === 'auth/invalid-credential') {
+        errorMsg = 'غلط ای میل یا پاس ورڈ! ایڈمن پورٹل میں داخلے کی اجازت نہیں ہے۔';
+      } else if (err?.code === 'auth/invalid-email') {
+        errorMsg = 'درج کردہ ای میل ایڈریس کا فارمیٹ درست نہیں ہے۔';
+      } else if (err?.code === 'auth/too-many-requests') {
+        errorMsg = 'بہت زیادہ غلط کوششیں کی گئیں۔ سیکیورٹی وجوہات کی بنا پر کچھ دیر بعد کوشش فرمائیں۔';
+      } else if (err?.message) {
+        errorMsg = err.message;
+      }
+      setLoginError(errorMsg);
+      setIsAuthenticated(false);
+    } finally {
+      setIsAuthLoading(false);
     }
   };
 
@@ -723,135 +669,41 @@ export const AdminDashboard: React.FC = () => {
     setLoginSuccessMessage('');
     setForgotError('');
     setForgotSuccess('');
-    setRecoveryStep('request');
-    setOtpCodeInput('');
-    setResetNewPass('');
-    setResetConfirmPass('');
-    setForgotEmailInput('');
+    setForgotEmailInput(loginEmail.trim() || 'usamasiddique105@gmail.com');
     setIsForgotModalOpen(true);
   };
 
-  const handleSendOtp = async (e: React.FormEvent) => {
+  const handleSendResetEmail = async (e: React.FormEvent) => {
     e.preventDefault();
     setForgotError('');
     setForgotSuccess('');
-    const inputEmail = forgotEmailInput.trim().toLowerCase();
+    const inputEmail = forgotEmailInput.trim();
 
     if (!inputEmail) {
       setForgotError('براہ کرم اپنا رجسٹرڈ ایڈمن ای میل درج فرمائیں۔');
       return;
     }
 
-    if (inputEmail !== ADMIN_RECOVERY_EMAIL.toLowerCase()) {
-      setForgotError(`غیر مجاز ای میل! پاس ورڈ ری سیٹ کے لیے صرف مخصوص رجسٹرڈ ایڈمن ای میل (${ADMIN_RECOVERY_EMAIL}) ہی استعمال کی جا سکتی ہے۔`);
-      return;
-    }
-
-    setIsSendingOtp(true);
+    setIsSendingReset(true);
     try {
-      // 1. Generate secure 6-digit OTP
-      const otp = Math.floor(100000 + Math.random() * 900000).toString();
-      setGeneratedOtp(otp);
-      localStorage.setItem('jamia_admin_otp_token', JSON.stringify({
-        code: otp,
-        email: inputEmail,
-        timestamp: Date.now()
-      }));
-
-      // 2. Trigger Firebase Auth Password Reset Email if available
-      if (auth) {
-        try {
-          await sendPasswordResetEmail(auth, ADMIN_RECOVERY_EMAIL);
-        } catch (fbErr) {
-          console.warn('Firebase password reset notice:', fbErr);
-        }
+      if (!auth) {
+        throw new Error('Firebase Authentication دستیاب نہیں ہے۔');
       }
 
-      setRecoveryStep('verify');
-      setForgotSuccess(`تصدیقی ویریفکیشن کوڈ ای میل (${ADMIN_RECOVERY_EMAIL}) پر بھیج دیا گیا ہے۔ براہ کرم اپنا ان باکس چیک کر کے کوڈ درج فرمائیں۔`);
+      // Send official secure Firebase password reset email
+      await sendPasswordResetEmail(auth, inputEmail);
+      setForgotSuccess(`پاس ورڈ ری سیٹ لنک ای میل (${inputEmail}) پر کامیابی کے ساتھ ارسال کر دیا گیا ہے۔ براہ کرم اپنا ان باکس یا اسپیم فولڈر چیک کر کے پاس ورڈ ری سیٹ کریں۔`);
     } catch (err: any) {
-      setForgotError('ویریفکیشن کوڈ بھیجنے میں خرابی: ' + (err?.message || 'نامعلوم'));
+      console.error('Password reset error:', err);
+      let errMsg = 'پاس ورڈ ری سیٹ لنک بھیجنے میں خرابی: ' + (err?.message || 'نامعلوم');
+      if (err?.code === 'auth/user-not-found') {
+        errMsg = 'یہ ای میل ایڈریس سسٹم میں رجسٹرڈ نہیں ہے۔';
+      } else if (err?.code === 'auth/invalid-email') {
+        errMsg = 'درج کردہ ای میل ایڈریس کا فارمیٹ درست نہیں ہے۔';
+      }
+      setForgotError(errMsg);
     } finally {
-      setIsSendingOtp(false);
-    }
-  };
-
-  const handleVerifyAndResetPassword = (e: React.FormEvent) => {
-    e.preventDefault();
-    setForgotError('');
-    setForgotSuccess('');
-
-    const inputCode = otpCodeInput.trim();
-    const newPass = resetNewPass.trim();
-    const confPass = resetConfirmPass.trim();
-
-    if (!inputCode) {
-      setForgotError('براہ کرم 6 ہندسوں کا ویریفکیشن کوڈ درج فرمائیں۔');
-      return;
-    }
-
-    // Verify OTP against stored token or generatedOtp
-    let isValidCode = false;
-    try {
-      const rawToken = localStorage.getItem('jamia_admin_otp_token');
-      if (rawToken) {
-        const parsed = JSON.parse(rawToken);
-        // Valid within 15 minutes
-        if (parsed.code === inputCode && (Date.now() - parsed.timestamp < 15 * 60 * 1000)) {
-          isValidCode = true;
-        }
-      }
-    } catch (e) {
-      console.error(e);
-    }
-
-    if (inputCode === generatedOtp) {
-      isValidCode = true;
-    }
-
-    if (!isValidCode) {
-      setForgotError('غلط یا زائد المیعاد (Expired) ویریفکیشن کوڈ! براہ کرم ای میل سے درست کوڈ دیکھ کر درج فرمائیں۔');
-      return;
-    }
-
-    if (!newPass) {
-      setForgotError('براہ کرم نیا پاس ورڈ درج فرمائیں۔');
-      return;
-    }
-
-    if (newPass.length < 6) {
-      setForgotError('نیا پاس ورڈ کم از کم ۶ حروف یا اس سے زیادہ ہونا چاہیے۔');
-      return;
-    }
-
-    if (newPass !== confPass) {
-      setForgotError('نیا پاس ورڈ اور تصدیقی پاس ورڈ یکساں نہیں ہیں!');
-      return;
-    }
-
-    // Update credentials
-    const currentCreds = getStoredAdminCredentials();
-    const updatedCreds = {
-      username: currentCreds.username || DEFAULT_ADMIN_USERNAME,
-      password: newPass,
-      updatedAt: new Date().toISOString()
-    };
-
-    try {
-      localStorage.setItem('jamia_admin_auth_config', JSON.stringify(updatedCreds));
-      localStorage.removeItem('jamia_admin_otp_token');
-      setAdminCreds(updatedCreds);
-      
-      // Reset state and close modal
-      setOtpCodeInput('');
-      setResetNewPass('');
-      setResetConfirmPass('');
-      setForgotEmailInput('');
-      setIsForgotModalOpen(false);
-      setRecoveryStep('request');
-      setLoginSuccessMessage('پاس ورڈ کامیابی سے تبدیل اور ری سیٹ ہو گیا ہے! اب آپ اپنے نئے پاس ورڈ سے لاگ ان کر سکتے ہیں۔');
-    } catch (err: any) {
-      setForgotError('پاس ورڈ محفوظ کرنے میں خرابی: ' + (err?.message || 'نامعلوم'));
+      setIsSendingReset(false);
     }
   };
 
@@ -865,6 +717,8 @@ export const AdminDashboard: React.FC = () => {
     setIsAuthenticated(false);
     localStorage.removeItem('jamia_admin_session');
     localStorage.removeItem('jamia_admin_email');
+    sessionStorage.removeItem('jamia_admin_session');
+    sessionStorage.removeItem('jamia_admin_email');
     setLoginPassword('');
   };
 
@@ -872,7 +726,7 @@ export const AdminDashboard: React.FC = () => {
   if (!isAuthenticated) {
     return (
       <div className="max-w-md mx-auto my-12 p-6 sm:p-8 bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border-2 border-[#B88A3B]/40 font-urdu text-right" dir="rtl">
-        {/* Forgot Password / OTP Recovery Modal View */}
+        {/* Forgot Password Modal View */}
         {isForgotModalOpen ? (
           <div className="space-y-5">
             <div className="text-center space-y-2 mb-4">
@@ -880,15 +734,15 @@ export const AdminDashboard: React.FC = () => {
                 <Mail className="w-7 h-7 text-[#B88A3B]" />
               </div>
               <h2 className="text-xl font-black text-[#5C4632] dark:text-amber-300">
-                پاس ورڈ ری سیٹ و ای میل تصدیق
+                پاس ورڈ ری سیٹ (Forgot Password)
               </h2>
               <p className="text-xs text-stone-600 dark:text-stone-400">
-                سیکیورٹی تصدیقی کوڈ صرف مجاز ایڈمن ای میل پر بھیجا جائے گا
+                پاس ورڈ کی بحالی کا محفوظ لنک آپ کی رجسٹرڈ ای میل پر بھیجا جائے گا
               </p>
             </div>
 
             {forgotSuccess && (
-              <div className="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-300 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-xs font-bold text-center">
+              <div className="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-300 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-xs font-bold text-center leading-relaxed">
                 {forgotSuccess}
               </div>
             )}
@@ -899,107 +753,39 @@ export const AdminDashboard: React.FC = () => {
               </div>
             )}
 
-            {recoveryStep === 'request' ? (
-              <form onSubmit={handleSendOtp} className="space-y-4">
-                <div>
-                  <label className="block text-xs font-bold text-stone-700 dark:text-stone-300 mb-1.5">
-                    رجسٹرڈ ایڈمن ای میل ایڈریس (Admin Email)
-                  </label>
-                  <input
-                    type="email"
-                    required
-                    value={forgotEmailInput}
-                    onChange={(e) => setForgotEmailInput(e.target.value)}
-                    placeholder="اپنا مجاز ای میل درج کریں"
-                    className="w-full px-4 py-2.5 rounded-xl border border-stone-300 dark:border-slate-700 bg-stone-50 dark:bg-slate-800 text-stone-900 dark:text-white text-sm font-sans focus:outline-hidden focus:border-[#B88A3B]"
-                    dir="ltr"
-                    autoComplete="email"
-                  />
-                  <p className="text-[10px] text-stone-500 dark:text-stone-400 mt-1">
-                    نوٹ: کوڈ صرف مجاز ایڈمن ای میل ({ADMIN_RECOVERY_EMAIL}) پر وصول ہوگا۔
-                  </p>
-                </div>
+            <form onSubmit={handleSendResetEmail} className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-stone-700 dark:text-stone-300 mb-1.5">
+                  رجسٹرڈ ایڈمن ای میل ایڈریس (Admin Email)
+                </label>
+                <input
+                  type="email"
+                  required
+                  value={forgotEmailInput}
+                  onChange={(e) => setForgotEmailInput(e.target.value)}
+                  placeholder="اپنا مجاز ایڈمن ای میل درج کریں"
+                  className="w-full px-4 py-2.5 rounded-xl border border-stone-300 dark:border-slate-700 bg-stone-50 dark:bg-slate-800 text-stone-900 dark:text-white text-sm font-sans focus:outline-hidden focus:border-[#B88A3B]"
+                  dir="ltr"
+                  autoComplete="email"
+                />
+                <p className="text-[10px] text-stone-500 dark:text-stone-400 mt-1">
+                  نوٹ: پاس ورڈ ری سیٹ کرنے کا محفوظ لنک Firebase Authentication کے ذریعے ای میل پر موصول ہوگا۔
+                </p>
+              </div>
 
-                <button
-                  type="submit"
-                  disabled={isSendingOtp}
-                  className="w-full py-3 bg-[#5C4632] hover:bg-[#433123] text-amber-300 font-bold rounded-xl border border-[#B88A3B] shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer text-xs disabled:opacity-70"
-                >
-                  {isSendingOtp ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                  ) : (
-                    <Send className="w-4 h-4" />
-                  )}
-                  <span>{isSendingOtp ? 'کوڈ بھیجا جا رہا ہے...' : 'ویریفکیشن کوڈ بھیجیں (Send OTP Code)'}</span>
-                </button>
-              </form>
-            ) : (
-              <form onSubmit={handleVerifyAndResetPassword} className="space-y-4">
-                <div>
-                  <label className="block text-xs font-bold text-stone-700 dark:text-stone-300 mb-1.5">
-                    ای میل پر موصول شدہ 6 ہندسوں کا ویریفکیشن کوڈ (OTP Code)
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    maxLength={6}
-                    value={otpCodeInput}
-                    onChange={(e) => setOtpCodeInput(e.target.value)}
-                    placeholder="مثلاً 123456"
-                    className="w-full px-4 py-2.5 rounded-xl border-2 border-amber-400 bg-stone-50 dark:bg-slate-800 text-stone-900 dark:text-white text-center text-lg font-mono tracking-widest focus:outline-hidden focus:border-[#B88A3B]"
-                    dir="ltr"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-stone-700 dark:text-stone-300 mb-1.5">
-                    نیا پاس ورڈ (New Password)
-                  </label>
-                  <input
-                    type="password"
-                    required
-                    value={resetNewPass}
-                    onChange={(e) => setResetNewPass(e.target.value)}
-                    placeholder="کم از کم ۶ حروف کا نیا پاس ورڈ"
-                    className="w-full px-4 py-2.5 rounded-xl border border-stone-300 dark:border-slate-700 bg-stone-50 dark:bg-slate-800 text-stone-900 dark:text-white text-sm font-sans focus:outline-hidden focus:border-[#B88A3B]"
-                    dir="ltr"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-stone-700 dark:text-stone-300 mb-1.5">
-                    نئے پاس ورڈ کی تصدیق (Confirm New Password)
-                  </label>
-                  <input
-                    type="password"
-                    required
-                    value={resetConfirmPass}
-                    onChange={(e) => setResetConfirmPass(e.target.value)}
-                    placeholder="دوبارہ نیا پاس ورڈ درج کریں"
-                    className="w-full px-4 py-2.5 rounded-xl border border-stone-300 dark:border-slate-700 bg-stone-50 dark:bg-slate-800 text-stone-900 dark:text-white text-sm font-sans focus:outline-hidden focus:border-[#B88A3B]"
-                    dir="ltr"
-                  />
-                </div>
-
-                <button
-                  type="submit"
-                  className="w-full py-3 bg-emerald-800 hover:bg-emerald-900 text-amber-200 font-bold rounded-xl border border-amber-400 shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer text-xs"
-                >
-                  <Key className="w-4 h-4" />
-                  <span>تصدیق کریں اور نیا پاس ورڈ محفوظ کریں</span>
-                </button>
-
-                <div className="text-center pt-1">
-                  <button
-                    type="button"
-                    onClick={() => setRecoveryStep('request')}
-                    className="text-xs text-[#B88A3B] hover:underline font-bold cursor-pointer"
-                  >
-                    کوڈ دوبارہ حاصل کریں (Resend Code)
-                  </button>
-                </div>
-              </form>
-            )}
+              <button
+                type="submit"
+                disabled={isSendingReset}
+                className="w-full py-3 bg-[#5C4632] hover:bg-[#433123] text-amber-300 font-bold rounded-xl border border-[#B88A3B] shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer text-xs disabled:opacity-70"
+              >
+                {isSendingReset ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Send className="w-4 h-4" />
+                )}
+                <span>{isSendingReset ? 'لنک بھیجا جا رہا ہے...' : 'پاس ورڈ ری سیٹ لنک بھیجیں (Send Reset Link)'}</span>
+              </button>
+            </form>
 
             <div className="pt-3 border-t border-stone-200 dark:border-slate-800 text-center">
               <button
@@ -1045,18 +831,18 @@ export const AdminDashboard: React.FC = () => {
             <form onSubmit={handleLogin} className="space-y-4">
               <div>
                 <label className="block text-xs font-bold text-stone-700 dark:text-stone-300 mb-1.5">
-                  ایڈمن یوزر نام یا ای میل (Username / Email)
+                  ایڈمن ای میل (Admin Email)
                 </label>
                 <div className="relative">
                   <input
-                    type="text"
+                    type="email"
                     required
-                    value={loginUsername}
-                    onChange={(e) => setLoginUsername(e.target.value)}
-                    placeholder="ایڈمن یوزر نام درج کریں"
+                    value={loginEmail}
+                    onChange={(e) => setLoginEmail(e.target.value)}
+                    placeholder="admin@jamiaislamia.edu.pk یا ای میل"
                     className="w-full px-4 py-2.5 rounded-xl border border-stone-300 dark:border-slate-700 bg-stone-50 dark:bg-slate-800 text-stone-900 dark:text-white text-sm font-sans focus:outline-hidden focus:border-[#B88A3B]"
                     dir="ltr"
-                    autoComplete="username"
+                    autoComplete="email"
                   />
                 </div>
               </div>
@@ -1122,10 +908,10 @@ export const AdminDashboard: React.FC = () => {
 
             <div className="mt-6 pt-4 border-t border-stone-200 dark:border-slate-800 text-center space-y-1">
               <p className="text-[11px] font-bold text-[#5C4632] dark:text-amber-300">
-                سیکورٹی وارننگ: ایڈمن پورٹل سخت سیکیورٹی پروٹیکشن میں ہے۔
+                سیکورٹی وارننگ: ایڈمن پورٹل فائر بیس سیکیورٹی اور توثیق سے محفوظ ہے۔
               </p>
               <p className="text-[10px] text-stone-500 dark:text-stone-400">
-                صرف مخصوص ایڈمن یوزر نام اور پاس ورڈ سے ہی رسائی ممکن ہے۔
+                صرف تصدیق شدہ ایڈمن ای میل اور پاس ورڈ سے ہی رسائی ممکن ہے۔
               </p>
             </div>
           </div>
@@ -2244,6 +2030,26 @@ export const AdminDashboard: React.FC = () => {
         </div>
       )}
 
+      {/* Tab: Departments Management */}
+      {activeTab === 'departments' && (
+        <DepartmentsManagement onUpdate={refreshData} />
+      )}
+
+      {/* Tab: Faculty Management */}
+      {activeTab === 'faculty' && (
+        <FacultyManagement onUpdate={refreshData} />
+      )}
+
+      {/* Tab: News Management */}
+      {activeTab === 'news' && (
+        <NewsManagement onUpdate={refreshData} />
+      )}
+
+      {/* Tab: Books Management */}
+      {activeTab === 'books' && (
+        <BooksManagement onUpdate={refreshData} />
+      )}
+
       {/* Tab 5: Site Settings */}
       {activeTab === 'settings' && (
         <form onSubmit={handleSaveSettings} className="bg-white dark:bg-slate-900 p-8 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-6 font-urdu">
@@ -2556,88 +2362,58 @@ export const AdminDashboard: React.FC = () => {
               </div>
             </div>
 
-            {/* Change Admin Username & Password Card (ایڈمن لاگ ان اسناد کی تبدیلی) */}
+            {/* Firebase Auth Admin Account Card */}
             <div className="p-5 bg-amber-50/60 dark:bg-slate-800/80 rounded-2xl border-2 border-amber-300 dark:border-amber-700/60 space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Key className="w-5 h-5 text-[#B88A3B]" />
                   <h4 className="font-bold text-sm text-[#5C4632] dark:text-amber-300 font-urdu">
-                    ایڈمن لاگ ان یوزر نام اور پاس ورڈ تبدیل کریں (Change Admin Credentials)
+                    ایڈمن سیکیورٹی و پاس ورڈ ری سیٹ (Admin Security & Password Reset)
                   </h4>
                 </div>
                 <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-900 dark:bg-emerald-950 dark:text-emerald-300 font-bold">
-                  محفوظ رسائی (Protected)
+                  Firebase Auth
                 </span>
               </div>
 
               <p className="text-xs text-stone-600 dark:text-stone-300">
-                یہاں سے آپ ایڈمن ڈیش بورڈ میں داخلے کے لیے اپنا مخصوص یوزر نام / ای میل اور نیا پاس ورڈ سیٹ کر سکتے ہیں۔ اس کے بعد پورٹل صرف اسی نام اور پاس ورڈ سے کھلے گا:
+                ایڈمن پورٹل اب مکمل طور پر Firebase Authentication سے محفوظ ہے۔ آپ اپنے لاگ ان شدہ اکاؤنٹ ({currentUser?.email || 'admin'}) کا پاس ورڈ تبدیل کرنے کے لیے محفوظ ری سیٹ لنک ای میل پر طلب کر سکتے ہیں:
               </p>
 
-              {credChangeSuccess && (
+              {settingsResetSuccess && (
                 <div className="p-3 rounded-xl bg-emerald-100 dark:bg-emerald-950 border border-emerald-300 dark:border-emerald-800 text-emerald-900 dark:text-emerald-200 text-xs font-bold text-center">
-                  {credChangeSuccess}
+                  {settingsResetSuccess}
                 </div>
               )}
 
-              {credChangeError && (
+              {settingsResetError && (
                 <div className="p-3 rounded-xl bg-red-100 dark:bg-red-950 border border-red-300 dark:border-red-800 text-red-900 dark:text-red-200 text-xs font-bold text-center">
-                  {credChangeError}
+                  {settingsResetError}
                 </div>
               )}
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
-                <div>
-                  <label className="block text-xs font-bold text-stone-700 dark:text-stone-300 mb-1">
-                    ایڈمن یوزر نام / ای میل
-                  </label>
-                  <input
-                    type="text"
-                    value={newAdminUsernameInput}
-                    onChange={(e) => setNewAdminUsernameInput(e.target.value)}
-                    placeholder="admin یا ای میل"
-                    className="w-full p-2.5 border rounded-xl bg-white dark:bg-slate-900 text-xs font-mono"
-                    dir="ltr"
-                  />
+              <div className="flex items-center justify-between gap-4 pt-1">
+                <div className="text-xs text-stone-600 dark:text-stone-400">
+                  موجودہ لاگ ان اکاؤنٹ: <span className="font-mono font-bold text-stone-800 dark:text-stone-200">{currentUser?.email || 'admin@jamiaislamia.edu.pk'}</span>
                 </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-stone-700 dark:text-stone-300 mb-1">
-                    نیا پاس ورڈ (New Password)
-                  </label>
-                  <input
-                    type="password"
-                    value={newAdminPasswordInput}
-                    onChange={(e) => setNewAdminPasswordInput(e.target.value)}
-                    placeholder="کم از کم ۶ حروف"
-                    className="w-full p-2.5 border rounded-xl bg-white dark:bg-slate-900 text-xs font-mono"
-                    dir="ltr"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-stone-700 dark:text-stone-300 mb-1">
-                    پاس ورڈ کی تصدیق (Confirm)
-                  </label>
-                  <input
-                    type="password"
-                    value={confirmAdminPasswordInput}
-                    onChange={(e) => setConfirmAdminPasswordInput(e.target.value)}
-                    placeholder="دوبارہ پاس ورڈ درج کریں"
-                    className="w-full p-2.5 border rounded-xl bg-white dark:bg-slate-900 text-xs font-mono"
-                    dir="ltr"
-                  />
-                </div>
-              </div>
-
-              <div className="flex justify-end pt-1">
                 <button
                   type="button"
-                  onClick={handleChangeAdminCredentials}
-                  className="px-5 py-2 bg-[#5C4632] hover:bg-[#433123] text-amber-300 text-xs font-bold rounded-xl border border-[#B88A3B] transition-all flex items-center gap-2 cursor-pointer shadow-xs"
+                  onClick={async () => {
+                    setSettingsResetError('');
+                    setSettingsResetSuccess('');
+                    const emailToSend = currentUser?.email || 'usamasiddique105@gmail.com';
+                    try {
+                      if (!auth) throw new Error('Firebase Auth دستیاب نہیں ہے۔');
+                      await sendPasswordResetEmail(auth, emailToSend);
+                      setSettingsResetSuccess(`پاس ورڈ ری سیٹ لنک (${emailToSend}) پر کامیابی سے بھیج دیا گیا ہے۔ ای میل چیک کریں۔`);
+                    } catch (err: any) {
+                      setSettingsResetError('پاس ورڈ ری سیٹ بھیجنے میں خرابی: ' + (err?.message || 'نامعلوم'));
+                    }
+                  }}
+                  className="px-5 py-2.5 bg-[#5C4632] hover:bg-[#433123] text-amber-300 text-xs font-bold rounded-xl border border-[#B88A3B] transition-all flex items-center gap-2 cursor-pointer shadow-xs"
                 >
-                  <Key className="w-3.5 h-3.5" />
-                  <span>نیا یوزر نام اور پاس ورڈ محفوظ کریں</span>
+                  <Send className="w-3.5 h-3.5" />
+                  <span>پاس ورڈ ری سیٹ لنک ای میل پر حاصل کریں</span>
                 </button>
               </div>
             </div>

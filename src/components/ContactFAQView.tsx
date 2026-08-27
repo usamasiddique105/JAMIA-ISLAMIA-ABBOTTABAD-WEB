@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useThemeLanguage } from '../context/ThemeLanguageContext';
 import { NotificationService } from '../services/notificationService';
+import { ReCaptcha } from './common/ReCaptcha';
 import { 
   Phone, 
   Mail, 
@@ -31,6 +32,7 @@ export const ContactFAQView: React.FC = () => {
   const [message, setMessage] = useState('');
   const [sent, setSent] = useState(false);
   const [whatsappUrl, setWhatsappUrl] = useState('');
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
 
   const [openFaq, setOpenFaq] = useState<number | null>(0);
 
@@ -87,6 +89,10 @@ export const ContactFAQView: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!captchaToken) {
+      alert(isAr ? 'يرجى إكمال التحقق الأمني (reCAPTCHA)' : isEn ? 'Please complete the reCAPTCHA verification.' : 'براہ کرم روبوٹ نہ ہونے کی تصدیق (reCAPTCHA) مکمل فرمائیں۔');
+      return;
+    }
     try {
       const res = await NotificationService.sendContactInquiryNotification({
         name: contactName,
@@ -438,9 +444,19 @@ export const ContactFAQView: React.FC = () => {
                 ></textarea>
               </div>
 
+              {/* Google reCAPTCHA */}
+              <div className="pt-1 flex justify-center">
+                <ReCaptcha onChange={setCaptchaToken} />
+              </div>
+
               <button 
                 type="submit"
-                className={`w-full py-3 bg-[#5C4632] hover:bg-[#4A3727] text-amber-200 font-bold text-xs rounded-xl shadow-md transition-all flex items-center justify-center gap-2 ${fontClass} border border-[#B88A3B]/40 cursor-pointer`}
+                disabled={!captchaToken}
+                className={`w-full py-3 text-amber-200 font-bold text-xs rounded-xl shadow-md transition-all flex items-center justify-center gap-2 ${fontClass} border ${
+                  !captchaToken
+                    ? 'bg-stone-400 dark:bg-slate-700 border-stone-400 text-stone-200 cursor-not-allowed opacity-70'
+                    : 'bg-[#5C4632] hover:bg-[#4A3727] border-[#B88A3B]/40 cursor-pointer'
+                }`}
               >
                 <Send className="w-4 h-4 text-[#B88A3B]" />
                 <span>{isAr ? 'إرسال الرسالة الآن' : isEn ? 'Send Message Now' : 'پیغام روانہ کریں'}</span>

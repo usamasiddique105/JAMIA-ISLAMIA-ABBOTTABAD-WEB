@@ -66,25 +66,37 @@ export interface IDatabaseService {
   // Departments
   getDepartments(): Department[] | Promise<Department[]>;
   saveDepartments(data: Department[]): void | Promise<void>;
+  addDepartment(dept: Department): void | Promise<void>;
+  updateDepartment(dept: Department): void | Promise<void>;
+  deleteDepartment(id: string): void | Promise<void>;
 
   // Faculty
   getFaculty(): FacultyMember[] | Promise<FacultyMember[]>;
   saveFaculty(data: FacultyMember[]): void | Promise<void>;
+  addFaculty(faculty: FacultyMember): void | Promise<void>;
+  updateFaculty(faculty: FacultyMember): void | Promise<void>;
+  deleteFaculty(id: string): void | Promise<void>;
 
   // Books / Publications
   getBooks(): PublicationBook[] | Promise<PublicationBook[]>;
   saveBooks(data: PublicationBook[]): void | Promise<void>;
   addBook(book: PublicationBook): void | Promise<void>;
+  updateBook(book: PublicationBook): void | Promise<void>;
+  deleteBook(id: string): void | Promise<void>;
 
   // Media
   getMedia(): MediaItem[] | Promise<MediaItem[]>;
   saveMedia(data: MediaItem[]): void | Promise<void>;
   addMedia(media: MediaItem): void | Promise<void>;
+  updateMedia(media: MediaItem): void | Promise<void>;
+  deleteMedia(id: string): void | Promise<void>;
 
   // News & Announcements
   getNews(): NewsItem[] | Promise<NewsItem[]>;
   saveNews(data: NewsItem[]): void | Promise<void>;
   addNews(news: NewsItem): void | Promise<void>;
+  updateNews(news: NewsItem): void | Promise<void>;
+  deleteNews(id: string): void | Promise<void>;
 
   // Donations
   getDonations(): DonationRecord[] | Promise<DonationRecord[]>;

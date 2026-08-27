@@ -3,6 +3,7 @@ import { useThemeLanguage } from '../context/ThemeLanguageContext';
 import { StorageService } from '../services/storage';
 import { NotificationService } from '../services/notificationService';
 import { ClassBooking } from '../types';
+import { ReCaptcha } from './common/ReCaptcha';
 import headerLogoCalligraphy from '../assets/images/jamia_logo_calligraphy_transparent.png';
 import { JAMIA_HEADER_LOGO_DATA_URI } from '../assets/logoBase64';
 import { DonationView } from './DonationView';
@@ -119,10 +120,12 @@ export const OnlineServicesView: React.FC<OnlineServicesViewProps> = ({
   const [admissionSubmitted, setAdmissionSubmitted] = useState(false);
   const [submittedAdmissionBooking, setSubmittedAdmissionBooking] = useState<ClassBooking | null>(null);
   const [admissionWhatsappUrl, setAdmissionWhatsappUrl] = useState('');
+  const [admissionCaptchaToken, setAdmissionCaptchaToken] = useState<string | null>(null);
 
   const [trialSubmitted, setTrialSubmitted] = useState(false);
   const [submittedTrialBooking, setSubmittedTrialBooking] = useState<ClassBooking | null>(null);
   const [trialWhatsappUrl, setTrialWhatsappUrl] = useState('');
+  const [trialCaptchaToken, setTrialCaptchaToken] = useState<string | null>(null);
 
   const [openFaq, setOpenFaq] = useState<number | null>(0);
 
@@ -139,6 +142,10 @@ export const OnlineServicesView: React.FC<OnlineServicesViewProps> = ({
 
   const handleAdmissionSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!admissionCaptchaToken) {
+      alert(isAr ? 'يرجى إكمال التحقق الأمني (reCAPTCHA)' : isEn ? 'Please complete the reCAPTCHA verification.' : 'براہ کرم روبوٹ نہ ہونے کی تصدیق (reCAPTCHA) مکمل فرمائیں۔');
+      return;
+    }
     
     // Save to Admin Portal Storage
     const newBooking: ClassBooking = {
@@ -172,6 +179,10 @@ export const OnlineServicesView: React.FC<OnlineServicesViewProps> = ({
 
   const handleTrialSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!trialCaptchaToken) {
+      alert(isAr ? 'يرجى إكمال التحقق الأمني (reCAPTCHA)' : isEn ? 'Please complete the reCAPTCHA verification.' : 'براہ کرم روبوٹ نہ ہونے کی تصدیق (reCAPTCHA) مکمل فرمائیں۔');
+      return;
+    }
 
     // Save to Admin Portal Storage
     const newTrial: ClassBooking = {
@@ -915,9 +926,19 @@ export const OnlineServicesView: React.FC<OnlineServicesViewProps> = ({
                 </div>
               </div>
 
+              {/* Google reCAPTCHA */}
+              <div className="pt-2 flex justify-center">
+                <ReCaptcha onChange={setAdmissionCaptchaToken} />
+              </div>
+
               <button
                 type="submit"
-                className={`w-full py-3 bg-[#5C4632] hover:bg-[#433324] text-white font-bold text-sm rounded-xl transition-all shadow-md border border-[#B88A3B] cursor-pointer ${fontClass}`}
+                disabled={!admissionCaptchaToken}
+                className={`w-full py-3 text-white font-bold text-sm rounded-xl transition-all shadow-md border ${
+                  !admissionCaptchaToken
+                    ? 'bg-stone-400 dark:bg-slate-700 border-stone-400 text-stone-200 cursor-not-allowed opacity-70'
+                    : 'bg-[#5C4632] hover:bg-[#433324] border-[#B88A3B] cursor-pointer'
+                } ${fontClass}`}
               >
                 {isAr ? 'إرسال طلب القبول الآن' : isEn ? 'Submit Admission Application' : 'داخلہ فارم جمع کروائیں'}
               </button>
@@ -1062,9 +1083,19 @@ export const OnlineServicesView: React.FC<OnlineServicesViewProps> = ({
                 </div>
               </div>
 
+              {/* Google reCAPTCHA */}
+              <div className="pt-2 flex justify-center">
+                <ReCaptcha onChange={setTrialCaptchaToken} />
+              </div>
+
               <button
                 type="submit"
-                className={`w-full py-3 bg-[#B88A3B] hover:bg-[#a17831] text-slate-950 font-black text-sm rounded-xl transition-all shadow-md cursor-pointer ${fontClass}`}
+                disabled={!trialCaptchaToken}
+                className={`w-full py-3 font-black text-sm rounded-xl transition-all shadow-md ${
+                  !trialCaptchaToken
+                    ? 'bg-stone-400 dark:bg-slate-700 text-stone-200 cursor-not-allowed opacity-70'
+                    : 'bg-[#B88A3B] hover:bg-[#a17831] text-slate-950 cursor-pointer'
+                } ${fontClass}`}
               >
                 {isAr ? 'ابدأ الحصة التجريبية المجانية' : isEn ? 'Start 3-Day Free Trial' : 'مفت ٹرائل کلاس کا آغاز کریں'}
               </button>

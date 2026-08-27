@@ -198,6 +198,18 @@ export class LocalStorageAdapter implements IDatabaseService {
   saveDepartments(data: Department[]): void {
     setItem(STORAGE_KEYS.DEPARTMENTS, data);
   }
+  addDepartment(dept: Department): void {
+    const list = this.getDepartments();
+    this.saveDepartments([dept, ...list]);
+  }
+  updateDepartment(dept: Department): void {
+    const list = this.getDepartments();
+    this.saveDepartments(list.map(item => item.id === dept.id ? dept : item));
+  }
+  deleteDepartment(id: string): void {
+    const list = this.getDepartments();
+    this.saveDepartments(list.filter(item => item.id !== id));
+  }
 
   // Faculty
   getFaculty(): FacultyMember[] {
@@ -205,6 +217,18 @@ export class LocalStorageAdapter implements IDatabaseService {
   }
   saveFaculty(data: FacultyMember[]): void {
     setItem(STORAGE_KEYS.FACULTY, data);
+  }
+  addFaculty(faculty: FacultyMember): void {
+    const list = this.getFaculty();
+    this.saveFaculty([faculty, ...list]);
+  }
+  updateFaculty(faculty: FacultyMember): void {
+    const list = this.getFaculty();
+    this.saveFaculty(list.map(item => item.id === faculty.id ? faculty : item));
+  }
+  deleteFaculty(id: string): void {
+    const list = this.getFaculty();
+    this.saveFaculty(list.filter(item => item.id !== id));
   }
 
   // Books / Publications
@@ -218,6 +242,14 @@ export class LocalStorageAdapter implements IDatabaseService {
     const list = this.getBooks();
     this.saveBooks([book, ...list]);
   }
+  updateBook(book: PublicationBook): void {
+    const list = this.getBooks();
+    this.saveBooks(list.map(item => item.id === book.id ? book : item));
+  }
+  deleteBook(id: string): void {
+    const list = this.getBooks();
+    this.saveBooks(list.filter(item => item.id !== id));
+  }
 
   // Media
   getMedia(): MediaItem[] {
@@ -230,6 +262,14 @@ export class LocalStorageAdapter implements IDatabaseService {
     const list = this.getMedia();
     this.saveMedia([media, ...list]);
   }
+  updateMedia(media: MediaItem): void {
+    const list = this.getMedia();
+    this.saveMedia(list.map(item => item.id === media.id ? media : item));
+  }
+  deleteMedia(id: string): void {
+    const list = this.getMedia();
+    this.saveMedia(list.filter(item => item.id !== id));
+  }
 
   // News & Announcements
   getNews(): NewsItem[] {
@@ -241,6 +281,14 @@ export class LocalStorageAdapter implements IDatabaseService {
   addNews(news: NewsItem): void {
     const list = this.getNews();
     this.saveNews([news, ...list]);
+  }
+  updateNews(news: NewsItem): void {
+    const list = this.getNews();
+    this.saveNews(list.map(item => item.id === news.id ? news : item));
+  }
+  deleteNews(id: string): void {
+    const list = this.getNews();
+    this.saveNews(list.filter(item => item.id !== id));
   }
 
   // Donations

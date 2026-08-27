@@ -58,25 +58,37 @@ export const StorageService = {
   // Departments
   getDepartments: (): Department[] => currentAdapter.getDepartments() as Department[],
   saveDepartments: (data: Department[]): void => { currentAdapter.saveDepartments(data); },
+  addDepartment: (dept: Department): void => { currentAdapter.addDepartment(dept); },
+  updateDepartment: (dept: Department): void => { currentAdapter.updateDepartment(dept); },
+  deleteDepartment: (id: string): void => { currentAdapter.deleteDepartment(id); },
 
   // Faculty
   getFaculty: (): FacultyMember[] => currentAdapter.getFaculty() as FacultyMember[],
   saveFaculty: (data: FacultyMember[]): void => { currentAdapter.saveFaculty(data); },
+  addFaculty: (faculty: FacultyMember): void => { currentAdapter.addFaculty(faculty); },
+  updateFaculty: (faculty: FacultyMember): void => { currentAdapter.updateFaculty(faculty); },
+  deleteFaculty: (id: string): void => { currentAdapter.deleteFaculty(id); },
 
   // Books / Publications
   getBooks: (): PublicationBook[] => currentAdapter.getBooks() as PublicationBook[],
   saveBooks: (data: PublicationBook[]): void => { currentAdapter.saveBooks(data); },
   addBook: (book: PublicationBook): void => { currentAdapter.addBook(book); },
+  updateBook: (book: PublicationBook): void => { currentAdapter.updateBook(book); },
+  deleteBook: (id: string): void => { currentAdapter.deleteBook(id); },
 
   // Media (Audio, Video, Photo)
   getMedia: (): MediaItem[] => currentAdapter.getMedia() as MediaItem[],
   saveMedia: (data: MediaItem[]): void => { currentAdapter.saveMedia(data); },
   addMedia: (media: MediaItem): void => { currentAdapter.addMedia(media); },
+  updateMedia: (media: MediaItem): void => { currentAdapter.updateMedia(media); },
+  deleteMedia: (id: string): void => { currentAdapter.deleteMedia(id); },
 
   // News & Announcements
   getNews: (): NewsItem[] => currentAdapter.getNews() as NewsItem[],
   saveNews: (data: NewsItem[]): void => { currentAdapter.saveNews(data); },
   addNews: (news: NewsItem): void => { currentAdapter.addNews(news); },
+  updateNews: (news: NewsItem): void => { currentAdapter.updateNews(news); },
+  deleteNews: (id: string): void => { currentAdapter.deleteNews(id); },
 
   // Donations
   getDonations: (): DonationRecord[] => currentAdapter.getDonations() as DonationRecord[],
