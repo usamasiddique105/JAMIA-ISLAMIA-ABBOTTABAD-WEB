@@ -37,7 +37,7 @@ export const INITIAL_SITE_SETTINGS: SiteSettings = {
   phoneSecondary: '0992-381401',
   email: 'info@jamia-islamia-abbottabad.pages.dev',
   whatsappNumber: '03489002496',
-  notificationEmail: 'usamasiddique105@gmail.com',
+  notificationEmail: 'jamiaislamia2003@gmail.com',
   notificationWhatsApp: '03489002496',
   enableEmailNotifications: true,
   enableWhatsAppNotifications: true,

@@ -14,7 +14,7 @@ export interface NotificationPayload {
 
 export const NotificationService = {
   // Default Admin Contact Information
-  DEFAULT_ADMIN_EMAIL: 'usamasiddique105@gmail.com',
+  DEFAULT_ADMIN_EMAIL: 'jamiaislamia2003@gmail.com',
   DEFAULT_ADMIN_WHATSAPP: '03489002496',
 
   getSettings(): SiteSettings {
@@ -28,7 +28,7 @@ export const NotificationService = {
         tagline: { ur: '', en: '', ar: '' },
         phonePrimary: '03489002496',
         phoneSecondary: '03489002496',
-        email: 'usamasiddique105@gmail.com',
+        email: 'jamiaislamia2003@gmail.com',
         whatsappNumber: '03489002496',
         address: 'ایبٹ آباد، پاکستان',
         city: 'Abbottabad',

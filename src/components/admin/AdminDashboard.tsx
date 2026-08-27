@@ -86,14 +86,23 @@ import {
   X
 } from 'lucide-react';
 
+const AUTHORIZED_ADMIN_EMAIL = 'jamiaislamia2003@gmail.com';
+
 export const AdminDashboard: React.FC = () => {
   const { t, language } = useThemeLanguage();
 
-  // Authentication State with Firebase Auth
-  const [currentUser, setCurrentUser] = useState<User | null>(auth?.currentUser || null);
-  const [isAuthLoading, setIsAuthLoading] = useState<boolean>(false);
+  // Authentication State strictly with Firebase Auth
+  const [currentUser, setCurrentUser] = useState<User | null>(() => {
+    const user = auth?.currentUser;
+    if (user && user.email && user.email.toLowerCase() === AUTHORIZED_ADMIN_EMAIL.toLowerCase()) {
+      return user;
+    }
+    return null;
+  });
+  const [isAuthLoading, setIsAuthLoading] = useState<boolean>(true);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
-    return Boolean(auth?.currentUser || localStorage.getItem('jamia_admin_session') || sessionStorage.getItem('jamia_admin_session'));
+    const user = auth?.currentUser;
+    return Boolean(user && user.email && user.email.toLowerCase() === AUTHORIZED_ADMIN_EMAIL.toLowerCase());
   });
   const [loginEmail, setLoginEmail] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
@@ -197,18 +206,29 @@ export const AdminDashboard: React.FC = () => {
   const [newDept, setNewDept] = useState('شعبہ درس نظامی');
   const [newObtainedMarks, setNewObtainedMarks] = useState<number>(450);
 
-  // Listen to Firebase Auth state
+  // Listen strictly to Firebase Auth state
   useEffect(() => {
-    if (!auth) return;
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    if (!auth) {
+      setIsAuthLoading(false);
+      return;
+    }
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      setIsAuthLoading(false);
       if (user) {
-        setCurrentUser(user);
-        setIsAuthenticated(true);
-      } else {
-        const savedSession = localStorage.getItem('jamia_admin_session') || sessionStorage.getItem('jamia_admin_session');
-        if (!savedSession) {
+        // Enforce authorized admin email check
+        if (user.email && user.email.toLowerCase() === AUTHORIZED_ADMIN_EMAIL.toLowerCase()) {
+          setCurrentUser(user);
+          setIsAuthenticated(true);
+        } else {
+          // If unauthorized user logs in, immediately sign out and reject
+          await signOut(auth);
+          setCurrentUser(null);
           setIsAuthenticated(false);
+          setLoginError('اس اکاؤنٹ کو ایڈمن کے اختیارات حاصل نہیں ہیں۔ صرف مجاز ایڈمن ای میل (jamiaislamia2003@gmail.com) کو لاگ ان کی اجازت ہے۔');
         }
+      } else {
+        setCurrentUser(null);
+        setIsAuthenticated(false);
       }
     });
     return () => unsubscribe();
@@ -331,7 +351,7 @@ export const AdminDashboard: React.FC = () => {
     const updated: Fatwa = {
       ...f,
       isTranslationApproved: true,
-      translationApprovedBy: currentUser?.email || 'usamasiddique105@gmail.com',
+      translationApprovedBy: currentUser?.email || AUTHORIZED_ADMIN_EMAIL,
     };
     StorageService.updateFatwa(updated);
     refreshData();
@@ -399,7 +419,7 @@ export const AdminDashboard: React.FC = () => {
         arabicText: newFatwaArabic || undefined,
         muftiName: newFatwaMufti || editingFatwa.muftiName || 'جامعہ اسلامیہ ایبٹ آباد',
         isTranslationApproved: newFatwaIsApproved,
-        translationApprovedBy: newFatwaIsApproved ? (currentUser?.email || 'usamasiddique105@gmail.com') : undefined,
+        translationApprovedBy: newFatwaIsApproved ? (currentUser?.email || AUTHORIZED_ADMIN_EMAIL) : undefined,
       };
 
       StorageService.updateFatwa(updatedF);
@@ -430,7 +450,7 @@ export const AdminDashboard: React.FC = () => {
         status: 'Published',
         views: 1,
         isTranslationApproved: newFatwaIsApproved,
-        translationApprovedBy: newFatwaIsApproved ? (currentUser?.email || 'usamasiddique105@gmail.com') : undefined,
+        translationApprovedBy: newFatwaIsApproved ? (currentUser?.email || AUTHORIZED_ADMIN_EMAIL) : undefined,
       };
 
       StorageService.addFatwa(newF);
@@ -624,27 +644,31 @@ export const AdminDashboard: React.FC = () => {
       return;
     }
 
+    if (inputEmail.toLowerCase() !== AUTHORIZED_ADMIN_EMAIL.toLowerCase()) {
+      setLoginError('اس اکاؤنٹ کو ایڈمن کے اختیارات حاصل نہیں ہیں۔ صرف مجاز ایڈمن ای میل (jamiaislamia2003@gmail.com) کو لاگ ان کی اجازت ہے۔');
+      setIsAuthLoading(false);
+      return;
+    }
+
     try {
       if (!auth) {
         throw new Error('Firebase Authentication دستیاب نہیں ہے۔');
       }
 
-      // 1. Authenticate via Firebase Authentication
+      // 1. Authenticate strictly via Firebase Authentication
       const userCredential = await signInWithEmailAndPassword(auth, inputEmail, inputPass);
       const user = userCredential.user;
 
-      setCurrentUser(user);
-      setIsAuthenticated(true);
-
-      if (rememberMe) {
-        localStorage.setItem('jamia_admin_session', user.email || inputEmail);
-        localStorage.setItem('jamia_admin_email', user.email || inputEmail);
+      if (user.email && user.email.toLowerCase() === AUTHORIZED_ADMIN_EMAIL.toLowerCase()) {
+        setCurrentUser(user);
+        setIsAuthenticated(true);
+        setLoginPassword('');
       } else {
-        sessionStorage.setItem('jamia_admin_session', user.email || inputEmail);
-        sessionStorage.setItem('jamia_admin_email', user.email || inputEmail);
+        await signOut(auth);
+        setCurrentUser(null);
+        setIsAuthenticated(false);
+        setLoginError('اس اکاؤنٹ کو ایڈمن کے اختیارات حاصل نہیں ہیں۔ صرف مجاز ایڈمن ای میل (jamiaislamia2003@gmail.com) کو لاگ ان کی اجازت ہے۔');
       }
-
-      setLoginPassword('');
     } catch (err: any) {
       console.error('Login error:', err);
       let errorMsg = 'لاگ ان کرنے میں خرابی پیش آئی۔ براہ کرم اپنے کوائف چیک کریں۔';
@@ -669,7 +693,7 @@ export const AdminDashboard: React.FC = () => {
     setLoginSuccessMessage('');
     setForgotError('');
     setForgotSuccess('');
-    setForgotEmailInput(loginEmail.trim() || 'usamasiddique105@gmail.com');
+    setForgotEmailInput(loginEmail.trim() || AUTHORIZED_ADMIN_EMAIL);
     setIsForgotModalOpen(true);
   };
 
@@ -681,6 +705,11 @@ export const AdminDashboard: React.FC = () => {
 
     if (!inputEmail) {
       setForgotError('براہ کرم اپنا رجسٹرڈ ایڈمن ای میل درج فرمائیں۔');
+      return;
+    }
+
+    if (inputEmail.toLowerCase() !== AUTHORIZED_ADMIN_EMAIL.toLowerCase()) {
+      setForgotError('صرف مجاز ایڈمن ای میل (jamiaislamia2003@gmail.com) کا پاس ورڈ ری سیٹ کیا جا سکتا ہے۔');
       return;
     }
 
@@ -2401,7 +2430,7 @@ export const AdminDashboard: React.FC = () => {
                   onClick={async () => {
                     setSettingsResetError('');
                     setSettingsResetSuccess('');
-                    const emailToSend = currentUser?.email || 'usamasiddique105@gmail.com';
+                    const emailToSend = currentUser?.email || AUTHORIZED_ADMIN_EMAIL;
                     try {
                       if (!auth) throw new Error('Firebase Auth دستیاب نہیں ہے۔');
                       await sendPasswordResetEmail(auth, emailToSend);
