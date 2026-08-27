@@ -16,7 +16,8 @@ import { IDatabaseService, DB_COLLECTIONS } from './dbInterface';
 import { CloudApiAdapter, D1_STORAGE_KEYS } from './cloudApiAdapter';
 
 // Primary Cloudflare D1 & SQL API adapter
-const currentAdapter: IDatabaseService = new CloudApiAdapter();
+const cloudAdapter = new CloudApiAdapter();
+const currentAdapter: IDatabaseService = cloudAdapter;
 
 export const StorageService = {
   // Collection & Storage Keys Metadata
@@ -34,13 +35,13 @@ export const StorageService = {
   // Online Questions
   getQuestions: (): OnlineQuestion[] => currentAdapter.getQuestions() as OnlineQuestion[],
   saveQuestions: (data: OnlineQuestion[]): void => { currentAdapter.saveQuestions(data); },
-  addQuestion: (question: OnlineQuestion): void => { currentAdapter.addQuestion(question); },
+  addQuestion: (question: OnlineQuestion, captchaToken?: string): void => { currentAdapter.addQuestion(question, captchaToken); },
   updateQuestion: (question: OnlineQuestion): void => { currentAdapter.updateQuestion(question); },
 
   // Online Class Bookings & Admissions
   getClassBookings: (): ClassBooking[] => currentAdapter.getClassBookings() as ClassBooking[],
   saveClassBookings: (data: ClassBooking[]): void => { currentAdapter.saveClassBookings(data); },
-  addClassBooking: (booking: ClassBooking): void => { currentAdapter.addClassBooking(booking); },
+  addClassBooking: (booking: ClassBooking, captchaToken?: string): void => { currentAdapter.addClassBooking(booking, captchaToken); },
   updateClassBooking: (booking: ClassBooking): void => { currentAdapter.updateClassBooking(booking); },
   deleteClassBooking: (id: string): void => { currentAdapter.deleteClassBooking(id); },
 
@@ -89,7 +90,7 @@ export const StorageService = {
   // Donations
   getDonations: (): DonationRecord[] => currentAdapter.getDonations() as DonationRecord[],
   saveDonations: (data: DonationRecord[]): void => { currentAdapter.saveDonations(data); },
-  addDonation: (don: DonationRecord): void => { currentAdapter.addDonation(don); },
+  addDonation: (don: DonationRecord, captchaToken?: string): void => { currentAdapter.addDonation(don, captchaToken); },
 
   // Site Settings
   getSiteSettings: (): SiteSettings => currentAdapter.getSiteSettings() as SiteSettings,
@@ -99,6 +100,9 @@ export const StorageService = {
   getVisitors: (): SiteVisitorLog[] => (currentAdapter.getVisitors?.() as SiteVisitorLog[]) || [],
   addVisitor: (log: SiteVisitorLog): void => { currentAdapter.addVisitor?.(log); },
   clearVisitors: (): void => { currentAdapter.clearVisitors?.(); },
+
+  // Cloudflare D1 Sync
+  syncFromCloud: (): Promise<void> => cloudAdapter.syncFromCloud(),
 
   // Reset to Defaults
   resetAll: (): void => { currentAdapter.resetAll(); }

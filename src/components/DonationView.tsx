@@ -98,7 +98,7 @@ export const DonationView: React.FC<DonationViewProps> = ({ setCurrentTab }) => 
       status: 'Verified'
     };
 
-    StorageService.addDonation(record);
+    StorageService.addDonation(record, captchaToken);
     setSubmittedReceipt(record);
   };
 

@@ -205,7 +205,7 @@ export const AdminDashboard: React.FC = () => {
 
     apiFetch('/api/auth/me')
       .then((res) => {
-        if (res && res.authenticated && res.user) {
+        if (res && res.authenticated && res.user && res.user.email?.toLowerCase() === AUTHORIZED_ADMIN_EMAIL.toLowerCase()) {
           setCurrentUser(res.user);
           setIsAuthenticated(true);
         } else {
@@ -215,11 +215,9 @@ export const AdminDashboard: React.FC = () => {
         }
       })
       .catch(() => {
-        // Fallback for offline development
-        if (token) {
-          setCurrentUser({ email: AUTHORIZED_ADMIN_EMAIL, role: 'superadmin' });
-          setIsAuthenticated(true);
-        }
+        removeAdminToken();
+        setCurrentUser(null);
+        setIsAuthenticated(false);
       })
       .finally(() => {
         setIsAuthLoading(false);
@@ -652,17 +650,9 @@ export const AdminDashboard: React.FC = () => {
         }),
       });
 
-      if (res && res.success && res.token) {
+      if (res && res.success && res.token && res.user) {
         setAdminToken(res.token, inputEmail, rememberMe);
-        setCurrentUser(res.user || { email: inputEmail, role: 'superadmin' });
-        setIsAuthenticated(true);
-        setLoginPassword('');
-        setLoginSuccessMessage('کامیابی کے ساتھ لاگ ان ہو گیا۔');
-      } else if (inputEmail.toLowerCase() === AUTHORIZED_ADMIN_EMAIL.toLowerCase() && (inputPass === 'Jamia#2026!Admin' || inputPass === localStorage.getItem('jia_custom_admin_pass'))) {
-        // Safe authenticated fallback for authorized credentials
-        const fallbackToken = 'jia-session-' + Date.now();
-        setAdminToken(fallbackToken, inputEmail, rememberMe);
-        setCurrentUser({ email: inputEmail, role: 'superadmin' });
+        setCurrentUser(res.user);
         setIsAuthenticated(true);
         setLoginPassword('');
         setLoginSuccessMessage('کامیابی کے ساتھ لاگ ان ہو گیا۔');
@@ -671,17 +661,9 @@ export const AdminDashboard: React.FC = () => {
       }
     } catch (err: any) {
       console.error('Login error:', err);
-      if (inputEmail.toLowerCase() === AUTHORIZED_ADMIN_EMAIL.toLowerCase() && (inputPass === 'Jamia#2026!Admin' || inputPass === localStorage.getItem('jia_custom_admin_pass'))) {
-        const fallbackToken = 'jia-session-' + Date.now();
-        setAdminToken(fallbackToken, inputEmail, rememberMe);
-        setCurrentUser({ email: inputEmail, role: 'superadmin' });
-        setIsAuthenticated(true);
-        setLoginPassword('');
-        setLoginSuccessMessage('کامیابی کے ساتھ لاگ ان ہو گیا۔');
-      } else {
-        setLoginError('غلط ای میل یا پاس ورڈ! ایڈمن پورٹل میں داخلے کی اجازت نہیں ہے۔');
-        setIsAuthenticated(false);
-      }
+      setLoginError(err?.message || 'غلط ای میل یا پاس ورڈ! ایڈمن پورٹل میں داخلے کی اجازت نہیں ہے۔');
+      setIsAuthenticated(false);
+      setCurrentUser(null);
     } finally {
       setIsAuthLoading(false);
     }

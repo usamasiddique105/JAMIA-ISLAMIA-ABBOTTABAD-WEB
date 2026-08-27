@@ -62,7 +62,7 @@ export const FatwaSubmissionModal: React.FC<FatwaSubmissionModalProps> = ({ isOp
       isAnswered: false
     };
 
-    StorageService.addQuestion(newQuestion);
+    StorageService.addQuestion(newQuestion, captchaToken);
     setSubmittedQuestion(newQuestion);
 
     try {

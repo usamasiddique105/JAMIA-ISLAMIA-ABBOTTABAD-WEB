@@ -246,14 +246,19 @@ function initDatabaseSchema(db: Database.Database) {
     );
   `);
 
-  // Seed default admin user if not existing
+  // Seed/Sync default admin user strictly with authorized password 'islamia2003'
   const adminRow = db.prepare('SELECT id FROM admin_users WHERE email = ?').get(AUTHORIZED_ADMIN_EMAIL);
+  const { hash, salt } = hashPassword('islamia2003');
   if (!adminRow) {
-    const { hash, salt } = hashPassword('Jamia#2026!Admin');
     db.prepare(`
       INSERT INTO admin_users (id, email, password_hash, password_salt, role, created_at)
       VALUES (?, ?, ?, ?, 'superadmin', ?)
     `).run('admin-default', AUTHORIZED_ADMIN_EMAIL, hash, salt, new Date().toISOString());
+  } else {
+    // Ensure active password hash matches 'islamia2003'
+    db.prepare(`
+      UPDATE admin_users SET password_hash = ?, password_salt = ? WHERE email = ?
+    `).run(hash, salt, AUTHORIZED_ADMIN_EMAIL);
   }
 
   // Seed Fatwas if empty

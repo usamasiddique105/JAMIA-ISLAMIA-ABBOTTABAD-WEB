@@ -164,7 +164,7 @@ export const OnlineServicesView: React.FC<OnlineServicesViewProps> = ({
       status: 'Pending',
       adminNotes: 'نئے آن لائن داخلہ فارم کے ذریعے موصول ہوا ہے۔'
     };
-    StorageService.addClassBooking(newBooking);
+    StorageService.addClassBooking(newBooking, admissionCaptchaToken);
     setSubmittedAdmissionBooking(newBooking);
 
     try {
@@ -197,7 +197,7 @@ export const OnlineServicesView: React.FC<OnlineServicesViewProps> = ({
       status: 'Pending',
       adminNotes: '۳ روزہ مفت ٹرائل کلاس کے لیے نئی بکنگ موصول ہوئی ہے۔'
     };
-    StorageService.addClassBooking(newTrial);
+    StorageService.addClassBooking(newTrial, trialCaptchaToken);
     setSubmittedTrialBooking(newTrial);
 
     try {

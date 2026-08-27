@@ -51,6 +51,7 @@ export interface Fatwa {
 
 export interface OnlineQuestion {
   id: string;
+  trackingNumber?: string;
   questionerName: string;
   questionerEmail: string;
   phone?: string;
@@ -68,6 +69,7 @@ export type BookingStatus = 'Pending' | 'Contacted' | 'Confirmed' | 'Completed' 
 
 export interface ClassBooking {
   id: string;
+  trackingNumber?: string;
   bookingType: BookingType;
   studentName: string;
   guardianName?: string;

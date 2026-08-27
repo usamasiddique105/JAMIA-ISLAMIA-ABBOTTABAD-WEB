@@ -46,13 +46,13 @@ export interface IDatabaseService {
   // Online Questions
   getQuestions(): OnlineQuestion[] | Promise<OnlineQuestion[]>;
   saveQuestions(data: OnlineQuestion[]): void | Promise<void>;
-  addQuestion(question: OnlineQuestion): void | Promise<void>;
+  addQuestion(question: OnlineQuestion, captchaToken?: string): void | Promise<void | string>;
   updateQuestion(question: OnlineQuestion): void | Promise<void>;
 
   // Online Class Bookings & Admissions
   getClassBookings(): ClassBooking[] | Promise<ClassBooking[]>;
   saveClassBookings(data: ClassBooking[]): void | Promise<void>;
-  addClassBooking(booking: ClassBooking): void | Promise<void>;
+  addClassBooking(booking: ClassBooking, captchaToken?: string): void | Promise<void | string>;
   updateClassBooking(booking: ClassBooking): void | Promise<void>;
   deleteClassBooking(id: string): void | Promise<void>;
 
@@ -101,7 +101,7 @@ export interface IDatabaseService {
   // Donations
   getDonations(): DonationRecord[] | Promise<DonationRecord[]>;
   saveDonations(data: DonationRecord[]): void | Promise<void>;
-  addDonation(don: DonationRecord): void | Promise<void>;
+  addDonation(don: DonationRecord, captchaToken?: string): void | Promise<void>;
 
   // Site Settings
   getSiteSettings(): SiteSettings | Promise<SiteSettings>;
