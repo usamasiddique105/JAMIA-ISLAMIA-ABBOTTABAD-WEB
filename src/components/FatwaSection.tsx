@@ -204,6 +204,25 @@ export const FatwaSection: React.FC<FatwaSectionProps> = ({
     };
   }, []);
 
+  // Support direct deep links to fatwas or search queries via URL parameters
+  useEffect(() => {
+    if (fatwas.length === 0) return;
+    const params = new URLSearchParams(window.location.search);
+    const qParam = params.get('q') || params.get('search');
+    const idParam = params.get('id') || params.get('fatwaId') || params.get('fatwa');
+    
+    if (qParam) {
+      setKeyword(qParam);
+      setAppliedFilter(prev => ({ ...prev, keyword: qParam }));
+    }
+    if (idParam) {
+      const found = fatwas.find(f => f.id === idParam || f.fatwaNumber === idParam);
+      if (found) {
+        setSelectedFatwa(found);
+      }
+    }
+  }, [fatwas]);
+
   const handleSearchSubmit = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     setAppliedFilter({

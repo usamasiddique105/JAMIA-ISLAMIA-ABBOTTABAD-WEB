@@ -38,8 +38,8 @@ const TAB_SEO_MAP: Record<string, SEOData> = {
     descAr: 'تصفح أكثر من 45,000 فتوى شرعية معتمدة من دار الإفتاء بالجامعة الإسلامية أبيت آباد وأرسل سؤالك الشرعي إلكترونياً.',
     keywords: 'آن لائن فتاویٰ, دار الافتاء ایبت آباد, Fatwa Online Pakistan, Online Fatwa Search, Darul Ifta Abbottabad, Ask Fatwa Online, فتاویٰ جامعہ اسلامیہ, Sharia Law Rulings',
     breadcrumbs: [
-      { name: 'صفحہ اول', item: 'https://jamia-islamia-abbottabad.pages.dev/#home' },
-      { name: 'دار الافتاء و فتاویٰ (Darul Ifta)', item: 'https://jamia-islamia-abbottabad.pages.dev/#fatwas' }
+      { name: 'صفحہ اول', item: 'https://jamia-islamia-abbottabad.pages.dev/' },
+      { name: 'دار الافتاء و فتاویٰ (Darul Ifta)', item: 'https://jamia-islamia-abbottabad.pages.dev/?tab=fatwas' }
     ]
   },
   'fatwa-duas': {
@@ -51,9 +51,9 @@ const TAB_SEO_MAP: Record<string, SEOData> = {
     descAr: 'مجموعة الأدعية المأثورة، أذكار الصباح والمساء، وأدعية الصلاة من الجامعة الإسلامية أبيت آباد.',
     keywords: 'مسنون دعائیں, اذکار صبح و شام, Daily Masnoon Duas, Islamic Prayers, Morning Evening Azkar, مسنون اذکار',
     breadcrumbs: [
-      { name: 'صفحہ اول', item: 'https://jamia-islamia-abbottabad.pages.dev/#home' },
-      { name: 'دار الافتاء', item: 'https://jamia-islamia-abbottabad.pages.dev/#fatwas' },
-      { name: 'مسنون دعائیں', item: 'https://jamia-islamia-abbottabad.pages.dev/#fatwa-duas' }
+      { name: 'صفحہ اول', item: 'https://jamia-islamia-abbottabad.pages.dev/' },
+      { name: 'دار الافتاء', item: 'https://jamia-islamia-abbottabad.pages.dev/?tab=fatwas' },
+      { name: 'مسنون دعائیں', item: 'https://jamia-islamia-abbottabad.pages.dev/?tab=fatwa-duas' }
     ]
   },
   'fatwa-names': {
@@ -65,9 +65,9 @@ const TAB_SEO_MAP: Record<string, SEOData> = {
     descAr: 'دليل الأسماء الإسلامية المعتمدة للأولاد والبنات مع معانيها اللغوية من علماء الجامعة الإسلامية.',
     keywords: 'منتخب اسلامی نام, Muslim Baby Names, Islamic Names with Meanings, Boys Names Urdu, Girls Names Arabic, اسلامی نام ڈائریکٹری',
     breadcrumbs: [
-      { name: 'صفحہ اول', item: 'https://jamia-islamia-abbottabad.pages.dev/#home' },
-      { name: 'دار الافتاء', item: 'https://jamia-islamia-abbottabad.pages.dev/#fatwas' },
-      { name: 'اسلامی نام', item: 'https://jamia-islamia-abbottabad.pages.dev/#fatwa-names' }
+      { name: 'صفحہ اول', item: 'https://jamia-islamia-abbottabad.pages.dev/' },
+      { name: 'دار الافتاء', item: 'https://jamia-islamia-abbottabad.pages.dev/?tab=fatwas' },
+      { name: 'اسلامی نام', item: 'https://jamia-islamia-abbottabad.pages.dev/?tab=fatwa-names' }
     ]
   },
   results: {
@@ -79,8 +79,8 @@ const TAB_SEO_MAP: Record<string, SEOData> = {
     descAr: 'استعلم عن نتائج الامتحانات السنوية لطلاب الجامعة الإسلامية أبيت آباد ورقم الجلوس وتحقق من الشهادات الدراسية.',
     keywords: 'امتحانی نتائج, رول نمبر رزلٹ, Jamia Islamia Exam Results, Wifaqul Madaris Result, Result Verification Abbottabad, رزلٹ پورٹل',
     breadcrumbs: [
-      { name: 'صفحہ اول', item: 'https://jamia-islamia-abbottabad.pages.dev/#home' },
-      { name: 'امتحانی نتائج (Results)', item: 'https://jamia-islamia-abbottabad.pages.dev/#results' }
+      { name: 'صفحہ اول', item: 'https://jamia-islamia-abbottabad.pages.dev/' },
+      { name: 'امتحانی نتائج (Results)', item: 'https://jamia-islamia-abbottabad.pages.dev/?tab=results' }
     ]
   },
   'online-quran': {
@@ -92,8 +92,8 @@ const TAB_SEO_MAP: Record<string, SEOData> = {
     descAr: 'أكاديمية تحفيظ وتجويد القرآن الكريم إلكترونياً من الجامعة الإسلامية بأبيت آباد مع قراء متخصصين وجدول مرن.',
     keywords: 'آن لائن قرآنی تعلیم, online quran academy, learn quran online, tajweed classes online, hifz quran online, online quran teacher, تجوید و ناظرہ قرآن',
     breadcrumbs: [
-      { name: 'صفحہ اول', item: 'https://jamia-islamia-abbottabad.pages.dev/#home' },
-      { name: 'آن لائن قرآنی تعلیم (Online Quran)', item: 'https://jamia-islamia-abbottabad.pages.dev/#online-quran' }
+      { name: 'صفحہ اول', item: 'https://jamia-islamia-abbottabad.pages.dev/' },
+      { name: 'آن لائن قرآنی تعلیم (Online Quran)', item: 'https://jamia-islamia-abbottabad.pages.dev/?tab=online-quran' }
     ]
   },
   'online-dars-nizami': {
@@ -105,8 +105,8 @@ const TAB_SEO_MAP: Record<string, SEOData> = {
     descAr: 'برنامج دراسة العلوم الشرعية والدرس النظامي والتفسير أونلاين من الجامعة الإسلامية بأبيت آباد.',
     keywords: 'آن لائن درس نظامی, online dars e nizami, tafseer course online, alim course online, fiqh online, arabic grammar online, تفسیر القرآن آن لائن',
     breadcrumbs: [
-      { name: 'صفحہ اول', item: 'https://jamia-islamia-abbottabad.pages.dev/#home' },
-      { name: 'آن لائن درسِ نظامی و تفسیر', item: 'https://jamia-islamia-abbottabad.pages.dev/#online-dars-nizami' }
+      { name: 'صفحہ اول', item: 'https://jamia-islamia-abbottabad.pages.dev/' },
+      { name: 'آن لائن درسِ نظامی و تفسیر', item: 'https://jamia-islamia-abbottabad.pages.dev/?tab=online-dars-nizami' }
     ]
   },
   'online-services': {
@@ -118,8 +118,8 @@ const TAB_SEO_MAP: Record<string, SEOData> = {
     descAr: 'التحق بأكاديمية القرآن الكريم أونلاين، تحفيظ وتجويد، دراسة العلوم الشرعية ودورة اللغة العربية من أي مكان في العالم.',
     keywords: 'online quran classes, online dars e nizami, online quran academy, learn arabic online, quran course online pakistan, alim course online, tajweed classes, آن لائن دینی تعلیم, آن لائن قرآن اکیڈمی',
     breadcrumbs: [
-      { name: 'صفحہ اول', item: 'https://jamia-islamia-abbottabad.pages.dev/#home' },
-      { name: 'آن لائن تعلیمی خدمات (Online Courses)', item: 'https://jamia-islamia-abbottabad.pages.dev/#online-services' }
+      { name: 'صفحہ اول', item: 'https://jamia-islamia-abbottabad.pages.dev/' },
+      { name: 'آن لائن تعلیمی خدمات (Online Courses)', item: 'https://jamia-islamia-abbottabad.pages.dev/?tab=online-services' }
     ]
   },
   library: {
@@ -131,8 +131,8 @@ const TAB_SEO_MAP: Record<string, SEOData> = {
     descAr: 'تحميل الكتب الإسلامية الرقمية، الأبحاث العلمية، ومجلة "الجامعة" الشهرية مجاناً بصيغة PDF.',
     keywords: 'اسلامی کتب پی ڈی ایف, ماہنامہ الجامعہ, Islamic Books PDF, Free Quran Tajweed Books, Research Papers PDF, دیجیٹل لائبریری ایبٹ آباد',
     breadcrumbs: [
-      { name: 'صفحہ اول', item: 'https://jamia-islamia-abbottabad.pages.dev/#home' },
-      { name: 'دیجیٹل لائبریری (Library)', item: 'https://jamia-islamia-abbottabad.pages.dev/#library' }
+      { name: 'صفحہ اول', item: 'https://jamia-islamia-abbottabad.pages.dev/' },
+      { name: 'دیجیٹل لائبریری (Library)', item: 'https://jamia-islamia-abbottabad.pages.dev/?tab=library' }
     ]
   },
   donations: {
@@ -144,8 +144,8 @@ const TAB_SEO_MAP: Record<string, SEOData> = {
     descAr: 'ادفع زكاتك وصدقاتك إلكترونياً لدعم طلاب العلم الأيتام والمحتاجين بالجامعة الإسلامية أبيت آباد عبر وسائل الدفع الآمنة.',
     keywords: 'آن لائن زکوۃ, عطیات پورٹل, Online Zakat Pakistan, Donate to Madrasa, Sponsor Quran Student, JazzCash Zakat, EasyPaisa Donation, Bank Transfer Jamia',
     breadcrumbs: [
-      { name: 'صفحہ اول', item: 'https://jamia-islamia-abbottabad.pages.dev/#home' },
-      { name: 'عطیات و زکوۃ (Donations)', item: 'https://jamia-islamia-abbottabad.pages.dev/#donations' }
+      { name: 'صفحہ اول', item: 'https://jamia-islamia-abbottabad.pages.dev/' },
+      { name: 'عطیات و زکوۃ (Donations)', item: 'https://jamia-islamia-abbottabad.pages.dev/?tab=donations' }
     ]
   },
   about: {
@@ -157,8 +157,8 @@ const TAB_SEO_MAP: Record<string, SEOData> = {
     descAr: 'تعرف على تاريخ الجامعة الإسلامية أبيت آباد منذ عام ١٩٥١م، رؤيتها التعليمية، وأبرز علمائها ومؤسسيها.',
     keywords: 'تاریخ جامعہ اسلامیہ, Abbottabad Madrasa History, Established 1951 Abbottabad, Wifaqul Madaris Institutions, بانیان جامعہ اسلامیہ',
     breadcrumbs: [
-      { name: 'صفحہ اول', item: 'https://jamia-islamia-abbottabad.pages.dev/#home' },
-      { name: 'جامعہ کا تعارف (About Us)', item: 'https://jamia-islamia-abbottabad.pages.dev/#about' }
+      { name: 'صفحہ اول', item: 'https://jamia-islamia-abbottabad.pages.dev/' },
+      { name: 'جامعہ کا تعارف (About Us)', item: 'https://jamia-islamia-abbottabad.pages.dev/?tab=about' }
     ]
   },
   contact: {
@@ -170,8 +170,8 @@ const TAB_SEO_MAP: Record<string, SEOData> = {
     descAr: 'تواصل مع الجامعة الإسلامية أبيت آباد. موقعنا على الخريطة، أرقام الهاتف، واتساب والمساعدة الفورية.',
     keywords: 'رابطہ جامعہ اسلامیہ, Jamia Abbottabad Address, Murree Road Abbottabad Location, Phone Number Jamia, WhatsApp Helpline 03489002496',
     breadcrumbs: [
-      { name: 'صفحہ اول', item: 'https://jamia-islamia-abbottabad.pages.dev/#home' },
-      { name: 'رابطہ کریں (Contact Us)', item: 'https://jamia-islamia-abbottabad.pages.dev/#contact' }
+      { name: 'صفحہ اول', item: 'https://jamia-islamia-abbottabad.pages.dev/' },
+      { name: 'رابطہ کریں (Contact Us)', item: 'https://jamia-islamia-abbottabad.pages.dev/?tab=contact' }
     ]
   }
 };
@@ -203,6 +203,11 @@ export const SEOHead: React.FC<SEOHeadProps> = ({ currentTab }) => {
       activeDesc = data.descAr;
     }
 
+    // Determine canonical and og:url
+    const canonicalUrl = key === 'home' || currentTab === 'home'
+      ? 'https://jamia-islamia-abbottabad.pages.dev/'
+      : `https://jamia-islamia-abbottabad.pages.dev/?tab=${currentTab}`;
+
     // Update document title
     document.title = activeTitle;
 
@@ -221,7 +226,7 @@ export const SEOHead: React.FC<SEOHeadProps> = ({ currentTab }) => {
     updateMeta('meta[name="keywords"]', 'name', 'keywords', data.keywords);
     updateMeta('meta[property="og:title"]', 'property', 'og:title', activeTitle);
     updateMeta('meta[property="og:description"]', 'property', 'og:description', activeDesc);
-    updateMeta('meta[property="og:url"]', 'property', 'og:url', `https://jamia-islamia-abbottabad.pages.dev/#${currentTab}`);
+    updateMeta('meta[property="og:url"]', 'property', 'og:url', canonicalUrl);
     updateMeta('meta[name="twitter:title"]', 'name', 'twitter:title', activeTitle);
     updateMeta('meta[name="twitter:description"]', 'name', 'twitter:description', activeDesc);
 
@@ -232,7 +237,7 @@ export const SEOHead: React.FC<SEOHeadProps> = ({ currentTab }) => {
       canonical.setAttribute('rel', 'canonical');
       document.head.appendChild(canonical);
     }
-    canonical.setAttribute('href', `https://jamia-islamia-abbottabad.pages.dev/#${currentTab}`);
+    canonical.setAttribute('href', canonicalUrl);
 
     // Update JSON-LD Breadcrumb Schema dynamically
     let breadcrumbScript = document.getElementById('json-ld-breadcrumb') as HTMLScriptElement | null;

@@ -40,26 +40,32 @@ import {
   ArrowUpRight
 } from 'lucide-react';
 
+function parseCurrentTab(): string {
+  const path = window.location.pathname.replace(/^\/+/, '').trim();
+  const hash = window.location.hash.replace('#', '').trim();
+  const searchParams = new URLSearchParams(window.location.search);
+  const tabParam = searchParams.get('tab');
+
+  if (path === 'admin-login' || hash === 'admin-login' || hash === 'admin' || path === 'admin') return 'admin';
+  if (tabParam) return tabParam;
+  if (path && path !== 'index.html') {
+    return path;
+  }
+  return hash || 'home';
+}
+
 function MainApp() {
   const { t, language } = useThemeLanguage();
-  const [currentTab, setCurrentTab] = useState(() => {
-    const path = window.location.pathname;
-    const hash = window.location.hash.replace('#', '');
-    if (path === '/admin-login' || hash === 'admin-login' || hash === 'admin') return 'admin';
-    return hash || 'home';
-  });
+  const [currentTab, setCurrentTab] = useState(() => parseCurrentTab());
   const [searchOpen, setSearchOpen] = useState(false);
   const [fatwaModalOpen, setFatwaModalOpen] = useState(false);
 
-  // Sync state with URL hash & support back/forward browser navigation and /admin-login
+  // Sync state with URL changes & support back/forward browser navigation and /admin-login
   useEffect(() => {
     const handleRouteCheck = () => {
-      const path = window.location.pathname;
-      const newHash = window.location.hash.replace('#', '');
-      if (path === '/admin-login' || newHash === 'admin-login' || newHash === 'admin') {
-        setCurrentTab('admin');
-      } else if (newHash && newHash !== currentTab) {
-        setCurrentTab(newHash);
+      const newTab = parseCurrentTab();
+      if (newTab !== currentTab) {
+        setCurrentTab(newTab);
       }
     };
 

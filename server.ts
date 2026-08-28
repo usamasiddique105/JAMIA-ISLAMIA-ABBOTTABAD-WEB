@@ -1331,20 +1331,35 @@ You are an expert Islamic jurist and Arabic/Urdu-to-English scholarly translator
 
   // Sitemap & SEO files explicit routes
   app.get(["/sitemap.xml", "/sitemap-*.xml"], (req, res, next) => {
-    const fileName = req.path.replace(/^\/+/, "");
+    const fileName = path.basename(req.path);
+    const prodPath = path.join(process.cwd(), "dist", fileName);
+    const pubPath = path.join(process.cwd(), "public", fileName);
     const filePath = path.join(process.cwd(), process.env.NODE_ENV === "production" ? "dist" : "public", fileName);
     res.setHeader("Content-Type", "application/xml; charset=utf-8");
     res.setHeader("X-Robots-Tag", "all");
+    res.setHeader("Cache-Control", "public, max-age=0, must-revalidate");
     res.sendFile(filePath, (err) => {
-      if (err) next();
+      if (err) {
+        // Fallback to public folder if dist is not yet built
+        res.sendFile(pubPath, (fallbackErr) => {
+          if (fallbackErr) next();
+        });
+      }
     });
   });
 
   app.get("/robots.txt", (req, res, next) => {
+    const prodPath = path.join(process.cwd(), "dist", "robots.txt");
+    const pubPath = path.join(process.cwd(), "public", "robots.txt");
     const filePath = path.join(process.cwd(), process.env.NODE_ENV === "production" ? "dist" : "public", "robots.txt");
     res.setHeader("Content-Type", "text/plain; charset=utf-8");
+    res.setHeader("Cache-Control", "public, max-age=0, must-revalidate");
     res.sendFile(filePath, (err) => {
-      if (err) next();
+      if (err) {
+        res.sendFile(pubPath, (fallbackErr) => {
+          if (fallbackErr) next();
+        });
+      }
     });
   });
 

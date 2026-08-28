@@ -1,5 +1,11 @@
 User-agent: *
 Allow: /
+Disallow: /admin
+Disallow: /admin-login
+Disallow: /?tab=admin
+Disallow: /api/admin/
+Disallow: /api/manage/
+Disallow: /api/auth/
 
 Sitemap: https://jamia-islamia-abbottabad.pages.dev/sitemap.xml
 Sitemap: https://jamia-islamia-abbottabad.pages.dev/sitemap-darulifta.xml

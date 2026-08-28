@@ -1,105 +1,138 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
-        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
-  <!-- Home Page -->
+  <!-- Jamia Islamia Abbottabad - Official Homepage -->
   <url>
     <loc>https://jamia-islamia-abbottabad.pages.dev/</loc>
-    <lastmod>2026-08-25</lastmod>
+    <lastmod>2026-08-28</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
-    <xhtml:link rel="alternate" hreflang="ur" href="https://jamia-islamia-abbottabad.pages.dev/?lang=ur" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://jamia-islamia-abbottabad.pages.dev/?lang=en" />
-    <xhtml:link rel="alternate" hreflang="ar" href="https://jamia-islamia-abbottabad.pages.dev/?lang=ar" />
   </url>
 
-  <!-- Darul Ifta and Fatwa Portal -->
+  <!-- Online Darul Ifta & Fatwa Portal -->
   <url>
-    <loc>https://jamia-islamia-abbottabad.pages.dev/?tab=fatwa</loc>
-    <lastmod>2026-08-25</lastmod>
+    <loc>https://jamia-islamia-abbottabad.pages.dev/?tab=fatwas</loc>
+    <lastmod>2026-08-28</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.95</priority>
-    <xhtml:link rel="alternate" hreflang="ur" href="https://jamia-islamia-abbottabad.pages.dev/?tab=fatwa" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://jamia-islamia-abbottabad.pages.dev/?tab=fatwa&amp;lang=en" />
-    <xhtml:link rel="alternate" hreflang="ar" href="https://jamia-islamia-abbottabad.pages.dev/?tab=fatwa&amp;lang=ar" />
   </url>
 
-  <!-- Online Fatwa Submission -->
+  <!-- Ask Online Fatwa Form -->
   <url>
     <loc>https://jamia-islamia-abbottabad.pages.dev/?tab=fatwa-ask</loc>
-    <lastmod>2026-08-25</lastmod>
+    <lastmod>2026-08-28</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.90</priority>
   </url>
 
-  <!-- Masnoon Duas and Azkar -->
+  <!-- Masnoon Duas & Daily Azkar -->
   <url>
     <loc>https://jamia-islamia-abbottabad.pages.dev/?tab=fatwa-duas</loc>
-    <lastmod>2026-08-25</lastmod>
+    <lastmod>2026-08-28</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
 
-  <!-- Islamic Names Directory -->
+  <!-- Islamic Baby Names & Meanings Directory -->
   <url>
     <loc>https://jamia-islamia-abbottabad.pages.dev/?tab=fatwa-names</loc>
-    <lastmod>2026-08-25</lastmod>
+    <lastmod>2026-08-28</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
 
-  <!-- Digital Library and Publications -->
-  <url>
-    <loc>https://jamia-islamia-abbottabad.pages.dev/?tab=library</loc>
-    <lastmod>2026-08-25</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.90</priority>
-  </url>
-
-  <!-- Examination Results Checker -->
+  <!-- Annual Examination Results Portal -->
   <url>
     <loc>https://jamia-islamia-abbottabad.pages.dev/?tab=results</loc>
-    <lastmod>2026-08-25</lastmod>
+    <lastmod>2026-08-28</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.90</priority>
   </url>
 
-  <!-- Online Admissions and Academic Departments -->
+  <!-- Online Quran Academy (Hifz & Tajweed) -->
   <url>
-    <loc>https://jamia-islamia-abbottabad.pages.dev/?tab=admissions</loc>
-    <lastmod>2026-08-25</lastmod>
+    <loc>https://jamia-islamia-abbottabad.pages.dev/?tab=online-quran</loc>
+    <lastmod>2026-08-28</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.90</priority>
   </url>
 
-  <!-- Online Dars-e-Nizami and Quran Academy -->
+  <!-- Online Dars-e-Nizami & Tafseer Courses -->
   <url>
-    <loc>https://jamia-islamia-abbottabad.pages.dev/?tab=dars-nizami</loc>
-    <lastmod>2026-08-25</lastmod>
+    <loc>https://jamia-islamia-abbottabad.pages.dev/?tab=online-dars-nizami</loc>
+    <lastmod>2026-08-28</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.90</priority>
   </url>
 
-  <!-- Online Donations and Zakat Portal -->
+  <!-- Online Distance Learning Services -->
+  <url>
+    <loc>https://jamia-islamia-abbottabad.pages.dev/?tab=online-services</loc>
+    <lastmod>2026-08-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.90</priority>
+  </url>
+
+  <!-- Academic Departments -->
+  <url>
+    <loc>https://jamia-islamia-abbottabad.pages.dev/?tab=departments</loc>
+    <lastmod>2026-08-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+
+  <!-- Faculty & Scholars (Asatiza-e-Kiram) -->
+  <url>
+    <loc>https://jamia-islamia-abbottabad.pages.dev/?tab=faculty</loc>
+    <lastmod>2026-08-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+
+  <!-- Digital Library & Jamia Journal Publications -->
+  <url>
+    <loc>https://jamia-islamia-abbottabad.pages.dev/?tab=library</loc>
+    <lastmod>2026-08-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.90</priority>
+  </url>
+
+  <!-- Campus Media & Video Gallery -->
+  <url>
+    <loc>https://jamia-islamia-abbottabad.pages.dev/?tab=media</loc>
+    <lastmod>2026-08-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+
+  <!-- News, Events & Announcements -->
+  <url>
+    <loc>https://jamia-islamia-abbottabad.pages.dev/?tab=news</loc>
+    <lastmod>2026-08-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+
+  <!-- Online Donations, Zakat & Sadaqah Portal -->
   <url>
     <loc>https://jamia-islamia-abbottabad.pages.dev/?tab=donations</loc>
-    <lastmod>2026-08-25</lastmod>
+    <lastmod>2026-08-28</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.90</priority>
   </url>
 
-  <!-- About Jamia Islamia Abbottabad -->
+  <!-- About Jamia Islamia Abbottabad (History & Vision) -->
   <url>
     <loc>https://jamia-islamia-abbottabad.pages.dev/?tab=about</loc>
-    <lastmod>2026-08-25</lastmod>
+    <lastmod>2026-08-28</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.85</priority>
   </url>
 
-  <!-- Contact and Location -->
+  <!-- Contact Us, Location & Map -->
   <url>
     <loc>https://jamia-islamia-abbottabad.pages.dev/?tab=contact</loc>
-    <lastmod>2026-08-25</lastmod>
+    <lastmod>2026-08-28</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.80</priority>
   </url>
