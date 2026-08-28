@@ -65,55 +65,7 @@ function setItem<T>(key: string, value: T): void {
 export class LocalStorageAdapter implements IDatabaseService {
   // Fatwas
   getFatwas(): Fatwa[] {
-    const stored = getItem<Fatwa[]>(STORAGE_KEYS.FATWAS, INITIAL_FATWAS);
-    // Ensure all fatwas have complete localized translations (ur, ar, en)
-    const initialMap = new Map<string, Fatwa>();
-    INITIAL_FATWAS.forEach(f => {
-      initialMap.set(f.id, f);
-      if (f.fatwaNumber) initialMap.set(f.fatwaNumber, f);
-    });
-
-    return stored.map(item => {
-      const defaultFatwa = initialMap.get(item.id) || (item.fatwaNumber ? initialMap.get(item.fatwaNumber) : undefined);
-      
-      // Normalize title
-      let title = typeof item.title === 'string' ? { ur: item.title, ar: '', en: '' } : { ...item.title };
-      if (defaultFatwa) {
-        title = {
-          ur: title.ur || defaultFatwa.title.ur,
-          ar: (title.ar && title.ar.trim()) ? title.ar : defaultFatwa.title.ar,
-          en: (title.en && title.en.trim()) ? title.en : defaultFatwa.title.en,
-        };
-      }
-
-      // Normalize question
-      let question = typeof item.question === 'string' ? { ur: item.question, ar: '', en: '' } : { ...item.question };
-      if (defaultFatwa) {
-        question = {
-          ur: question.ur || defaultFatwa.question.ur,
-          ar: (question.ar && question.ar.trim()) ? question.ar : defaultFatwa.question.ar,
-          en: (question.en && question.en.trim()) ? question.en : defaultFatwa.question.en,
-        };
-      }
-
-      // Normalize answer
-      let answer = typeof item.answer === 'string' ? { ur: item.answer, ar: '', en: '' } : { ...item.answer };
-      if (defaultFatwa) {
-        answer = {
-          ur: answer.ur || defaultFatwa.answer.ur,
-          ar: (answer.ar && answer.ar.trim()) ? answer.ar : defaultFatwa.answer.ar,
-          en: (answer.en && answer.en.trim()) ? answer.en : defaultFatwa.answer.en,
-        };
-      }
-
-      return {
-        ...item,
-        title,
-        question,
-        answer,
-        arabicText: item.arabicText || defaultFatwa?.arabicText,
-      };
-    });
+    return getItem<Fatwa[]>(STORAGE_KEYS.FATWAS, []);
   }
   saveFatwas(data: Fatwa[]): void {
     setItem(STORAGE_KEYS.FATWAS, data);

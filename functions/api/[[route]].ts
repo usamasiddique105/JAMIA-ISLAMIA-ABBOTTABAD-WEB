@@ -235,6 +235,12 @@ export const onRequest: PagesFunction<Env> = async (context) => {
   // 3. Auth: Login
   if (path === '/api/login' && method === 'POST') {
     try {
+      const clientIp = request.headers.get('CF-Connecting-IP') || request.headers.get('x-forwarded-for') || '127.0.0.1';
+      const rateCheck = checkEdgeRateLimit(clientIp, 'login', 5, 15 * 60 * 1000);
+      if (!rateCheck.allowed) {
+        return json({ success: false, error: 'بہت زیادہ کوششیں — 15 منٹ بعد دوبارہ کوشش کریں۔' }, 429);
+      }
+
       const body = await request.json() as { email?: string; password?: string; rememberMe?: boolean };
       const email = (body.email || '').trim().toLowerCase();
       const password = body.password || '';
@@ -271,11 +277,6 @@ export const onRequest: PagesFunction<Env> = async (context) => {
           }
         }
 
-        // Direct verification for the exact authorized admin password 'islamia2003'
-        if (!isValid && password === 'islamia2003') {
-          isValid = true;
-        }
-
         if (!isValid) {
           return json({ success: false, error: 'غلط ای میل یا پاس ورڈ! ایڈمن پورٹل میں داخلے کی اجازت نہیں ہے۔' }, 401);
         }
@@ -294,16 +295,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
           user: { email, role: 'superadmin' },
         });
       } else {
-        // Verification for exact authorized credentials
-        if (password !== 'islamia2003') {
-          return json({ success: false, error: 'غلط ای میل یا پاس ورڈ! ایڈمن پورٹل میں داخلے کی اجازت نہیں ہے۔' }, 401);
-        }
-        const sessionToken = 'jia-session-' + crypto.randomUUID();
-        return json({
-          success: true,
-          token: sessionToken,
-          user: { email, role: 'superadmin' },
-        });
+        return json({ success: false, error: 'ڈیٹا بیس دستیاب نہیں، لاگ اِن ممکن نہیں۔' }, 503);
       }
     } catch (e: any) {
       return json({ success: false, error: e?.message || 'Login failed.' }, 500);

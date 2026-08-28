@@ -13,17 +13,9 @@ import {
   SiteVisitorLog 
 } from '../types';
 import { 
-  INITIAL_FATWAS, 
-  INITIAL_ONLINE_QUESTIONS, 
-  INITIAL_EXAM_RESULTS, 
   INITIAL_DEPARTMENTS, 
   INITIAL_FACULTY, 
-  INITIAL_BOOKS, 
-  INITIAL_MEDIA, 
-  INITIAL_NEWS, 
-  INITIAL_DONATIONS, 
-  INITIAL_SITE_SETTINGS, 
-  INITIAL_CLASS_BOOKINGS 
+  INITIAL_SITE_SETTINGS 
 } from '../data/initialData';
 import { IDatabaseService } from './dbInterface';
 
@@ -66,8 +58,18 @@ function setLocal<T>(key: string, data: T): void {
 }
 
 function notifyUpdate(): void {
-  if (typeof window !== 'undefined') {
-    window.dispatchEvent(new CustomEvent('jamia_db_updated'));
+  try {
+    if (typeof window !== 'undefined' && typeof window.dispatchEvent === 'function') {
+      if (typeof CustomEvent === 'function') {
+        window.dispatchEvent(new CustomEvent('jamia_db_updated'));
+      } else if (typeof document !== 'undefined' && typeof document.createEvent === 'function') {
+        const event = document.createEvent('CustomEvent');
+        event.initCustomEvent('jamia_db_updated', false, false, null);
+        window.dispatchEvent(event);
+      }
+    }
+  } catch (err) {
+    // Non-blocking notification fallback
   }
 }
 
@@ -225,7 +227,7 @@ export class CloudApiAdapter implements IDatabaseService {
 
       let changed = false;
 
-      if (fatwasRes.status === 'fulfilled' && fatwasRes.value.success && Array.isArray(fatwasRes.value.data) && fatwasRes.value.data.length > 0) {
+      if (fatwasRes.status === 'fulfilled' && fatwasRes.value.success && Array.isArray(fatwasRes.value.data)) {
         setLocal(D1_STORAGE_KEYS.FATWAS, fatwasRes.value.data);
         changed = true;
       }
@@ -237,15 +239,15 @@ export class CloudApiAdapter implements IDatabaseService {
         setLocal(D1_STORAGE_KEYS.BOOKINGS, bookingsRes.value.data);
         changed = true;
       }
-      if (resultsRes.status === 'fulfilled' && resultsRes.value.success && Array.isArray(resultsRes.value.data) && resultsRes.value.data.length > 0) {
+      if (resultsRes.status === 'fulfilled' && resultsRes.value.success && Array.isArray(resultsRes.value.data)) {
         setLocal(D1_STORAGE_KEYS.RESULTS, resultsRes.value.data);
         changed = true;
       }
-      if (newsRes.status === 'fulfilled' && newsRes.value.success && Array.isArray(newsRes.value.data) && newsRes.value.data.length > 0) {
+      if (newsRes.status === 'fulfilled' && newsRes.value.success && Array.isArray(newsRes.value.data)) {
         setLocal(D1_STORAGE_KEYS.NEWS, newsRes.value.data);
         changed = true;
       }
-      if (booksRes.status === 'fulfilled' && booksRes.value.success && Array.isArray(booksRes.value.data) && booksRes.value.data.length > 0) {
+      if (booksRes.status === 'fulfilled' && booksRes.value.success && Array.isArray(booksRes.value.data)) {
         setLocal(D1_STORAGE_KEYS.BOOKS, booksRes.value.data);
         changed = true;
       }
@@ -257,7 +259,7 @@ export class CloudApiAdapter implements IDatabaseService {
         setLocal(D1_STORAGE_KEYS.DEPARTMENTS, deptRes.value.data);
         changed = true;
       }
-      if (mediaRes.status === 'fulfilled' && mediaRes.value.success && Array.isArray(mediaRes.value.data) && mediaRes.value.data.length > 0) {
+      if (mediaRes.status === 'fulfilled' && mediaRes.value.success && Array.isArray(mediaRes.value.data)) {
         setLocal(D1_STORAGE_KEYS.MEDIA, mediaRes.value.data);
         changed = true;
       }
@@ -278,7 +280,7 @@ export class CloudApiAdapter implements IDatabaseService {
   // 1. FATWAS (Authoritative D1 Operations)
   // ==========================================
   getFatwas(): Fatwa[] {
-    return getLocal<Fatwa[]>(D1_STORAGE_KEYS.FATWAS, INITIAL_FATWAS);
+    return getLocal<Fatwa[]>(D1_STORAGE_KEYS.FATWAS, []);
   }
 
   async saveFatwas(data: Fatwa[]): Promise<void> {
@@ -337,7 +339,7 @@ export class CloudApiAdapter implements IDatabaseService {
   // 2. ONLINE QUESTIONS (Authoritative D1 Operations)
   // ==========================================
   getQuestions(): OnlineQuestion[] {
-    return getLocal<OnlineQuestion[]>(D1_STORAGE_KEYS.QUESTIONS, INITIAL_ONLINE_QUESTIONS);
+    return getLocal<OnlineQuestion[]>(D1_STORAGE_KEYS.QUESTIONS, []);
   }
 
   async saveQuestions(data: OnlineQuestion[]): Promise<void> {
@@ -383,7 +385,7 @@ export class CloudApiAdapter implements IDatabaseService {
   // 3. CLASS BOOKINGS & ADMISSIONS (Authoritative D1 Operations)
   // ==========================================
   getClassBookings(): ClassBooking[] {
-    return getLocal<ClassBooking[]>(D1_STORAGE_KEYS.BOOKINGS, INITIAL_CLASS_BOOKINGS);
+    return getLocal<ClassBooking[]>(D1_STORAGE_KEYS.BOOKINGS, []);
   }
 
   async saveClassBookings(data: ClassBooking[]): Promise<void> {
@@ -441,7 +443,7 @@ export class CloudApiAdapter implements IDatabaseService {
   // 4. EXAM RESULTS (Authoritative D1 Operations)
   // ==========================================
   getExamResults(): ExamResult[] {
-    return getLocal<ExamResult[]>(D1_STORAGE_KEYS.RESULTS, INITIAL_EXAM_RESULTS);
+    return getLocal<ExamResult[]>(D1_STORAGE_KEYS.RESULTS, []);
   }
 
   async saveExamResults(data: ExamResult[]): Promise<void> {
@@ -608,7 +610,7 @@ export class CloudApiAdapter implements IDatabaseService {
   // 7. BOOKS / PUBLICATIONS (Authoritative D1 Operations)
   // ==========================================
   getBooks(): PublicationBook[] {
-    return getLocal<PublicationBook[]>(D1_STORAGE_KEYS.BOOKS, INITIAL_BOOKS);
+    return getLocal<PublicationBook[]>(D1_STORAGE_KEYS.BOOKS, []);
   }
 
   async saveBooks(data: PublicationBook[]): Promise<void> {
@@ -666,7 +668,7 @@ export class CloudApiAdapter implements IDatabaseService {
   // 8. MEDIA GALLERY (Authoritative D1 Operations)
   // ==========================================
   getMedia(): MediaItem[] {
-    return getLocal<MediaItem[]>(D1_STORAGE_KEYS.MEDIA, INITIAL_MEDIA);
+    return getLocal<MediaItem[]>(D1_STORAGE_KEYS.MEDIA, []);
   }
 
   async saveMedia(data: MediaItem[]): Promise<void> {
@@ -724,7 +726,7 @@ export class CloudApiAdapter implements IDatabaseService {
   // 9. NEWS & ANNOUNCEMENTS (Authoritative D1 Operations)
   // ==========================================
   getNews(): NewsItem[] {
-    return getLocal<NewsItem[]>(D1_STORAGE_KEYS.NEWS, INITIAL_NEWS);
+    return getLocal<NewsItem[]>(D1_STORAGE_KEYS.NEWS, []);
   }
 
   async saveNews(data: NewsItem[]): Promise<void> {
@@ -782,7 +784,7 @@ export class CloudApiAdapter implements IDatabaseService {
   // 10. DONATIONS (Authoritative D1 Operations)
   // ==========================================
   getDonations(): DonationRecord[] {
-    return getLocal<DonationRecord[]>(D1_STORAGE_KEYS.DONATIONS, INITIAL_DONATIONS);
+    return getLocal<DonationRecord[]>(D1_STORAGE_KEYS.DONATIONS, []);
   }
 
   async saveDonations(data: DonationRecord[]): Promise<void> {
