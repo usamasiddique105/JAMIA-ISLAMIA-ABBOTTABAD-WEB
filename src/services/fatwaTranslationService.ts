@@ -1,8 +1,19 @@
-import { Fatwa } from '../types';
+import { Fatwa, NewsItem } from '../types';
 import { StorageService } from './storage';
 
 // In-flight promise cache to avoid duplicate API calls
-const inFlightTranslations = new Map<string, Promise<Fatwa>>();
+const inFlightTranslations = new Map<string, Promise<any>>();
+
+export interface TranslationResult {
+  titleEn: string;
+  questionEn?: string;
+  answerEn?: string;
+  contentEn?: string;
+  titleAr: string;
+  questionAr?: string;
+  answerAr?: string;
+  contentAr?: string;
+}
 
 export const isEnglishTranslationMissingOrFallback = (fatwa: Fatwa): boolean => {
   const enAnswer = fatwa.answer?.en?.trim() || '';
@@ -20,18 +31,26 @@ export const isEnglishTranslationMissingOrFallback = (fatwa: Fatwa): boolean => 
   return false;
 };
 
+export const isArabicTranslationMissingOrFallback = (fatwa: Fatwa): boolean => {
+  const arAnswer = fatwa.answer?.ar?.trim() || '';
+  const urAnswer = fatwa.answer?.ur?.trim() || '';
+  if (!arAnswer) return true;
+  if (arAnswer === urAnswer) return true;
+  return false;
+};
+
 export const translateFatwaServerSide = async (
   titleUr: string,
   questionUr: string,
   answerUr: string
-): Promise<{ titleEn: string; questionEn: string; answerEn: string }> => {
+): Promise<TranslationResult> => {
   const response = await fetch('/api/translate-fatwa', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      fatwaId: 'custom-translate',
+      contentType: 'fatwa',
       titleUr: titleUr || '',
       questionUr: questionUr || '',
       answerUr: answerUr || '',
@@ -49,80 +68,157 @@ export const translateFatwaServerSide = async (
   }
 
   return {
-    titleEn: result.data.titleEn,
-    questionEn: result.data.questionEn,
-    answerEn: result.data.answerEn,
+    titleEn: result.data.titleEn || titleUr,
+    questionEn: result.data.questionEn || questionUr,
+    answerEn: result.data.answerEn || answerUr,
+    titleAr: result.data.titleAr || titleUr,
+    questionAr: result.data.questionAr || questionUr,
+    answerAr: result.data.answerAr || answerUr,
   };
 };
 
-export const translateFatwaWithGemini = async (fatwa: Fatwa): Promise<{ titleEn: string; questionEn: string; answerEn: string }> => {
-  return translateFatwaServerSide(
-    fatwa.title?.ur || '',
-    fatwa.question?.ur || '',
-    fatwa.answer?.ur || ''
-  );
+export const translateArticleServerSide = async (
+  titleUr: string,
+  contentUr: string
+): Promise<TranslationResult> => {
+  const response = await fetch('/api/translate-content', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      contentType: 'article',
+      titleUr: titleUr || '',
+      contentUr: contentUr || '',
+    }),
+  });
+
+  if (!response.ok) {
+    const errData = await response.json().catch(() => ({}));
+    throw new Error(errData.error || `Translation request failed with status ${response.status}`);
+  }
+
+  const result = await response.json();
+  if (!result.success || !result.data) {
+    throw new Error(result.error || 'Failed to obtain translation from Gemini API.');
+  }
+
+  return {
+    titleEn: result.data.titleEn || titleUr,
+    contentEn: result.data.contentEn || contentUr,
+    titleAr: result.data.titleAr || titleUr,
+    contentAr: result.data.contentAr || contentUr,
+  };
 };
 
-export const getOrTranslateFatwaEnglish = async (
-  fatwa: Fatwa,
-  forceRefresh = false
-): Promise<Fatwa> => {
-  // If already translated and not forcing refresh, return immediately
-  if (!forceRefresh && !isEnglishTranslationMissingOrFallback(fatwa)) {
-    return fatwa;
+export const generateDraftTranslationForFatwa = async (fatwa: Fatwa): Promise<Fatwa> => {
+  const cacheKey = `fatwa-trans-${fatwa.id}`;
+  if (inFlightTranslations.has(cacheKey)) {
+    return inFlightTranslations.get(cacheKey)!;
   }
 
-  // Deduplicate concurrent translation requests for the same fatwa
-  if (inFlightTranslations.has(fatwa.id)) {
-    return inFlightTranslations.get(fatwa.id)!;
-  }
-
-  const translationPromise = (async () => {
+  const promise = (async () => {
     try {
-      const translated = await translateFatwaWithGemini(fatwa);
+      const res = await translateFatwaServerSide(
+        fatwa.title?.ur || '',
+        fatwa.question?.ur || '',
+        fatwa.answer?.ur || ''
+      );
 
-      const updatedFatwa: Fatwa = {
+      const updated: Fatwa = {
         ...fatwa,
         title: {
-          ...fatwa.title,
-          en: translated.titleEn || fatwa.title?.en || fatwa.title?.ur,
+          ur: fatwa.title?.ur || '',
+          ar: res.titleAr || fatwa.title?.ar || fatwa.title?.ur || '',
+          en: res.titleEn || fatwa.title?.en || fatwa.title?.ur || '',
         },
         question: {
-          ...fatwa.question,
-          en: translated.questionEn || fatwa.question?.en || fatwa.question?.ur,
+          ur: fatwa.question?.ur || '',
+          ar: res.questionAr || fatwa.question?.ar || fatwa.question?.ur || '',
+          en: res.questionEn || fatwa.question?.en || fatwa.question?.ur || '',
         },
         answer: {
-          ...fatwa.answer,
-          en: translated.answerEn || fatwa.answer?.en || fatwa.answer?.ur,
+          ur: fatwa.answer?.ur || '',
+          ar: res.answerAr || fatwa.answer?.ar || fatwa.answer?.ur || '',
+          en: res.answerEn || fatwa.answer?.en || fatwa.answer?.ur || '',
         },
-        isAiTranslatedEn: Boolean(translated.answerEn && translated.answerEn !== fatwa.answer?.ur),
-        isTranslationApproved: fatwa.isTranslationApproved || false,
+        isAiTranslatedEn: true,
+        // STRICT RULE: Translations generated by AI remain unapproved drafts until an authorized scholar approves
+        isTranslationApproved: false,
         aiTranslatedEnAt: new Date().toISOString(),
       };
 
-      // Save/cache into database & local storage
-      StorageService.updateFatwa(updatedFatwa);
-      return updatedFatwa;
-    } catch (err) {
-      console.warn(`Translation notice for fatwa ${fatwa.id}:`, err);
-      // Return the current fatwa safely without throwing
-      return fatwa;
+      StorageService.updateFatwa(updated);
+      return updated;
     } finally {
-      inFlightTranslations.delete(fatwa.id);
+      inFlightTranslations.delete(cacheKey);
     }
   })();
 
-  inFlightTranslations.set(fatwa.id, translationPromise);
-  return translationPromise;
+  inFlightTranslations.set(cacheKey, promise);
+  return promise;
 };
 
-export const approveFatwaTranslation = (fatwaId: string, approvedBy = 'دارالافتاء جامعہ اسلامیہ'): Fatwa | null => {
+// Backwards-compatible alias for existing components
+export const getOrTranslateFatwaEnglish = async (
+  fatwa: Fatwa,
+  _forceRefresh = false
+): Promise<Fatwa> => {
+  return generateDraftTranslationForFatwa(fatwa);
+};
+
+export const generateDraftTranslationForNews = async (news: NewsItem): Promise<NewsItem> => {
+  const cacheKey = `news-trans-${news.id}`;
+  if (inFlightTranslations.has(cacheKey)) {
+    return inFlightTranslations.get(cacheKey)!;
+  }
+
+  const promise = (async () => {
+    try {
+      const res = await translateArticleServerSide(
+        news.title?.ur || '',
+        news.content?.ur || ''
+      );
+
+      const updated: NewsItem = {
+        ...news,
+        title: {
+          ur: news.title?.ur || '',
+          ar: res.titleAr || news.title?.ar || news.title?.ur || '',
+          en: res.titleEn || news.title?.en || news.title?.ur || '',
+        },
+        content: {
+          ur: news.content?.ur || '',
+          ar: res.contentAr || news.content?.ar || news.content?.ur || '',
+          en: res.contentEn || news.content?.en || news.content?.ur || '',
+        },
+        isAiTranslated: true,
+        isTranslationApproved: false,
+      };
+
+      StorageService.updateNews(updated);
+      return updated;
+    } finally {
+      inFlightTranslations.delete(cacheKey);
+    }
+  })();
+
+  inFlightTranslations.set(cacheKey, promise);
+  return promise;
+};
+
+export const approveFatwaTranslation = (
+  fatwaId: string, 
+  approvedBy = 'دارالافتاء جامعہ اسلامیہ',
+  customEdits?: Partial<Fatwa>
+): Fatwa | null => {
   const fatwas = StorageService.getFatwas();
   const target = fatwas.find(f => f.id === fatwaId);
   if (!target) return null;
 
   const updated: Fatwa = {
     ...target,
+    ...(customEdits || {}),
     isTranslationApproved: true,
     translationApprovedBy: approvedBy,
   };
@@ -145,3 +241,39 @@ export const revokeFatwaTranslationApproval = (fatwaId: string): Fatwa | null =>
   StorageService.updateFatwa(updated);
   return updated;
 };
+
+export const approveNewsTranslation = (
+  newsId: string,
+  approvedBy = 'ادارہ جامعہ اسلامیہ',
+  customEdits?: Partial<NewsItem>
+): NewsItem | null => {
+  const newsList = StorageService.getNews();
+  const target = newsList.find(n => n.id === newsId);
+  if (!target) return null;
+
+  const updated: NewsItem = {
+    ...target,
+    ...(customEdits || {}),
+    isTranslationApproved: true,
+    translationApprovedBy: approvedBy,
+  };
+
+  StorageService.updateNews(updated);
+  return updated;
+};
+
+export const revokeNewsTranslationApproval = (newsId: string): NewsItem | null => {
+  const newsList = StorageService.getNews();
+  const target = newsList.find(n => n.id === newsId);
+  if (!target) return null;
+
+  const updated: NewsItem = {
+    ...target,
+    isTranslationApproved: false,
+    translationApprovedBy: undefined,
+  };
+
+  StorageService.updateNews(updated);
+  return updated;
+};
+

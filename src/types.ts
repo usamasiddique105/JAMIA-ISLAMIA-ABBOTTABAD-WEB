@@ -55,6 +55,9 @@ export interface OnlineQuestion {
   questionerName: string;
   questionerEmail: string;
   phone?: string;
+  country?: string;
+  city?: string;
+  language?: string;
   category: FatwaCategory;
   subject: string;
   question: string;
@@ -169,6 +172,9 @@ export interface NewsItem {
   category: 'News' | 'Announcement' | 'Event' | 'Admission';
   imageUrl?: string;
   isPinned?: boolean;
+  isTranslationApproved?: boolean;
+  translationApprovedBy?: string;
+  isAiTranslated?: boolean;
 }
 
 export type FundType = 

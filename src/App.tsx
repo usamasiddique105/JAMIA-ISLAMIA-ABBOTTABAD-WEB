@@ -18,6 +18,7 @@ import { FacultyView } from './components/FacultyView';
 import { NewsEventsView } from './components/NewsEventsView';
 import { ContactFAQView } from './components/ContactFAQView';
 import { OnlineServicesView } from './components/OnlineServicesView';
+import { AskScholarView } from './components/AskScholarView';
 import { GlobalSearchModal } from './components/GlobalSearchModal';
 import { AdminDashboard } from './components/admin/AdminDashboard';
 import { trackSiteVisit } from './services/visitorTracker';
@@ -41,13 +42,30 @@ import {
 } from 'lucide-react';
 
 function parseCurrentTab(): string {
-  const path = window.location.pathname.replace(/^\/+/, '').trim();
+  if (typeof window === 'undefined') return 'home';
+  let path = window.location.pathname.replace(/^\/+/, '').replace(/\/+$/, '').trim().toLowerCase();
   const hash = window.location.hash.replace('#', '').trim();
   const searchParams = new URLSearchParams(window.location.search);
   const tabParam = searchParams.get('tab');
 
   if (path === 'admin-login' || hash === 'admin-login' || hash === 'admin' || path === 'admin') return 'admin';
   if (tabParam) return tabParam;
+
+  // Handle language prefixes: /en, /ar, /ur
+  if (path === 'en' || path === 'ar' || path === 'ur') return 'home';
+  if (path.startsWith('en/')) {
+    path = path.substring(3).trim();
+  } else if (path.startsWith('ar/')) {
+    path = path.substring(3).trim();
+  } else if (path.startsWith('ur/')) {
+    path = path.substring(3).trim();
+  }
+
+  // Handle fatwa specific deep paths e.g. /fatwa/123 or /en/fatwa/123
+  if (path.startsWith('fatwa/')) {
+    return 'fatwas';
+  }
+
   if (path && path !== 'index.html') {
     return path;
   }
@@ -86,8 +104,27 @@ function MainApp() {
 
   const handleTabChange = (newTab: string) => {
     setCurrentTab(newTab);
-    if (window.location.hash.replace('#', '') !== newTab) {
-      window.history.pushState(null, '', `#${newTab}`);
+    const pathname = window.location.pathname.toLowerCase();
+    
+    // If user is currently browsing English clean URL routes
+    if (pathname === '/en' || pathname.startsWith('/en/')) {
+      const targetUrl = newTab === 'home' ? '/en' : `/en/${newTab}`;
+      if (window.location.pathname !== targetUrl) {
+        window.history.pushState(null, '', targetUrl);
+      }
+    } 
+    // If user is currently browsing Arabic clean URL routes
+    else if (pathname === '/ar' || pathname.startsWith('/ar/')) {
+      const targetUrl = newTab === 'home' ? '/ar' : `/ar/${newTab}`;
+      if (window.location.pathname !== targetUrl) {
+        window.history.pushState(null, '', targetUrl);
+      }
+    } 
+    // Default Urdu / standard navigation
+    else {
+      if (window.location.hash.replace('#', '') !== newTab) {
+        window.history.pushState(null, '', `#${newTab}`);
+      }
     }
   };
 
@@ -167,6 +204,10 @@ function MainApp() {
         {currentTab === 'faq' && <ContactFAQView />}
 
         {/* TAB 11: ONLINE ACADEMY & SERVICES */}
+        {currentTab === 'ask-scholar' && (
+          <AskScholarView onBackToServices={() => handleTabChange('online-services')} />
+        )}
+
         {((currentTab === 'online-services' || currentTab.startsWith('online-')) && currentTab !== 'online-taawun') && (
           <OnlineServicesView 
             activeSubTab={currentTab}

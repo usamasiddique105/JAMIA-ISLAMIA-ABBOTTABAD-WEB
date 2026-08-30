@@ -246,6 +246,12 @@ function initDatabaseSchema(db: Database.Database) {
     );
   `);
 
+  // Safe schema column migrations
+  try { db.exec("ALTER TABLE fatwas ADD COLUMN isTranslationApproved INTEGER NOT NULL DEFAULT 0;"); } catch {}
+  try { db.exec("ALTER TABLE fatwas ADD COLUMN translationApprovedBy TEXT;"); } catch {}
+  try { db.exec("ALTER TABLE news ADD COLUMN isTranslationApproved INTEGER NOT NULL DEFAULT 0;"); } catch {}
+  try { db.exec("ALTER TABLE news ADD COLUMN translationApprovedBy TEXT;"); } catch {}
+
   // Seed/Sync default admin user strictly with authorized password 'islamia2003'
   const adminRow = db.prepare('SELECT id FROM admin_users WHERE email = ?').get(AUTHORIZED_ADMIN_EMAIL);
   const { hash, salt } = hashPassword('islamia2003');

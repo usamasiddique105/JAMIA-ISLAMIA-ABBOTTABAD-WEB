@@ -262,7 +262,24 @@ export const Navbar: React.FC<NavbarProps> = ({
           label: language === 'ur' ? 'آن لائن قرآن کریم و درسِ نظامی' : language === 'ar' ? 'أكاديمية القرآن الكريم والدرس النظامي' : 'Online Quran & Dars-e-Nizami', 
           desc: language === 'ur' ? 'ناظرہ، تجوید، حفظ اور مکمل درسِ نظامی آن لائن' : language === 'ar' ? 'القرآن الكريم والعلوم الإسلامية والدرس النظامي عبر الإنترنت' : 'Online Quran recitation, Tajweed, Hifz & Dars-e-Nizami',
           icon: BookOpen,
-          tab: 'online-services' 
+          tab: 'online-services',
+          subChildren: [
+            { 
+              id: 'sub-online-quran', 
+              label: language === 'ur' ? 'آن لائن قرآن اکیڈمی' : language === 'ar' ? 'أكاديمية القرآن الكريم' : 'Online Quran Academy', 
+              tab: 'online-quran' 
+            },
+            { 
+              id: 'sub-online-dars', 
+              label: language === 'ur' ? 'آن لائن درسِ نظامی' : language === 'ar' ? 'الدرس النظامي عبر الإنترنت' : 'Online Dars-e-Nizami', 
+              tab: 'online-dars-nizami' 
+            },
+            { 
+              id: 'sub-ask-scholar', 
+              label: language === 'ur' ? 'Ask a Scholar (انگریزی سوال)' : language === 'ar' ? 'اسأل المفتي (بالإنكليزية)' : 'Ask a Scholar (English)', 
+              tab: 'ask-scholar' 
+            },
+          ]
         },
         { 
           id: 'online-contact', 
@@ -347,7 +364,12 @@ export const Navbar: React.FC<NavbarProps> = ({
                   />
                   <div className="absolute left-0 top-full mt-1.5 bg-[#6B5138] border border-[#85674B] rounded-md shadow-2xl z-[100] text-xs sm:text-sm w-28 sm:w-32 overflow-hidden text-white divide-y divide-[#543E29] animate-in fade-in zoom-in-95 duration-150">
                     <button 
-                      onClick={() => { setLanguage('ur'); setShowLangMenu(false); }} 
+                      onClick={() => { 
+                        setLanguage('ur'); 
+                        setShowLangMenu(false); 
+                        const newUrl = currentTab === 'home' ? '/' : `/?tab=${currentTab}`;
+                        window.history.pushState(null, '', newUrl);
+                      }} 
                       className={`w-full text-right px-3 py-2 font-bold transition-colors flex items-center justify-between cursor-pointer ${language === 'ur' ? 'bg-[#503A26] text-amber-200' : 'hover:bg-[#5A432D] text-white'}`}
                       style={{ fontFamily: "'Jameel Noori Nastaleeq', 'Noto Nastaliq Urdu', serif" }}
                     >
@@ -355,7 +377,12 @@ export const Navbar: React.FC<NavbarProps> = ({
                       {language === 'ur' && <span className="text-amber-300 text-xs">✓</span>}
                     </button>
                     <button 
-                      onClick={() => { setLanguage('ar'); setShowLangMenu(false); }} 
+                      onClick={() => { 
+                        setLanguage('ar'); 
+                        setShowLangMenu(false); 
+                        const newUrl = currentTab === 'home' ? '/ar' : `/ar/${currentTab}`;
+                        window.history.pushState(null, '', newUrl);
+                      }} 
                       className={`w-full text-right px-3 py-2 font-bold transition-colors flex items-center justify-between cursor-pointer ${language === 'ar' ? 'bg-[#503A26] text-amber-200' : 'hover:bg-[#5A432D] text-white'}`}
                       style={{ fontFamily: "'Amiri', 'Noto Naskh Arabic', serif" }}
                     >
@@ -363,7 +390,12 @@ export const Navbar: React.FC<NavbarProps> = ({
                       {language === 'ar' && <span className="text-amber-300 text-xs">✓</span>}
                     </button>
                     <button 
-                      onClick={() => { setLanguage('en'); setShowLangMenu(false); }} 
+                      onClick={() => { 
+                        setLanguage('en'); 
+                        setShowLangMenu(false); 
+                        const newUrl = currentTab === 'home' ? '/en' : `/en/${currentTab}`;
+                        window.history.pushState(null, '', newUrl);
+                      }} 
                       className={`w-full text-left px-3 py-2 font-semibold transition-colors flex items-center justify-between cursor-pointer font-sans ${language === 'en' ? 'bg-[#503A26] text-amber-200' : 'hover:bg-[#5A432D] text-white'}`}
                     >
                       <span className="text-sm leading-none">English</span>
@@ -374,10 +406,10 @@ export const Navbar: React.FC<NavbarProps> = ({
               )}
             </div>
 
-            {/* Login Button */}
+            {/* Login Button (Hidden on Mobile) */}
             <button 
               onClick={() => setCurrentTab('results')} 
-              className="h-6 sm:h-7 flex items-center gap-1 text-white hover:text-amber-200 px-2 sm:px-2.5 rounded border border-[#85674B]/70 sm:border-transparent text-[11px] xs:text-xs sm:text-sm font-bold transition-all cursor-pointer bg-[#6B5138]/60 hover:bg-[#6B5138] sm:bg-transparent active:scale-95"
+              className="hidden sm:flex h-6 sm:h-7 items-center gap-1 text-white hover:text-amber-200 px-2 sm:px-2.5 rounded border border-[#85674B]/70 sm:border-transparent text-[11px] xs:text-xs sm:text-sm font-bold transition-all cursor-pointer bg-[#6B5138]/60 hover:bg-[#6B5138] sm:bg-transparent active:scale-95"
               title={language === 'ar' ? 'تسجيل الدخول ونتائج الامتحانات' : language === 'en' ? 'Portal Login & Results' : 'آن لائن رزلٹ و پورٹل لاگ ان'}
             >
               <span className="text-white hover:text-amber-200">
@@ -660,31 +692,21 @@ export const Navbar: React.FC<NavbarProps> = ({
 
           </div>
 
-          {/* MOBILE CONTROLS: UNIFIED SEARCH & HAMBURGER MENU BUTTONS */}
-          <div className="md:hidden flex items-center gap-2 shrink-0">
-            {/* Mobile Search Button */}
-            <button
-              onClick={onOpenSearch}
-              className="h-8.5 w-8.5 xs:h-9 xs:w-9 flex items-center justify-center rounded-md bg-[#3C2E21] hover:bg-[#2C2016] text-amber-200 border border-[#B88A3B]/50 hover:border-[#B88A3B] shadow-xs transition-all cursor-pointer active:scale-95"
-              title={language === 'ar' ? 'بحث' : language === 'en' ? 'Search' : 'تلاش کریں'}
-              aria-label="Search"
-            >
-              <Search className="w-4.5 h-4.5 text-amber-200" />
-            </button>
-
+          {/* MOBILE CONTROLS: CLEAR, ENHANCED HAMBURGER MENU BUTTON */}
+          <div className="md:hidden flex items-center shrink-0">
             {/* Mobile Hamburger Toggle Button (☰) */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="h-8.5 xs:h-9 flex items-center gap-1.5 px-2.5 xs:px-3 bg-[#3C2E21] hover:bg-[#2C2016] text-white border border-[#B88A3B]/50 hover:border-[#B88A3B] rounded-md font-urdu font-bold text-xs xs:text-sm shadow-xs transition-all cursor-pointer active:scale-95"
+              className="h-9.5 xs:h-10 min-w-[88px] xs:min-w-[98px] flex items-center justify-center gap-2 px-3.5 xs:px-4 bg-[#3C2E21] hover:bg-[#2C2016] active:bg-[#20150D] text-white border-1.5 border-[#B88A3B]/80 hover:border-[#B88A3B] rounded-lg shadow-sm transition-all cursor-pointer active:scale-95 select-none"
               title={language === 'ar' ? 'فتح القائمة' : language === 'en' ? 'Open Menu' : 'مینو کھولیں'}
               aria-label="Toggle Navigation Menu"
             >
               {mobileMenuOpen ? (
-                <X className="w-4.5 h-4.5 text-amber-200" />
+                <X className="w-5 h-5 text-amber-300 shrink-0 stroke-[2.5]" />
               ) : (
-                <Menu className="w-4.5 h-4.5 text-amber-200" />
+                <Menu className="w-5 h-5 text-amber-300 shrink-0 stroke-[2.5]" />
               )}
-              <span className="text-white leading-none">
+              <span className={`text-white font-bold text-sm xs:text-[15px] leading-none pt-0.5 ${language === 'en' ? 'font-sans' : 'font-urdu'}`}>
                 {mobileMenuOpen 
                   ? (language === 'ar' ? 'إغلاق' : language === 'en' ? 'Close' : 'بند کریں') 
                   : (language === 'ar' ? 'القائمة' : language === 'en' ? 'Menu' : 'مینو')}

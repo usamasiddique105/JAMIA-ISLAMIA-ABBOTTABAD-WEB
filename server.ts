@@ -503,7 +503,7 @@ async function startServer() {
       }
     }
 
-    const questionText = (q.questionText || "").trim();
+    const questionText = (q.questionText || q.question || "").trim();
     if (!questionText || questionText.length < 10) {
       return res.status(400).json({ success: false, error: "برائے مہربانی اپنا شرعی سوال کم از کم ۱۰ حروف پر واضح طور پر تحریر فرمائیں۔" });
     }
@@ -518,15 +518,15 @@ async function startServer() {
       `).run(
         questionId,
         trackingNumber,
-        (q.name || "سائل").slice(0, 100),
-        (q.email || "").slice(0, 100),
+        (q.name || q.questionerName || "سائل").slice(0, 100),
+        (q.email || q.questionerEmail || "").slice(0, 100),
         (q.phone || "").slice(0, 50),
-        (q.city || "").slice(0, 50),
+        (q.city || q.country || "").slice(0, 50),
         questionText.slice(0, 5000),
         (q.category || "عام").slice(0, 100),
         isAdmin ? (q.status || "Pending") : "Pending",
         isAdmin ? (q.answerText || null) : null,
-        q.submittedAt || new Date().toISOString(),
+        q.submittedAt || q.submissionDate || new Date().toISOString(),
         isAdmin ? (q.answeredAt || null) : null,
         isAdmin ? (q.muftiName || null) : null
       );
@@ -999,13 +999,13 @@ async function startServer() {
       let rows: any[];
       if (adminEmail) {
         rows = db.prepare(`
-          SELECT id, title_ur, title_ar, title_en, content_ur, content_ar, content_en, date, category, imageUrl, isUrgent, isPublished
+          SELECT id, title_ur, title_ar, title_en, content_ur, content_ar, content_en, date, category, imageUrl, isUrgent, isPublished, isTranslationApproved, translationApprovedBy
           FROM news ORDER BY date DESC
         `).all() as any[];
       } else {
         // Public Read: Strictly published news only
         rows = db.prepare(`
-          SELECT id, title_ur, title_ar, title_en, content_ur, content_ar, content_en, date, category, imageUrl, isUrgent, isPublished
+          SELECT id, title_ur, title_ar, title_en, content_ur, content_ar, content_en, date, category, imageUrl, isUrgent, isPublished, isTranslationApproved
           FROM news WHERE isPublished = 1 ORDER BY date DESC
         `).all() as any[];
       }
@@ -1019,6 +1019,8 @@ async function startServer() {
         imageUrl: n.imageUrl,
         isUrgent: Boolean(n.isUrgent),
         isPublished: Boolean(n.isPublished),
+        isTranslationApproved: Boolean(n.isTranslationApproved),
+        ...(adminEmail ? { translationApprovedBy: n.translationApprovedBy } : {}),
       }));
       res.json({ success: true, data: mapped });
     } catch {
@@ -1030,9 +1032,24 @@ async function startServer() {
     const n = req.body || {};
     try {
       db.prepare(`
-        INSERT OR REPLACE INTO news (id, title_ur, title_ar, title_en, content_ur, content_ar, content_en, date, category, imageUrl, isUrgent, isPublished)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-      `).run(n.id || `news-${Date.now()}`, n.title?.ur || "", n.title?.ar || "", n.title?.en || "", n.content?.ur || "", n.content?.ar || "", n.content?.en || "", n.date || new Date().toISOString().split("T")[0], n.category || "جامعہ خبریں", n.imageUrl || null, n.isUrgent ? 1 : 0, n.isPublished !== false ? 1 : 0);
+        INSERT OR REPLACE INTO news (id, title_ur, title_ar, title_en, content_ur, content_ar, content_en, date, category, imageUrl, isUrgent, isPublished, isTranslationApproved, translationApprovedBy)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `).run(
+        n.id || `news-${Date.now()}`,
+        n.title?.ur || "",
+        n.title?.ar || "",
+        n.title?.en || "",
+        n.content?.ur || "",
+        n.content?.ar || "",
+        n.content?.en || "",
+        n.date || new Date().toISOString().split("T")[0],
+        n.category || "جامعہ خبریں",
+        n.imageUrl || null,
+        n.isUrgent ? 1 : 0,
+        n.isPublished !== false ? 1 : 0,
+        n.isTranslationApproved ? 1 : 0,
+        n.translationApprovedBy || null
+      );
       res.json({ success: true });
     } catch {
       res.status(500).json({ success: false, error: "خبر محفوظ کرنے میں مسئلہ پیش آیا۔" });
@@ -1204,10 +1221,10 @@ async function startServer() {
     }
   });
 
-  // 16. Fatwa AI Translation API (Gemini with fallback & rate limiting)
-  app.post("/api/translate-fatwa", async (req, res) => {
+  // 16. Fatwa & Article AI Translation API (Gemini with fallback & rate limiting)
+  app.post(["/api/translate-fatwa", "/api/translate-content"], async (req, res) => {
     const clientIp = (req.ip || req.socket.remoteAddress || "").replace(/^::ffff:/, '');
-    const rateCheck = checkPublicFormRateLimit(clientIp, "fatwa_translate", 15, 5 * 60 * 1000);
+    const rateCheck = checkPublicFormRateLimit(clientIp, "fatwa_translate", 25, 5 * 60 * 1000);
     if (!rateCheck.allowed) {
       return res.status(429).json({
         success: false,
@@ -1216,18 +1233,37 @@ async function startServer() {
     }
 
     try {
-      const { fatwaId, titleUr, questionUr, answerUr } = req.body || {};
+      const { 
+        fatwaId, 
+        contentType = "fatwa", 
+        titleUr = "", 
+        questionUr = "", 
+        answerUr = "", 
+        contentUr = "" 
+      } = req.body || {};
 
-      if (!titleUr && !questionUr && !answerUr) {
+      const isArticle = contentType === "article" || Boolean(contentUr && !answerUr);
+      const effectiveContent = isArticle ? (contentUr || answerUr) : answerUr;
+
+      if (!titleUr && !questionUr && !effectiveContent) {
         return res.status(400).json({
           success: false,
-          error: "ترجمہ کے لیے فتویٰ کا متن درکار ہے۔",
+          error: "ترجمہ کے لیے متن درکار ہے۔",
         });
       }
 
       const ai = getGeminiClient();
 
-      const prompt = `Please translate the following Islamic Fatwa (Sharia ruling) from Urdu into clear, formal, scholarly, and strictly accurate English:
+      const prompt = isArticle 
+        ? `Please translate the following Islamic Article / News from Urdu into clear, dignified, academic English AND classical Islamic Arabic:
+
+--- TITLE (Urdu) ---
+${titleUr || "N/A"}
+
+--- CONTENT / BODY (Urdu) ---
+${effectiveContent || "N/A"}
+`
+        : `Please translate the following Islamic Fatwa (Sharia ruling) from Urdu into clear, formal, scholarly English AND authentic classical Islamic Arabic:
 
 --- FATWA TITLE (Urdu) ---
 ${titleUr || "N/A"}
@@ -1236,10 +1272,10 @@ ${titleUr || "N/A"}
 ${questionUr || "N/A"}
 
 --- SHARIA RULING & ANSWER (Urdu) ---
-${answerUr || "N/A"}
+${effectiveContent || "N/A"}
 `;
 
-      const systemInstruction = `یہ ایک اسلامی فتویٰ (شرعی حکم) کا متن ہے۔ اسے واضح، رسمی اور مکمل طور پر درست انگریزی میں ترجمہ کریں۔ فقہی اصطلاحات (جیسے حلال، حرام، مکروہ، واجب، سنت، زکوٰۃ، ہبہ، طلاق، نکاح وغیرہ) کو اصل عربی/اردو لفظ کے ساتھ بریکٹ میں انگریزی وضاحت دیں (مثلاً 'Makruh (disliked but not forbidden)', 'Wajib (obligatory)', 'Fard (mandatory)', 'Sunnah (prophetic tradition)', 'Hibah (gift)', 'Zakat (obligatory alms)'). حکم کا مفہوم ہرگز تبدیل نہ کریں، نہ ہی کوئی نیا مفہوم شامل کریں۔
+      const systemInstruction = `یہ ایک اسلامی فتویٰ/مضمون کا متن ہے۔ اسے واضح، رسمی اور مکمل درست [انگریزی/عربی] میں ترجمہ کریں۔ فقہی اصطلاحات (حلال، حرام، مکروہ، واجب، سنت، نفل، زکوٰۃ، ہبہ، طلاق، نکاح وغیرہ) کا مفہوم ہرگز تبدیل نہ کریں، نہ کوئی نیا مفہوم شامل کریں۔
 You are an expert Islamic jurist and Arabic/Urdu-to-English scholarly translator representing Darul Ifta Jamia Islamia Abbottabad. Maintain complete fidelity to the original text without editorializing.`;
 
       const modelsToTry = [
@@ -1259,25 +1295,29 @@ You are an expert Islamic jurist and Arabic/Urdu-to-English scholarly translator
             config: {
               systemInstruction,
               responseMimeType: "application/json",
-              responseSchema: {
-                type: Type.OBJECT,
-                properties: {
-                  titleEn: {
-                    type: Type.STRING,
-                    description: "Clear, formal, and accurate English translation of the fatwa title",
+              responseSchema: isArticle 
+                ? {
+                    type: Type.OBJECT,
+                    properties: {
+                      titleEn: { type: Type.STRING, description: "Clear English title" },
+                      contentEn: { type: Type.STRING, description: "Clear, formal English content" },
+                      titleAr: { type: Type.STRING, description: "Classical Arabic title" },
+                      contentAr: { type: Type.STRING, description: "Classical Arabic content" },
+                    },
+                    required: ["titleEn", "contentEn", "titleAr", "contentAr"],
+                  }
+                : {
+                    type: Type.OBJECT,
+                    properties: {
+                      titleEn: { type: Type.STRING, description: "Clear English fatwa title" },
+                      questionEn: { type: Type.STRING, description: "Clear English question" },
+                      answerEn: { type: Type.STRING, description: "Clear, formal English sharia answer" },
+                      titleAr: { type: Type.STRING, description: "Classical Arabic fatwa title" },
+                      questionAr: { type: Type.STRING, description: "Classical Arabic question" },
+                      answerAr: { type: Type.STRING, description: "Classical Arabic sharia answer" },
+                    },
+                    required: ["titleEn", "questionEn", "answerEn", "titleAr", "questionAr", "answerAr"],
                   },
-                  questionEn: {
-                    type: Type.STRING,
-                    description: "Clear, formal, and accurate English translation of the inquirer's question",
-                  },
-                  answerEn: {
-                    type: Type.STRING,
-                    description:
-                      "Clear, formal, and strictly accurate English translation of the Sharia ruling and answer, preserving all jurisprudence terms with parenthetical explanations",
-                  },
-                },
-                required: ["titleEn", "questionEn", "answerEn"],
-              },
             },
           });
           if (response?.text) {
@@ -1294,36 +1334,40 @@ You are an expert Islamic jurist and Arabic/Urdu-to-English scholarly translator
       }
 
       const responseText = response.text || "{}";
-      let parsed: { titleEn?: string; questionEn?: string; answerEn?: string } = {};
+      let parsed: any = {};
       try {
         parsed = JSON.parse(responseText);
       } catch {
-        parsed = {
-          titleEn: titleUr,
-          questionEn: questionUr,
-          answerEn: responseText,
-        };
+        parsed = {};
       }
 
       res.json({
         success: true,
         data: {
-          fatwaId: fatwaId || null,
+          id: fatwaId || null,
           titleEn: parsed.titleEn || titleUr,
           questionEn: parsed.questionEn || questionUr,
-          answerEn: parsed.answerEn || answerUr,
+          answerEn: parsed.answerEn || parsed.contentEn || effectiveContent,
+          contentEn: parsed.contentEn || parsed.answerEn || effectiveContent,
+          titleAr: parsed.titleAr || titleUr,
+          questionAr: parsed.questionAr || questionUr,
+          answerAr: parsed.answerAr || parsed.contentAr || effectiveContent,
+          contentAr: parsed.contentAr || parsed.answerAr || effectiveContent,
           translatedAt: new Date().toISOString(),
         },
       });
     } catch (e: any) {
-      console.error("Fatwa translation error detail:", e);
+      console.error("Content translation error detail:", e);
       res.status(200).json({
         success: false,
         error: e?.message || "عارضی طور پر ترجمہ سروس دستیاب نہیں ہے۔",
         fallback: {
           titleEn: req.body?.titleUr || "",
           questionEn: req.body?.questionUr || "",
-          answerEn: req.body?.answerUr || "",
+          answerEn: req.body?.answerUr || req.body?.contentUr || "",
+          titleAr: req.body?.titleUr || "",
+          questionAr: req.body?.questionUr || "",
+          answerAr: req.body?.answerUr || req.body?.contentUr || "",
         },
       });
     }

@@ -122,6 +122,20 @@ const TAB_SEO_MAP: Record<string, SEOData> = {
       { name: 'آن لائن تعلیمی خدمات (Online Courses)', item: 'https://jamia-islamia-abbottabad.pages.dev/?tab=online-services' }
     ]
   },
+  'ask-scholar': {
+    titleUr: 'Ask an Islamic Scholar (انگریزی سوال و فتویٰ) | دار الافتاء جامعہ اسلامیہ ایبٹ آباد',
+    titleEn: 'Ask an Islamic Scholar Online | Online Fatwa & Sharia Guidance | Jamia Islamia Abbottabad',
+    titleAr: 'اسأل عالم دين إسلامي أونلاين | الفتاوى الشرعية بالإنكليزية | الجامعة الإسلامية',
+    descUr: 'جامعہ اسلامیہ ایبٹ آباد کے مستند مفتیان کرام سے انگریزی زبان میں اپنے شرعی سوالات کے جوابات اور آن لائن فتاویٰ حاصل کریں۔',
+    descEn: 'Submit your Islamic questions online to certified Muftis & scholars at Darul Ifta Jamia Islamia Abbottabad. Authentic Sharia rulings based on the Quran, Sunnah, and Hanafi Fiqh.',
+    descAr: 'اطرح أسئلتك واستفساراتك الشرعية باللغة الإنكليزية على نخبة من المفتين بالجامعة الإسلامية أبيت آباد واحصل على فتاوى معتمدة.',
+    keywords: 'ask an islamic scholar online, ask a mufti online, online fatwa in english, islamic sharia questions online, darul ifta english online, hanafi fatwa english, islamic q&a online, certified muftis online',
+    breadcrumbs: [
+      { name: 'Home', item: 'https://jamia-islamia-abbottabad.pages.dev/' },
+      { name: 'Online Services', item: 'https://jamia-islamia-abbottabad.pages.dev/?tab=online-services' },
+      { name: 'Ask a Scholar', item: 'https://jamia-islamia-abbottabad.pages.dev/?tab=ask-scholar' }
+    ]
+  },
   library: {
     titleUr: 'دیجیٹل لائبریری، ماہنامہ الجامعہ و مطبوعات | الجامعة الإسلامية ایبت آباد',
     titleEn: 'Digital Publications Library & Monthly Journal "Al-Jamia" | Jamia Islamia Abbottabad',
@@ -173,6 +187,58 @@ const TAB_SEO_MAP: Record<string, SEOData> = {
       { name: 'صفحہ اول', item: 'https://jamia-islamia-abbottabad.pages.dev/' },
       { name: 'رابطہ کریں (Contact Us)', item: 'https://jamia-islamia-abbottabad.pages.dev/?tab=contact' }
     ]
+  },
+  departments: {
+    titleUr: 'تعلیمی شعبہ جات و فیکلٹی | الجامعة الإسلامية ایبت آباد',
+    titleEn: 'Academic Departments & Faculties | Jamia Islamia Abbottabad',
+    titleAr: 'الأقسام والكليات الأكاديمية | الجامعة الإسلامية أبيت آباد',
+    descUr: 'جامعہ اسلامیہ کے مختلف تعلیمی شعبہ جات: شعبہ تجوید و قرأت، شعبہ درس نظامی، شعبہ تخصص فی الفقہ، اور شعبہ عصری علوم۔',
+    descEn: 'Academic Departments at Jamia Islamia Abbottabad: Tajweed, Dars-e-Nizami Alim Course, Takhassus (Ifta), and Modern Sciences.',
+    descAr: 'الأقسام الأكاديمية بالجامعة الإسلامية: قسم التجويد والقراءات، الدرس النظامي، التخصص في الفقه والإفتاء.',
+    keywords: 'شعبہ جات جامعہ اسلامیہ, Academic Departments Jamia Abbottabad, Dars-e-Nizami Departments, Tajweed College, Takhassus fil Fiqh',
+    breadcrumbs: [
+      { name: 'صفحہ اول', item: 'https://jamia-islamia-abbottabad.pages.dev/' },
+      { name: 'تعلیمی شعبہ جات (Departments)', item: 'https://jamia-islamia-abbottabad.pages.dev/?tab=departments' }
+    ]
+  },
+  faculty: {
+    titleUr: 'اساتذہ کرام، شیوخ الحدیث و مفتیان | الجامعة الإسلامية ایبت آباد',
+    titleEn: 'Faculty, Renowned Scholars & Muftis | Jamia Islamia Abbottabad',
+    titleAr: 'أعضاء الهيئة التدريسية وكبار العلماء والمفتين | الجامعة الإسلامية أبيت آباد',
+    descUr: 'جامعہ اسلامیہ کے نامور شیوخ الحدیث، مفتیانِ کرام اور جید اساتذہ کا تعارف اور علمی خدمات کا جائزہ۔',
+    descEn: 'Meet the esteemed faculty, scholars of Hadith, and certified muftis at Jamia Islamia Abbottabad, Pakistan.',
+    descAr: 'تعرف على مشايخ الحديث، المفتين المعتمدين، وأعضاء هيئة التدريس بالجامعة الإسلامية بأبيت آباد.',
+    keywords: 'اساتذہ کرام جامعہ اسلامیہ, Faculty Jamia Abbottabad, Shaikhul Hadith Pakistan, Muftis Jamia Islamia',
+    breadcrumbs: [
+      { name: 'صفحہ اول', item: 'https://jamia-islamia-abbottabad.pages.dev/' },
+      { name: 'اساتذہ کرام (Faculty)', item: 'https://jamia-islamia-abbottabad.pages.dev/?tab=faculty' }
+    ]
+  },
+  news: {
+    titleUr: 'تازہ ترین خبریں، تعلیمی اعلانات و تقاریب | الجامعة الإسلامية ایبت آباد',
+    titleEn: 'Latest News, Announcements & Events | Jamia Islamia Abbottabad',
+    titleAr: 'آخر الأخبار والإعلانات والفعاليات | الجامعة الإسلامية أبيت آباد',
+    descUr: 'جامعہ اسلامیہ کی تازہ ترین سرگرمیاں، سالانہ دستار بندی تقاریب، امتحانی اعلانات اور تعلیمی خبریں۔',
+    descEn: 'Stay updated with the latest news, admission announcements, graduation ceremonies, and events from Jamia Islamia Abbottabad.',
+    descAr: 'تابع آخر الأخبار الرسمية، مواعيد التسجيل، حفلات التخرج والفعاليات بالجامعة الإسلامية أبيت آباد.',
+    keywords: 'خبریں جامعہ اسلامیہ, Jamia Abbottabad News, Madrassa Announcements Abbottabad, Dastarbandi Event',
+    breadcrumbs: [
+      { name: 'صفحہ اول', item: 'https://jamia-islamia-abbottabad.pages.dev/' },
+      { name: 'خبریں و اعلانات (News)', item: 'https://jamia-islamia-abbottabad.pages.dev/?tab=news' }
+    ]
+  },
+  media: {
+    titleUr: 'آڈیو، ویڈیو، بیانات و تصویری گیلری | الجامعة الإسلامية ایبت آباد',
+    titleEn: 'Media Gallery, Audio Lectures & Video Discourses | Jamia Islamia Abbottabad',
+    titleAr: 'المكتبة المرئية والصوتية ومعرض الصور | الجامعة الإسلامية أبيت آباد',
+    descUr: 'جامعہ اسلامیہ کی دعوتی و تعلیمی ویڈیوز، خطبات جمعہ، اصلاحی بیانات اور کیمپس کی تصویری گیلری۔',
+    descEn: 'Explore the multimedia library of Jamia Islamia Abbottabad: Friday sermons, Islamic video lectures, and campus photo gallery.',
+    descAr: 'استمع وشاهد المحاضرات والدروس الإسلامية، خطب الجمعة، وتصفح معرض الصور الخاص بالجامعة الإسلامية.',
+    keywords: 'جامعہ میڈیا گیلری, Islamic Audio Lectures Abbottabad, Friday Khutbahs, Photo Gallery Jamia',
+    breadcrumbs: [
+      { name: 'صفحہ اول', item: 'https://jamia-islamia-abbottabad.pages.dev/' },
+      { name: 'میڈیا و گیلری (Media)', item: 'https://jamia-islamia-abbottabad.pages.dev/?tab=media' }
+    ]
   }
 };
 
@@ -183,9 +249,13 @@ export const SEOHead: React.FC<SEOHeadProps> = ({ currentTab }) => {
     // Determine active key (support subtabs like 'online-quran' -> 'online-services')
     let key = currentTab;
     if (!TAB_SEO_MAP[key]) {
-      if (key.startsWith('fatwa')) key = 'fatwas';
+      if (key.startsWith('fatwa-')) key = key;
+      else if (key.startsWith('fatwa')) key = 'fatwas';
+      else if (key.startsWith('online-') && TAB_SEO_MAP[key]) key = key;
       else if (key.startsWith('online')) key = 'online-services';
       else if (key.startsWith('about')) key = 'about';
+      else if (key === 'faq') key = 'contact';
+      else if (key === 'taawun' || key === 'online-taawun') key = 'donations';
       else key = 'home';
     }
 
@@ -203,12 +273,22 @@ export const SEOHead: React.FC<SEOHeadProps> = ({ currentTab }) => {
       activeDesc = data.descAr;
     }
 
-    // Determine canonical and og:url
-    const canonicalUrl = key === 'home' || currentTab === 'home'
-      ? 'https://jamia-islamia-abbottabad.pages.dev/'
-      : `https://jamia-islamia-abbottabad.pages.dev/?tab=${currentTab}`;
+    const baseUrl = 'https://jamia-islamia-abbottabad.pages.dev';
 
-    // Update document title
+    // Determine canonical and og:url based on active language and key
+    let canonicalUrl = '';
+    if (language === 'en') {
+      canonicalUrl = key === 'home' ? `${baseUrl}/en` : `${baseUrl}/en/${key}`;
+    } else if (language === 'ar') {
+      canonicalUrl = key === 'home' ? `${baseUrl}/ar` : `${baseUrl}/ar/${key}`;
+    } else {
+      // Default Urdu (original URL preserved exactly)
+      canonicalUrl = key === 'home' || currentTab === 'home'
+        ? `${baseUrl}/`
+        : `${baseUrl}/?tab=${currentTab}`;
+    }
+
+    // Update document title and lang/dir on html tag
     document.title = activeTitle;
 
     // Helper to update or create meta tags
@@ -227,6 +307,7 @@ export const SEOHead: React.FC<SEOHeadProps> = ({ currentTab }) => {
     updateMeta('meta[property="og:title"]', 'property', 'og:title', activeTitle);
     updateMeta('meta[property="og:description"]', 'property', 'og:description', activeDesc);
     updateMeta('meta[property="og:url"]', 'property', 'og:url', canonicalUrl);
+    updateMeta('meta[property="og:locale"]', 'property', 'og:locale', language === 'en' ? 'en_US' : language === 'ar' ? 'ar_SA' : 'ur_PK');
     updateMeta('meta[name="twitter:title"]', 'name', 'twitter:title', activeTitle);
     updateMeta('meta[name="twitter:description"]', 'name', 'twitter:description', activeDesc);
 
@@ -238,6 +319,27 @@ export const SEOHead: React.FC<SEOHeadProps> = ({ currentTab }) => {
       document.head.appendChild(canonical);
     }
     canonical.setAttribute('href', canonicalUrl);
+
+    // Dynamic hreflang Alternate Tags for International SEO across all languages
+    const updateHreflang = (lang: string, href: string) => {
+      let link = document.querySelector(`link[rel="alternate"][hreflang="${lang}"]`) as HTMLLinkElement | null;
+      if (!link) {
+        link = document.createElement('link');
+        link.setAttribute('rel', 'alternate');
+        link.setAttribute('hreflang', lang);
+        document.head.appendChild(link);
+      }
+      link.setAttribute('href', href);
+    };
+
+    const urUrl = key === 'home' ? `${baseUrl}/` : `${baseUrl}/?tab=${key}`;
+    const enUrl = key === 'home' ? `${baseUrl}/en` : `${baseUrl}/en/${key}`;
+    const arUrl = key === 'home' ? `${baseUrl}/ar` : `${baseUrl}/ar/${key}`;
+
+    updateHreflang('ur', urUrl);
+    updateHreflang('en', enUrl);
+    updateHreflang('ar', arUrl);
+    updateHreflang('x-default', urUrl);
 
     // Update JSON-LD Breadcrumb Schema dynamically
     let breadcrumbScript = document.getElementById('json-ld-breadcrumb') as HTMLScriptElement | null;
@@ -261,8 +363,8 @@ export const SEOHead: React.FC<SEOHeadProps> = ({ currentTab }) => {
 
     breadcrumbScript.textContent = JSON.stringify(breadcrumbSchema);
 
-    // Inject FAQPage schema when on contact/faq or fatwa tab
-    if (key === 'contact' || key === 'faq' || key === 'fatwas') {
+    // Inject FAQPage schema when on contact/faq, fatwa, or ask-scholar tab
+    if (key === 'contact' || key === 'faq' || key === 'fatwas' || key === 'ask-scholar') {
       let faqScript = document.getElementById('json-ld-faq') as HTMLScriptElement | null;
       if (!faqScript) {
         faqScript = document.createElement('script');

@@ -24,6 +24,7 @@ import { FacultyManagement } from './FacultyManagement';
 import { DepartmentsManagement } from './DepartmentsManagement';
 import { NewsManagement } from './NewsManagement';
 import { BooksManagement } from './BooksManagement';
+import { TranslationsManagement } from './TranslationsManagement';
 import { 
   ShieldAlert, 
   Plus, 
@@ -108,7 +109,7 @@ export const AdminDashboard: React.FC = () => {
   const [settingsResetSuccess, setSettingsResetSuccess] = useState<string>('');
   const [settingsResetError, setSettingsResetError] = useState<string>('');
 
-  const [activeTab, setActiveTab] = useState<'overview' | 'bookings' | 'questions' | 'fatwas' | 'results' | 'news' | 'books' | 'faculty' | 'departments' | 'donations' | 'settings' | 'visitors'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'bookings' | 'questions' | 'fatwas' | 'translations' | 'results' | 'news' | 'books' | 'faculty' | 'departments' | 'donations' | 'settings' | 'visitors'>('overview');
 
   // State
   const [fatwas, setFatwas] = useState<Fatwa[]>([]);
@@ -960,6 +961,7 @@ export const AdminDashboard: React.FC = () => {
           { id: 'bookings', label: `کلاس بکنگ و داخلہ جات (${bookings.filter(b => b.status === 'Pending').length})`, icon: GraduationCap, badgeColor: bookings.filter(b => b.status === 'Pending').length > 0 ? 'bg-amber-600' : undefined },
           { id: 'questions', label: `آن لائن سوالات (${questions.filter(q => !q.isAnswered).length})`, icon: MessageSquare },
           { id: 'fatwas', label: `فتاویٰ جات (${fatwas.length})`, icon: BookOpen },
+          { id: 'translations', label: `زیرِ التواء تراجم (${fatwas.filter(f => !f.isTranslationApproved).length})`, icon: Globe, badgeColor: 'bg-amber-600' },
           { id: 'results', label: `امتحانی نتائج (${results.length})`, icon: GraduationCap },
           { id: 'news', label: 'خبریں و اعلانات', icon: Bell },
           { id: 'donations', label: 'عطیات کا ریکارڈ', icon: Heart },
@@ -987,7 +989,7 @@ export const AdminDashboard: React.FC = () => {
       {/* Tab 1: Overview */}
       {activeTab === 'overview' && (
         <div className="space-y-6">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 gap-4">
             <div 
               onClick={() => setActiveTab('visitors')}
               className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-emerald-300 dark:border-emerald-900/60 shadow-sm space-y-2 cursor-pointer hover:border-emerald-500 transition-colors"
@@ -1002,6 +1004,20 @@ export const AdminDashboard: React.FC = () => {
               <div className="text-2xl font-mono font-bold text-emerald-600 flex items-center justify-between">
                 <span>{visitors.filter(v => v.date === new Date().toISOString().split('T')[0]).length}</span>
                 <span className="text-[11px] font-sans font-normal px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300">کل {visitors.length}</span>
+              </div>
+            </div>
+
+            <div 
+              onClick={() => setActiveTab('translations')}
+              className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-amber-300 dark:border-amber-900/60 shadow-sm space-y-2 cursor-pointer hover:border-amber-500 transition-colors"
+            >
+              <div className="text-xs text-amber-700 dark:text-amber-400 font-urdu flex items-center justify-between font-bold">
+                <span>زیرِ التواء تراجم:</span>
+                <Globe className="w-3.5 h-3.5 text-amber-500" />
+              </div>
+              <div className="text-2xl font-mono font-bold text-amber-600 flex items-center justify-between">
+                <span>{fatwas.filter(f => !f.isTranslationApproved).length}</span>
+                <span className="text-[11px] font-sans font-normal px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300">ڈرافٹ</span>
               </div>
             </div>
 
@@ -2043,6 +2059,15 @@ export const AdminDashboard: React.FC = () => {
       {/* Tab: Books Management */}
       {activeTab === 'books' && (
         <BooksManagement onUpdate={refreshData} />
+      )}
+
+      {/* Tab: Pending Translations Management */}
+      {activeTab === 'translations' && (
+        <TranslationsManagement 
+          fatwas={fatwas} 
+          news={news} 
+          onRefreshData={refreshData} 
+        />
       )}
 
       {/* Tab 5: Site Settings */}

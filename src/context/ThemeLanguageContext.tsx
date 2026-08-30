@@ -214,9 +214,27 @@ const translations: Record<Language, Record<string, string>> = {
   }
 };
 
+export const detectLanguageFromUrl = (): Language | null => {
+  if (typeof window === 'undefined') return null;
+  const path = window.location.pathname.toLowerCase();
+  if (path === '/en' || path.startsWith('/en/')) return 'en';
+  if (path === '/ar' || path.startsWith('/ar/')) return 'ar';
+  if (path === '/ur' || path.startsWith('/ur/')) return 'ur';
+  
+  const searchParams = new URLSearchParams(window.location.search);
+  const langParam = searchParams.get('lang')?.toLowerCase();
+  if (langParam === 'en' || langParam === 'ar' || langParam === 'ur') return langParam as Language;
+  
+  return null;
+};
+
 const detectDefaultLanguage = (): Language => {
   try {
-    // 1. Check browser languages
+    // 1. Check URL first
+    const urlLang = detectLanguageFromUrl();
+    if (urlLang) return urlLang;
+
+    // 2. Check browser languages
     const browserLangs = (typeof navigator !== 'undefined' && navigator.languages && navigator.languages.length > 0)
       ? navigator.languages
       : (typeof navigator !== 'undefined' ? [navigator.language || ''] : ['ur']);
@@ -231,7 +249,7 @@ const detectDefaultLanguage = (): Language => {
       }
     }
 
-    // 2. Check user timezone
+    // 3. Check user timezone
     if (typeof Intl !== 'undefined' && Intl.DateTimeFormat) {
       const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
       const tzLower = timeZone.toLowerCase();
@@ -267,6 +285,8 @@ const ThemeLanguageContext = createContext<ThemeLanguageContextType | undefined>
 export const ThemeLanguageProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [language, setLanguage] = useState<Language>(() => {
     if (typeof window !== 'undefined') {
+      const urlLang = detectLanguageFromUrl();
+      if (urlLang) return urlLang;
       const savedLang = localStorage.getItem('jia_lang') as Language;
       if (savedLang && ['ur', 'en', 'ar'].includes(savedLang)) {
         return savedLang;
@@ -284,6 +304,28 @@ export const ThemeLanguageProvider: React.FC<{ children: React.ReactNode }> = ({
   });
 
   useEffect(() => {
+    const handleUrlLangSync = () => {
+      const urlLang = detectLanguageFromUrl();
+      if (urlLang && urlLang !== language) {
+        setLanguage(urlLang);
+      }
+    };
+
+    window.addEventListener('popstate', handleUrlLangSync);
+    window.addEventListener('hashchange', handleUrlLangSync);
+    return () => {
+      window.removeEventListener('popstate', handleUrlLangSync);
+      window.removeEventListener('hashchange', handleUrlLangSync);
+    };
+  }, [language]);
+
+  useEffect(() => {
+    const urlLang = detectLanguageFromUrl();
+    if (urlLang) {
+      setLanguage(urlLang);
+      localStorage.setItem('jia_lang', urlLang);
+      return;
+    }
     const savedLang = localStorage.getItem('jia_lang') as Language;
     if (!savedLang || !['ur', 'en', 'ar'].includes(savedLang)) {
       const detected = detectDefaultLanguage();

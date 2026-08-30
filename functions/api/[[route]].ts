@@ -610,7 +610,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
         }
       }
 
-      const questionText = (q.questionText || '').trim();
+      const questionText = (q.questionText || q.question || '').trim();
       if (!questionText || questionText.length < 10) {
         return json({ success: false, error: 'برائے مہربانی اپنا شرعی سوال کم از کم ۱۰ حروف پر واضح طور پر تحریر فرمائیں۔' }, 400);
       }
@@ -622,15 +622,15 @@ export const onRequest: PagesFunction<Env> = async (context) => {
       `).bind(
         q.id || crypto.randomUUID(),
         trackingNumber,
-        (q.name || 'سائل').slice(0, 100),
-        (q.email || '').slice(0, 100),
+        (q.name || q.questionerName || 'سائل').slice(0, 100),
+        (q.email || q.questionerEmail || '').slice(0, 100),
         (q.phone || '').slice(0, 50),
-        (q.city || '').slice(0, 50),
+        (q.city || q.country || '').slice(0, 50),
         questionText.slice(0, 5000),
         (q.category || 'عام').slice(0, 100),
         isAdmin ? (q.status || 'Pending') : 'Pending',
         isAdmin ? (q.answerText || null) : null,
-        q.submittedAt || new Date().toISOString(),
+        q.submittedAt || q.submissionDate || new Date().toISOString(),
         isAdmin ? (q.answeredAt || null) : null,
         isAdmin ? (q.muftiName || null) : null
       ).run();
@@ -1217,9 +1217,19 @@ export const onRequest: PagesFunction<Env> = async (context) => {
       answerUr?: string;
     };
 
-    const { titleUr = '', questionUr = '', answerUr = '' } = body;
+    const { 
+      fatwaId = null,
+      contentType = 'fatwa',
+      titleUr = '', 
+      questionUr = '', 
+      answerUr = '',
+      contentUr = ''
+    } = body;
 
-    if (!titleUr && !questionUr && !answerUr) {
+    const isArticle = contentType === 'article' || Boolean(contentUr && !answerUr);
+    const effectiveContent = isArticle ? (contentUr || answerUr) : answerUr;
+
+    if (!titleUr && !questionUr && !effectiveContent) {
       return json({ success: false, error: 'ترجمہ کے لیے اردو متن درکار ہے۔' }, 400);
     }
 
@@ -1230,20 +1240,39 @@ export const onRequest: PagesFunction<Env> = async (context) => {
       }, 500);
     }
 
-    const prompt = `You are a certified Islamic scholar and English translator for Darul Ifta, Jamia Islamia Abbottabad.
-Translate the following Urdu Fatwa (Islamic Legal Verdict) into clear, dignified, academic English.
-Accurately convey Hanafi jurisprudence terms (e.g., Nikah, Talaq, Wudu, Ghusl, Salah, Halal, Haram, Wajib, Makruh, Sunnah, Khuntha, Iddah, Zakat, Sadaqah).
+    const prompt = isArticle
+      ? `You are an expert Islamic scholar and scholarly translator for Darul Ifta Jamia Islamia Abbottabad.
+Translate the following Islamic Article / News from Urdu into clear, formal, academic English AND authentic classical Islamic Arabic.
+System Directive: یہ ایک اسلامی فتویٰ/مضمون کا متن ہے۔ اسے واضح، رسمی اور مکمل درست [انگریزی/عربی] میں ترجمہ کریں۔ فقہی اصطلاحات (حلال، حرام، مکروہ، واجب وغیرہ) کا مفہوم ہرگز تبدیل نہ کریں، نہ کوئی نیا مفہوم شامل کریں۔
+
+Urdu Input:
+Title: ${titleUr || 'N/A'}
+Content: ${effectiveContent || 'N/A'}
+
+Return ONLY a valid JSON object without markdown fences:
+{
+  "titleEn": "...",
+  "contentEn": "...",
+  "titleAr": "...",
+  "contentAr": "..."
+}`
+      : `You are an expert Islamic jurist and scholarly translator for Darul Ifta Jamia Islamia Abbottabad.
+Translate the following Islamic Fatwa (Sharia ruling) from Urdu into clear, dignified English AND authentic classical Islamic Arabic.
+System Directive: یہ ایک اسلامی فتویٰ/مضمون کا متن ہے۔ اسے واضح، رسمی اور مکمل درست [انگریزی/عربی] میں ترجمہ کریں۔ فقہی اصطلاحات (حلال، حرام، مکروہ، واجب وغیرہ) کا مفہوم ہرگز تبدیل نہ کریں، نہ کوئی نیا مفہوم شامل کریں۔
 
 Urdu Input:
 Title: ${titleUr || 'N/A'}
 Question: ${questionUr || 'N/A'}
-Answer: ${answerUr || 'N/A'}
+Answer: ${effectiveContent || 'N/A'}
 
-Return ONLY a valid JSON object without markdown fences, with these exact keys:
+Return ONLY a valid JSON object without markdown fences:
 {
   "titleEn": "...",
   "questionEn": "...",
-  "answerEn": "..."
+  "answerEn": "...",
+  "titleAr": "...",
+  "questionAr": "...",
+  "answerAr": "..."
 }`;
 
     const models = [
@@ -1254,7 +1283,7 @@ Return ONLY a valid JSON object without markdown fences, with these exact keys:
     ];
 
     let lastErr = '';
-    let parsed: { titleEn?: string; questionEn?: string; answerEn?: string } | null = null;
+    let parsed: any = null;
 
     for (const model of models) {
       try {
@@ -1297,9 +1326,16 @@ Return ONLY a valid JSON object without markdown fences, with these exact keys:
     return json({
       success: true,
       data: {
+        id: fatwaId,
         titleEn: parsed.titleEn || titleUr,
         questionEn: parsed.questionEn || questionUr,
-        answerEn: parsed.answerEn || answerUr,
+        answerEn: parsed.answerEn || parsed.contentEn || effectiveContent,
+        contentEn: parsed.contentEn || parsed.answerEn || effectiveContent,
+        titleAr: parsed.titleAr || titleUr,
+        questionAr: parsed.questionAr || questionUr,
+        answerAr: parsed.answerAr || parsed.contentAr || effectiveContent,
+        contentAr: parsed.contentAr || parsed.answerAr || effectiveContent,
+        translatedAt: new Date().toISOString(),
       },
     });
   }

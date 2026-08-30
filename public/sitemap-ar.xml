@@ -2,9 +2,9 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
         xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
-  <!-- Jamia Islamia Abbottabad - Official Homepage -->
+  <!-- Jamia Islamia Abbottabad - Arabic Home -->
   <url>
-    <loc>https://jamia-islamia-abbottabad.pages.dev/</loc>
+    <loc>https://jamia-islamia-abbottabad.pages.dev/ar</loc>
     <xhtml:link rel="alternate" hreflang="ur" href="https://jamia-islamia-abbottabad.pages.dev/" />
     <xhtml:link rel="alternate" hreflang="en" href="https://jamia-islamia-abbottabad.pages.dev/en" />
     <xhtml:link rel="alternate" hreflang="ar" href="https://jamia-islamia-abbottabad.pages.dev/ar" />
@@ -14,9 +14,9 @@
     <priority>1.0</priority>
   </url>
 
-  <!-- Online Darul Ifta & Fatwa Portal -->
+  <!-- Online Darul Ifta & Fatwa Archive -->
   <url>
-    <loc>https://jamia-islamia-abbottabad.pages.dev/?tab=fatwas</loc>
+    <loc>https://jamia-islamia-abbottabad.pages.dev/ar/fatwas</loc>
     <xhtml:link rel="alternate" hreflang="ur" href="https://jamia-islamia-abbottabad.pages.dev/?tab=fatwas" />
     <xhtml:link rel="alternate" hreflang="en" href="https://jamia-islamia-abbottabad.pages.dev/en/fatwas" />
     <xhtml:link rel="alternate" hreflang="ar" href="https://jamia-islamia-abbottabad.pages.dev/ar/fatwas" />
@@ -26,9 +26,9 @@
     <priority>0.95</priority>
   </url>
 
-  <!-- Masnoon Duas & Daily Azkar -->
+  <!-- Masnoon Duas & Daily Prayers -->
   <url>
-    <loc>https://jamia-islamia-abbottabad.pages.dev/?tab=fatwa-duas</loc>
+    <loc>https://jamia-islamia-abbottabad.pages.dev/ar/fatwa-duas</loc>
     <xhtml:link rel="alternate" hreflang="ur" href="https://jamia-islamia-abbottabad.pages.dev/?tab=fatwa-duas" />
     <xhtml:link rel="alternate" hreflang="en" href="https://jamia-islamia-abbottabad.pages.dev/en/fatwa-duas" />
     <xhtml:link rel="alternate" hreflang="ar" href="https://jamia-islamia-abbottabad.pages.dev/ar/fatwa-duas" />
@@ -38,9 +38,9 @@
     <priority>0.85</priority>
   </url>
 
-  <!-- Islamic Baby Names & Meanings Directory -->
+  <!-- Muslim Baby Names Directory -->
   <url>
-    <loc>https://jamia-islamia-abbottabad.pages.dev/?tab=fatwa-names</loc>
+    <loc>https://jamia-islamia-abbottabad.pages.dev/ar/fatwa-names</loc>
     <xhtml:link rel="alternate" hreflang="ur" href="https://jamia-islamia-abbottabad.pages.dev/?tab=fatwa-names" />
     <xhtml:link rel="alternate" hreflang="en" href="https://jamia-islamia-abbottabad.pages.dev/en/fatwa-names" />
     <xhtml:link rel="alternate" hreflang="ar" href="https://jamia-islamia-abbottabad.pages.dev/ar/fatwa-names" />
@@ -50,9 +50,9 @@
     <priority>0.85</priority>
   </url>
 
-  <!-- Annual Examination Results Portal -->
+  <!-- Examination Results Portal -->
   <url>
-    <loc>https://jamia-islamia-abbottabad.pages.dev/?tab=results</loc>
+    <loc>https://jamia-islamia-abbottabad.pages.dev/ar/results</loc>
     <xhtml:link rel="alternate" hreflang="ur" href="https://jamia-islamia-abbottabad.pages.dev/?tab=results" />
     <xhtml:link rel="alternate" hreflang="en" href="https://jamia-islamia-abbottabad.pages.dev/en/results" />
     <xhtml:link rel="alternate" hreflang="ar" href="https://jamia-islamia-abbottabad.pages.dev/ar/results" />
@@ -62,9 +62,9 @@
     <priority>0.90</priority>
   </url>
 
-  <!-- Online Quran Academy (Hifz & Tajweed) -->
+  <!-- Online Quran Academy -->
   <url>
-    <loc>https://jamia-islamia-abbottabad.pages.dev/?tab=online-quran</loc>
+    <loc>https://jamia-islamia-abbottabad.pages.dev/ar/online-quran</loc>
     <xhtml:link rel="alternate" hreflang="ur" href="https://jamia-islamia-abbottabad.pages.dev/?tab=online-quran" />
     <xhtml:link rel="alternate" hreflang="en" href="https://jamia-islamia-abbottabad.pages.dev/en/online-quran" />
     <xhtml:link rel="alternate" hreflang="ar" href="https://jamia-islamia-abbottabad.pages.dev/ar/online-quran" />
@@ -74,9 +74,9 @@
     <priority>0.90</priority>
   </url>
 
-  <!-- Online Dars-e-Nizami & Tafseer Courses -->
+  <!-- Online Dars-e-Nizami & Islamic Studies -->
   <url>
-    <loc>https://jamia-islamia-abbottabad.pages.dev/?tab=online-dars-nizami</loc>
+    <loc>https://jamia-islamia-abbottabad.pages.dev/ar/online-dars-nizami</loc>
     <xhtml:link rel="alternate" hreflang="ur" href="https://jamia-islamia-abbottabad.pages.dev/?tab=online-dars-nizami" />
     <xhtml:link rel="alternate" hreflang="en" href="https://jamia-islamia-abbottabad.pages.dev/en/online-dars-nizami" />
     <xhtml:link rel="alternate" hreflang="ar" href="https://jamia-islamia-abbottabad.pages.dev/ar/online-dars-nizami" />
@@ -88,7 +88,7 @@
 
   <!-- Online Distance Learning Services -->
   <url>
-    <loc>https://jamia-islamia-abbottabad.pages.dev/?tab=online-services</loc>
+    <loc>https://jamia-islamia-abbottabad.pages.dev/ar/online-services</loc>
     <xhtml:link rel="alternate" hreflang="ur" href="https://jamia-islamia-abbottabad.pages.dev/?tab=online-services" />
     <xhtml:link rel="alternate" hreflang="en" href="https://jamia-islamia-abbottabad.pages.dev/en/online-services" />
     <xhtml:link rel="alternate" hreflang="ar" href="https://jamia-islamia-abbottabad.pages.dev/ar/online-services" />
@@ -98,9 +98,9 @@
     <priority>0.90</priority>
   </url>
 
-  <!-- Ask an Islamic Scholar (English Online Fatwa) -->
+  <!-- Ask an Islamic Scholar Online -->
   <url>
-    <loc>https://jamia-islamia-abbottabad.pages.dev/?tab=ask-scholar</loc>
+    <loc>https://jamia-islamia-abbottabad.pages.dev/ar/ask-scholar</loc>
     <xhtml:link rel="alternate" hreflang="ur" href="https://jamia-islamia-abbottabad.pages.dev/?tab=ask-scholar" />
     <xhtml:link rel="alternate" hreflang="en" href="https://jamia-islamia-abbottabad.pages.dev/en/ask-scholar" />
     <xhtml:link rel="alternate" hreflang="ar" href="https://jamia-islamia-abbottabad.pages.dev/ar/ask-scholar" />
@@ -112,7 +112,7 @@
 
   <!-- Academic Departments -->
   <url>
-    <loc>https://jamia-islamia-abbottabad.pages.dev/?tab=departments</loc>
+    <loc>https://jamia-islamia-abbottabad.pages.dev/ar/departments</loc>
     <xhtml:link rel="alternate" hreflang="ur" href="https://jamia-islamia-abbottabad.pages.dev/?tab=departments" />
     <xhtml:link rel="alternate" hreflang="en" href="https://jamia-islamia-abbottabad.pages.dev/en/departments" />
     <xhtml:link rel="alternate" hreflang="ar" href="https://jamia-islamia-abbottabad.pages.dev/ar/departments" />
@@ -122,9 +122,9 @@
     <priority>0.85</priority>
   </url>
 
-  <!-- Faculty & Scholars (Asatiza-e-Kiram) -->
+  <!-- Faculty & Scholars -->
   <url>
-    <loc>https://jamia-islamia-abbottabad.pages.dev/?tab=faculty</loc>
+    <loc>https://jamia-islamia-abbottabad.pages.dev/ar/faculty</loc>
     <xhtml:link rel="alternate" hreflang="ur" href="https://jamia-islamia-abbottabad.pages.dev/?tab=faculty" />
     <xhtml:link rel="alternate" hreflang="en" href="https://jamia-islamia-abbottabad.pages.dev/en/faculty" />
     <xhtml:link rel="alternate" hreflang="ar" href="https://jamia-islamia-abbottabad.pages.dev/ar/faculty" />
@@ -134,9 +134,9 @@
     <priority>0.85</priority>
   </url>
 
-  <!-- Digital Library & Jamia Journal Publications -->
+  <!-- Digital Publications Library -->
   <url>
-    <loc>https://jamia-islamia-abbottabad.pages.dev/?tab=library</loc>
+    <loc>https://jamia-islamia-abbottabad.pages.dev/ar/library</loc>
     <xhtml:link rel="alternate" hreflang="ur" href="https://jamia-islamia-abbottabad.pages.dev/?tab=library" />
     <xhtml:link rel="alternate" hreflang="en" href="https://jamia-islamia-abbottabad.pages.dev/en/library" />
     <xhtml:link rel="alternate" hreflang="ar" href="https://jamia-islamia-abbottabad.pages.dev/ar/library" />
@@ -146,9 +146,9 @@
     <priority>0.90</priority>
   </url>
 
-  <!-- Campus Media & Video Gallery -->
+  <!-- Media & Video Gallery -->
   <url>
-    <loc>https://jamia-islamia-abbottabad.pages.dev/?tab=media</loc>
+    <loc>https://jamia-islamia-abbottabad.pages.dev/ar/media</loc>
     <xhtml:link rel="alternate" hreflang="ur" href="https://jamia-islamia-abbottabad.pages.dev/?tab=media" />
     <xhtml:link rel="alternate" hreflang="en" href="https://jamia-islamia-abbottabad.pages.dev/en/media" />
     <xhtml:link rel="alternate" hreflang="ar" href="https://jamia-islamia-abbottabad.pages.dev/ar/media" />
@@ -158,9 +158,9 @@
     <priority>0.85</priority>
   </url>
 
-  <!-- News, Events & Announcements -->
+  <!-- News & Announcements -->
   <url>
-    <loc>https://jamia-islamia-abbottabad.pages.dev/?tab=news</loc>
+    <loc>https://jamia-islamia-abbottabad.pages.dev/ar/news</loc>
     <xhtml:link rel="alternate" hreflang="ur" href="https://jamia-islamia-abbottabad.pages.dev/?tab=news" />
     <xhtml:link rel="alternate" hreflang="en" href="https://jamia-islamia-abbottabad.pages.dev/en/news" />
     <xhtml:link rel="alternate" hreflang="ar" href="https://jamia-islamia-abbottabad.pages.dev/ar/news" />
@@ -170,9 +170,9 @@
     <priority>0.85</priority>
   </url>
 
-  <!-- Online Donations, Zakat & Sadaqah Portal -->
+  <!-- Online Donations & Zakat -->
   <url>
-    <loc>https://jamia-islamia-abbottabad.pages.dev/?tab=donations</loc>
+    <loc>https://jamia-islamia-abbottabad.pages.dev/ar/donations</loc>
     <xhtml:link rel="alternate" hreflang="ur" href="https://jamia-islamia-abbottabad.pages.dev/?tab=donations" />
     <xhtml:link rel="alternate" hreflang="en" href="https://jamia-islamia-abbottabad.pages.dev/en/donations" />
     <xhtml:link rel="alternate" hreflang="ar" href="https://jamia-islamia-abbottabad.pages.dev/ar/donations" />
@@ -182,9 +182,9 @@
     <priority>0.90</priority>
   </url>
 
-  <!-- About Jamia Islamia Abbottabad (History & Vision) -->
+  <!-- About Jamia Islamia Abbottabad -->
   <url>
-    <loc>https://jamia-islamia-abbottabad.pages.dev/?tab=about</loc>
+    <loc>https://jamia-islamia-abbottabad.pages.dev/ar/about</loc>
     <xhtml:link rel="alternate" hreflang="ur" href="https://jamia-islamia-abbottabad.pages.dev/?tab=about" />
     <xhtml:link rel="alternate" hreflang="en" href="https://jamia-islamia-abbottabad.pages.dev/en/about" />
     <xhtml:link rel="alternate" hreflang="ar" href="https://jamia-islamia-abbottabad.pages.dev/ar/about" />
@@ -194,9 +194,9 @@
     <priority>0.85</priority>
   </url>
 
-  <!-- Contact Us, Location & Map -->
+  <!-- Contact Us & Location -->
   <url>
-    <loc>https://jamia-islamia-abbottabad.pages.dev/?tab=contact</loc>
+    <loc>https://jamia-islamia-abbottabad.pages.dev/ar/contact</loc>
     <xhtml:link rel="alternate" hreflang="ur" href="https://jamia-islamia-abbottabad.pages.dev/?tab=contact" />
     <xhtml:link rel="alternate" hreflang="en" href="https://jamia-islamia-abbottabad.pages.dev/en/contact" />
     <xhtml:link rel="alternate" hreflang="ar" href="https://jamia-islamia-abbottabad.pages.dev/ar/contact" />
