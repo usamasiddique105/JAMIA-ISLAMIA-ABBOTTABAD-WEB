@@ -813,7 +813,46 @@ export class CloudApiAdapter implements IDatabaseService {
   // 11. SITE SETTINGS (Authoritative D1 Operations)
   // ==========================================
   getSiteSettings(): SiteSettings {
-    return getLocal<SiteSettings>(D1_STORAGE_KEYS.SETTINGS, INITIAL_SITE_SETTINGS);
+    const raw = getLocal<Partial<SiteSettings> | null>(D1_STORAGE_KEYS.SETTINGS, null);
+    if (!raw || typeof raw !== 'object') {
+      return { ...INITIAL_SITE_SETTINGS };
+    }
+    return {
+      ...INITIAL_SITE_SETTINGS,
+      ...raw,
+      tagline: {
+        ...INITIAL_SITE_SETTINGS.tagline,
+        ...(raw.tagline || {})
+      },
+      heroAnnouncement: {
+        ...INITIAL_SITE_SETTINGS.heroAnnouncement,
+        ...(raw.heroAnnouncement || {})
+      },
+      bankDetails: {
+        ...INITIAL_SITE_SETTINGS.bankDetails,
+        ...(raw.bankDetails || {}),
+        meezanBank: {
+          ...INITIAL_SITE_SETTINGS.bankDetails.meezanBank,
+          ...(raw.bankDetails?.meezanBank || {})
+        },
+        bankIslami: {
+          ...INITIAL_SITE_SETTINGS.bankDetails.bankIslami,
+          ...(raw.bankDetails?.bankIslami || {})
+        },
+        hbl: {
+          ...INITIAL_SITE_SETTINGS.bankDetails.hbl,
+          ...(raw.bankDetails?.hbl || {})
+        },
+        easyPaisa: {
+          ...INITIAL_SITE_SETTINGS.bankDetails.easyPaisa,
+          ...(raw.bankDetails?.easyPaisa || {})
+        },
+        jazzCash: {
+          ...INITIAL_SITE_SETTINGS.bankDetails.jazzCash,
+          ...(raw.bankDetails?.jazzCash || {})
+        }
+      }
+    };
   }
 
   async saveSiteSettings(data: SiteSettings): Promise<void> {

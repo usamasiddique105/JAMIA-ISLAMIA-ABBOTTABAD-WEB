@@ -17,15 +17,9 @@ export const onRequestPost = async (context: PagesContext<Env>): Promise<Respons
   };
 
   try {
-    const apiKey = context.env.GEMINI_API_KEY;
-    if (!apiKey) {
-      return new Response(
-        JSON.stringify({ success: false, error: 'GEMINI_API_KEY is not configured in Cloudflare environment.' }),
-        { status: 500, headers }
-      );
-    }
+    const apiKey = context.env.GEMINI_API_KEY || (context.env as any).GEMINI_KEY || (context.env as any).GOOGLE_API_KEY || (context.env as any).VITE_GEMINI_API_KEY;
 
-    const body = (await context.request.json()) as {
+    const body = (await context.request.json().catch(() => ({}))) as {
       fatwaId?: string;
       titleUr?: string;
       questionUr?: string;
@@ -34,14 +28,31 @@ export const onRequestPost = async (context: PagesContext<Env>): Promise<Respons
 
     const { titleUr = '', questionUr = '', answerUr = '' } = body;
 
-    const prompt = `You are a professional Islamic scholar and English translator for Darul Ifta, Jamia Islamia Abbottabad.
-Translate the following Urdu Fatwa (Question & Answer) into clear, dignified, academic English.
-Maintain authentic Islamic terminology where appropriate (e.g., Nikah, Talaq, Wudu, Salah, Halal, Haram, Shariah, Iddah, Zakat).
+    if (!titleUr && !questionUr && !answerUr) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'ترجمہ کے لیے اردو متن درکار ہے۔' }),
+        { status: 400, headers }
+      );
+    }
+
+    if (!apiKey) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: 'Cloudflare Pages میں GEMINI_API_KEY ترتیب نہیں دیا گیا۔ برائے مہربانی Cloudflare Pages Settings -> Environment Variables میں GEMINI_API_KEY کی قدر شامل فرمائیں۔',
+        }),
+        { status: 500, headers }
+      );
+    }
+
+    const prompt = `You are a certified Islamic scholar and English translator for Darul Ifta, Jamia Islamia Abbottabad.
+Translate the following Urdu Fatwa (Islamic Legal Verdict) into clear, dignified, academic English.
+Accurately convey Hanafi jurisprudence terms (e.g., Nikah, Talaq, Wudu, Ghusl, Salah, Halal, Haram, Wajib, Makruh, Sunnah, Khuntha, Iddah, Zakat, Sadaqah).
 
 Urdu Input:
-Title: ${titleUr}
-Question: ${questionUr}
-Answer: ${answerUr}
+Title: ${titleUr || 'N/A'}
+Question: ${questionUr || 'N/A'}
+Answer: ${answerUr || 'N/A'}
 
 Return ONLY a valid JSON object without markdown fences, with these exact keys:
 {
@@ -50,42 +61,64 @@ Return ONLY a valid JSON object without markdown fences, with these exact keys:
   "answerEn": "..."
 }`;
 
-    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+    const models = [
+      'gemini-2.5-flash',
+      'gemini-flash-latest',
+      'gemini-3.1-flash-lite',
+      'gemini-3.1-pro-preview',
+    ];
 
-    const geminiRes = await fetch(geminiUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: {
-          responseMimeType: 'application/json',
-          temperature: 0.2,
-        },
-      }),
-    });
+    let lastErr = '';
+    let parsed: { titleEn?: string; questionEn?: string; answerEn?: string } | null = null;
 
-    if (!geminiRes.ok) {
-      const errTxt = await geminiRes.text();
+    for (const model of models) {
+      try {
+        const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+        const geminiRes = await fetch(geminiUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: prompt }] }],
+            generationConfig: {
+              responseMimeType: 'application/json',
+              temperature: 0.2,
+            },
+          }),
+        });
+
+        if (geminiRes.ok) {
+          const geminiData = (await geminiRes.json()) as any;
+          const rawText = geminiData.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || '';
+          if (rawText) {
+            const cleanJson = rawText.replace(/^```json\s*/i, '').replace(/```\s*$/, '').trim();
+            parsed = JSON.parse(cleanJson);
+            if (parsed) break;
+          }
+        } else {
+          lastErr = await geminiRes.text();
+        }
+      } catch (err: any) {
+        lastErr = err?.message || String(err);
+      }
+    }
+
+    if (!parsed) {
       return new Response(
-        JSON.stringify({ success: false, error: `Gemini API Error: ${errTxt}` }),
+        JSON.stringify({ 
+          success: false, 
+          error: `Gemini API سے رابطہ میں مسئلہ پیش آیا: ${lastErr || 'No response generated'}` 
+        }),
         { status: 502, headers }
       );
     }
-
-    const geminiData = (await geminiRes.json()) as {
-      candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }>;
-    };
-
-    const rawText = geminiData.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || '{}';
-    const parsed = JSON.parse(rawText);
 
     return new Response(
       JSON.stringify({
         success: true,
         data: {
-          titleEn: parsed.titleEn || '',
-          questionEn: parsed.questionEn || '',
-          answerEn: parsed.answerEn || '',
+          titleEn: parsed.titleEn || titleUr,
+          questionEn: parsed.questionEn || questionUr,
+          answerEn: parsed.answerEn || answerUr,
         },
       }),
       { status: 200, headers }

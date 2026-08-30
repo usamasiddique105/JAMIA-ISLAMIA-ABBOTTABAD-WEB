@@ -261,7 +261,7 @@ export const FatwaDetailModal: React.FC<FatwaDetailModalProps> = ({ fatwa: initi
             )}
           </div>
 
-          {/* 3. Question (سوال) Section */}
+            {/* 3. Question (سوال) Section */}
           <div className="space-y-3">
             <div className="w-full bg-[#FAF6EE] dark:bg-slate-800 px-4 sm:px-6 py-2.5 rounded-lg flex items-center justify-between">
               <span className={`font-black text-lg sm:text-xl md:text-2xl text-[#5C4632] dark:text-amber-200 leading-none ${headingFontClass}`}>
@@ -273,9 +273,9 @@ export const FatwaDetailModal: React.FC<FatwaDetailModalProps> = ({ fatwa: initi
                 </span>
               )}
             </div>
-            <div className={`px-2 sm:px-3 py-1 space-y-4 text-stone-900 dark:text-stone-100 text-base sm:text-lg md:text-[19px] leading-relaxed text-justify ${fontClass}`}>
+            <div className={`px-2 sm:px-3 py-1 space-y-4 text-stone-900 dark:text-stone-100 text-base sm:text-lg md:text-[19px] leading-[2.4] text-right ${fontClass}`}>
               {formatParagraphs(activeQuestion).map((para, idx) => (
-                <p key={idx} className="leading-relaxed text-justify indent-6 sm:indent-8">
+                <p key={idx} className="leading-[2.4] text-right indent-6 sm:indent-8">
                   {para}
                 </p>
               ))}
@@ -292,11 +292,11 @@ export const FatwaDetailModal: React.FC<FatwaDetailModalProps> = ({ fatwa: initi
               </span>
             </div>
             
-            <div className={`px-2 sm:px-3 py-1 space-y-4 text-stone-900 dark:text-stone-100 text-base sm:text-lg md:text-[19px] leading-relaxed text-justify ${fontClass}`}>
+            <div className={`px-2 sm:px-3 py-1 space-y-4 text-stone-900 dark:text-stone-100 text-base sm:text-lg md:text-[19px] leading-[2.4] text-right ${fontClass}`}>
               
               {/* Main Ruling Body Rendered in Distinct Paragraphs with first-line indent */}
               {formatParagraphs(activeAnswer, true).map((para, idx) => (
-                <p key={idx} className="leading-relaxed text-justify indent-6 sm:indent-8">
+                <p key={idx} className="leading-[2.4] text-right indent-6 sm:indent-8">
                   {para}
                 </p>
               ))}
@@ -318,11 +318,11 @@ export const FatwaDetailModal: React.FC<FatwaDetailModalProps> = ({ fatwa: initi
                         </div>
                         
                         <div 
-                          className="px-2 sm:px-3 pt-1 pb-0 font-arabic space-y-2 text-base sm:text-lg md:text-[19px] leading-[2.3] text-justify text-stone-800 dark:text-stone-200"
+                          className="px-2 sm:px-3 pt-1 pb-0 font-arabic space-y-2 text-base sm:text-lg md:text-[19px] leading-[2.3] text-right text-stone-800 dark:text-stone-200"
                           dir="rtl"
                         >
                           {paragraphs.map((arabicPara, aIdx) => (
-                            <p key={aIdx} className="leading-[2.3] font-arabic text-justify indent-6 sm:indent-8">
+                            <p key={aIdx} className="leading-[2.3] font-arabic text-right indent-6 sm:indent-8">
                               {arabicPara}
                             </p>
                           ))}

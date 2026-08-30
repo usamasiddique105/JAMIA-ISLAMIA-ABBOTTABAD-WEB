@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import { useThemeLanguage } from '../context/ThemeLanguageContext';
 import headerLogoCalligraphy from '../assets/images/jamia_logo_calligraphy_transparent.png';
 import { JAMIA_HEADER_LOGO_DATA_URI } from '../assets/logoBase64';
@@ -55,6 +56,8 @@ export const Navbar: React.FC<NavbarProps> = ({
   const { language, setLanguage, t, darkMode, setDarkMode } = useThemeLanguage();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+  const [hoveredMenuId, setHoveredMenuId] = useState<string | null>(null);
+  const [hoveredSubId, setHoveredSubId] = useState<string | null>(null);
   const [activeSubDropdown, setActiveSubDropdown] = useState<string | null>(null);
   const [showLangMenu, setShowLangMenu] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
@@ -62,6 +65,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   const [expandedMobileSubItem, setExpandedMobileSubItem] = useState<string | null>(null);
   const headerRef = useRef<HTMLElement>(null);
   const langDropdownRef = useRef<HTMLDivElement>(null);
+  const closeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Close dropdown on outside click or tap
   useEffect(() => {
@@ -247,18 +251,18 @@ export const Navbar: React.FC<NavbarProps> = ({
       label: language === 'ur' ? 'آن لائن خدمات' : language === 'ar' ? 'الخدمات الإلكترونية' : 'Online Services',
       children: [
         { 
-          id: 'online-quran-dars', 
-          label: language === 'ur' ? 'آن لائن قرآن کریم و درسِ نظامی' : language === 'ar' ? 'أكاديمية القرآن الكريم والدرس النظامي' : 'Online Quran & Dars-e-Nizami', 
-          desc: language === 'ur' ? 'ناظرہ، تجوید، حفظ اور مکمل درسِ نظامی آن لائن' : language === 'ar' ? 'القرآن الكريم والعلوم الإسلامية والدرس النظامي عبر الإنترنت' : 'Online Quran recitation, Tajweed, Hifz & Dars-e-Nizami',
-          icon: BookOpen,
-          tab: 'online-services' 
-        },
-        { 
           id: 'online-taawun', 
           label: language === 'ur' ? 'طریقہ تعاون' : language === 'ar' ? 'طريقة التعاون' : 'Donation & Contribution', 
           desc: language === 'ur' ? 'زکوٰۃ، صدقات اور عطیات کے لیے بنک اکاؤنٹس کی مکمل تفصیل' : language === 'ar' ? 'الحسابات البنكية للتبرعات والزكاة والصدقات' : 'Official bank accounts and guidance for donations and Zakat',
           icon: Heart,
           tab: 'donations' 
+        },
+        { 
+          id: 'online-quran-dars', 
+          label: language === 'ur' ? 'آن لائن قرآن کریم و درسِ نظامی' : language === 'ar' ? 'أكاديمية القرآن الكريم والدرس النظامي' : 'Online Quran & Dars-e-Nizami', 
+          desc: language === 'ur' ? 'ناظرہ، تجوید، حفظ اور مکمل درسِ نظامی آن لائن' : language === 'ar' ? 'القرآن الكريم والعلوم الإسلامية والدرس النظامي عبر الإنترنت' : 'Online Quran recitation, Tajweed, Hifz & Dars-e-Nizami',
+          icon: BookOpen,
+          tab: 'online-services' 
         },
         { 
           id: 'online-contact', 
@@ -440,7 +444,15 @@ export const Navbar: React.FC<NavbarProps> = ({
           <div className="hidden md:flex flex-1 items-center justify-between gap-1.5 md:gap-2 lg:gap-4 min-w-0">
             
             {/* Navigation Menu with Jameel Noori Nastaleeq Font & Vertical Dividers */}
-            <nav className="w-full" onMouseLeave={() => setOpenMenuId(null)}>
+            <nav 
+              className="w-full" 
+              onMouseLeave={() => {
+                closeTimeoutRef.current = setTimeout(() => {
+                  setHoveredMenuId(null);
+                  setHoveredSubId(null);
+                }, 140);
+              }}
+            >
               <ul className="flex items-center justify-center gap-0 w-full flex-nowrap">
                 
                 {navItems.map((item, index) => {
@@ -448,13 +460,24 @@ export const Navbar: React.FC<NavbarProps> = ({
                     (item.id === 'about' && (currentTab === 'about' || currentTab.startsWith('about-') || currentTab === 'departments' || currentTab.startsWith('dep-'))) ||
                     (item.id === 'fatwas' && (currentTab === 'fatwas' || currentTab.startsWith('fatwa-'))) ||
                     (item.id === 'library' && (currentTab === 'library' || currentTab === 'media')) ||
-                    (item.id === 'online-services' && (currentTab === 'online-services' || currentTab.startsWith('online-') || currentTab === 'results' || currentTab === 'news')) ||
-                    (item.id === 'contact' && (currentTab === 'contact' || currentTab === 'donations'));
+                    (item.id === 'online-services' && (currentTab === 'online-services' || currentTab.startsWith('online-') || currentTab === 'results' || currentTab === 'news' || currentTab === 'donations')) ||
+                    (item.id === 'contact' && currentTab === 'contact');
                   const hasDropdown = !!item.children;
-                  const isOpen = openMenuId === item.id;
+                  const isDropdownOpen = (hoveredMenuId === item.id) || (openMenuId === item.id);
 
                   return (
-                    <li key={item.id} className="relative group py-1 flex items-center shrink-0">
+                    <li 
+                      key={item.id} 
+                      className="relative py-1 flex items-center shrink-0"
+                      onMouseEnter={() => {
+                        if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current);
+                        if (hasDropdown) {
+                          setHoveredMenuId(item.id);
+                        } else {
+                          setHoveredMenuId(null);
+                        }
+                      }}
+                    >
                       {/* Vertical Divider between items */}
                       {index > 0 && (
                         <span className="h-5 md:h-6 lg:h-7 w-[1px] bg-stone-300 dark:bg-stone-700 mx-1 md:mx-1.5 lg:mx-2 xl:mx-3 shrink-0" />
@@ -462,87 +485,156 @@ export const Navbar: React.FC<NavbarProps> = ({
 
                       <button
                         onClick={() => {
-                          setOpenMenuId(null);
-                          if ((item as any).isModal) {
-                            onOpenFatwaModal();
+                          if (hasDropdown) {
+                            setOpenMenuId(prev => prev === item.id ? null : item.id);
                           } else {
-                            setCurrentTab(item.id);
+                            setOpenMenuId(null);
+                            setHoveredMenuId(null);
+                            if ((item as any).isModal) {
+                              onOpenFatwaModal();
+                            } else {
+                              setCurrentTab(item.id);
+                            }
                           }
                         }}
-                        className={`px-1.5 md:px-2 lg:px-2.5 xl:px-3.5 py-1 md:py-1.5 transition-all flex items-center gap-0.5 md:gap-1 lg:gap-1.5 cursor-pointer whitespace-nowrap rounded-t-md border-t-2 ${
-                          isSelected || isOpen
+                        className={`px-1.5 md:px-2 lg:px-2.5 xl:px-3.5 py-1 md:py-1.5 transition-all duration-200 flex items-center gap-0.5 md:gap-1 lg:gap-1.5 cursor-pointer whitespace-nowrap rounded-t-md border-t-2 select-none ${
+                          isSelected || isDropdownOpen
                             ? 'bg-[#3C2E21] text-white border-t-[#B88A3B] shadow-sm' 
-                            : 'border-t-transparent text-[#361F0D] dark:text-stone-100 group-hover:bg-[#3C2E21] group-hover:text-white group-hover:border-t-[#B88A3B]'
+                            : 'border-t-transparent text-[#361F0D] dark:text-stone-100 hover:bg-[#3C2E21] hover:text-white hover:border-t-[#B88A3B]'
                         }`}
                       >
                         <span className="text-xs sm:text-sm md:text-[15px] lg:text-lg xl:text-xl 2xl:text-2xl font-bold leading-normal transition-colors">
                           {item.label}
                         </span>
-                        <ChevronLeft className="w-2.5 h-2.5 md:w-3 md:h-3 lg:w-3.5 lg:h-3.5 transition-all shrink-0 group-hover:-translate-x-0.5" />
+                        {hasDropdown ? (
+                          <ChevronDown 
+                            className={`w-2.5 h-2.5 md:w-3 md:h-3 lg:w-3.5 lg:h-3.5 transition-transform duration-300 shrink-0 text-amber-300/80 ${
+                              isDropdownOpen ? 'rotate-180 text-amber-200' : 'rotate-0'
+                            }`} 
+                          />
+                        ) : (
+                          <ChevronLeft className="w-2.5 h-2.5 md:w-3 md:h-3 lg:w-3.5 lg:h-3.5 transition-transform duration-200 shrink-0 opacity-60 group-hover:-translate-x-0.5" />
+                        )}
                       </button>
 
-                      {/* Rich Dropdown Menu */}
+                      {/* Refined Smooth Animated Dropdown Menu */}
                       {hasDropdown && (
-                        <div 
-                          className={`absolute ${index >= 3 ? 'left-auto right-0 origin-top-right' : 'right-0 origin-top'} top-full transition-all duration-300 w-64 md:w-72 xl:w-80 z-50 pt-0 ${
-                            isOpen 
-                              ? 'opacity-100 visible pointer-events-auto translate-y-0 scale-y-100' 
-                              : 'opacity-0 invisible pointer-events-none -translate-y-4 scale-y-90 group-hover:opacity-100 group-hover:visible group-hover:pointer-events-auto group-hover:translate-y-0 group-hover:scale-y-100'
-                          }`}
-                        >
-                          <div className="bg-[#3C2E21] border border-[#2A1F15] border-t-0 rounded-b-md shadow-2xl divide-y divide-[#4D3C2D] overflow-hidden text-white font-urdu">
-                            {item.children?.map((child: any) => {
-                              return (
-                                <div key={child.id} className="relative group/sub">
-                                  <button
-                                    onClick={() => {
-                                      setOpenMenuId(null);
-                                      if (child.isModal) {
-                                        onOpenFatwaModal();
-                                      }
-                                      if (child.tab) {
-                                        setCurrentTab(child.tab);
-                                      }
-                                    }}
-                                    className="relative w-full text-right px-3.5 md:px-4 py-2.5 md:py-3 bg-[#3C2E21] hover:bg-[#2A1D13] active:bg-[#20150D] transition-colors flex items-center justify-between gap-2 cursor-pointer text-white group/item overflow-hidden"
-                                  >
-                                    <div className="flex-1 min-w-0 flex items-center justify-between z-10">
-                                      <span className="text-base md:text-lg xl:text-xl font-bold text-white group-hover/item:text-[#F3E5AB] transition-colors leading-[1.9] tracking-wide">
-                                        {child.label}
-                                      </span>
-                                      {child.subChildren && <ChevronDown className="w-3.5 h-3.5 -rotate-90 text-amber-200 shrink-0 mr-1" />}
-                                    </div>
-                                    
-                                    {/* Soft Golden Amber underline expanding smoothly from center to left & right on hover */}
-                                    <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-[1.5px] bg-[#D4AF37] shadow-[0_0_6px_rgba(212,175,55,0.35)] transition-all duration-600 ease-out group-hover/item:w-full" />
-                                  </button>
+                        <AnimatePresence>
+                          {isDropdownOpen && (
+                            <motion.div
+                              initial={{ opacity: 0, y: -10, scaleY: 0.96, filter: 'blur(2px)' }}
+                              animate={{ opacity: 1, y: 0, scaleY: 1, filter: 'blur(0px)' }}
+                              exit={{ opacity: 0, y: -8, scaleY: 0.97, filter: 'blur(1.5px)' }}
+                              transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+                              className={`absolute ${index >= 3 ? 'left-auto right-0 origin-top-right' : 'right-0 origin-top'} top-full pt-1.5 w-64 md:w-72 xl:w-80 z-50`}
+                              onMouseEnter={() => {
+                                if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current);
+                              }}
+                              onMouseLeave={() => {
+                                setHoveredMenuId(null);
+                                setHoveredSubId(null);
+                              }}
+                            >
+                              <div className="relative bg-[#3C2E21] border border-[#543E29] rounded-xl shadow-[0_18px_45px_-6px_rgba(25,18,12,0.6)] overflow-visible text-white font-urdu">
+                                
+                                {/* Top Pointer Arrow Anchor pointing to button */}
+                                <div 
+                                  className={`w-3.5 h-3.5 bg-[#3C2E21] border-t border-r border-[#543E29] rotate-[-45deg] absolute -top-[7px] ${
+                                    index >= 3 ? 'right-8' : 'right-6'
+                                  } z-10 shadow-xs`} 
+                                />
 
-                                  {/* Secondary Flyout Sub-menu */}
-                                  {child.subChildren && (
-                                    <div className={`absolute ${index >= 3 ? 'left-auto right-full' : 'right-full'} top-0 opacity-0 invisible pointer-events-none translate-x-4 -translate-y-2 scale-95 origin-top-right group-hover/sub:opacity-100 group-hover/sub:visible group-hover/sub:pointer-events-auto group-hover/sub:translate-x-0 group-hover/sub:translate-y-0 group-hover/sub:scale-100 transition-all duration-500 ease-in-out w-56 md:w-64 bg-[#3C2E21] border border-[#2A1F15] rounded-md shadow-2xl divide-y divide-[#4D3C2D] overflow-hidden`}>
-                                      {child.subChildren.map((sub: any) => (
+                                {/* Elegant Top Golden Line Accent */}
+                                <div className="h-[2.5px] bg-gradient-to-r from-transparent via-[#D4AF37] to-transparent w-full rounded-t-xl relative z-10" />
+
+                                <div className="divide-y divide-[#4D3C2D]/70 rounded-b-xl overflow-hidden">
+                                  {item.children?.map((child: any) => {
+                                    const isSubMenuOpen = hoveredSubId === child.id;
+
+                                    return (
+                                      <div 
+                                        key={child.id} 
+                                        className="relative"
+                                        onMouseEnter={() => {
+                                          if (child.subChildren) setHoveredSubId(child.id);
+                                        }}
+                                        onMouseLeave={() => {
+                                          if (child.subChildren) setHoveredSubId(null);
+                                        }}
+                                      >
                                         <button
-                                          key={sub.id}
-                                          onClick={(e) => {
-                                            e.stopPropagation();
+                                          onClick={() => {
                                             setOpenMenuId(null);
-                                            setCurrentTab(sub.tab);
+                                            setHoveredMenuId(null);
+                                            setHoveredSubId(null);
+                                            if (child.isModal) {
+                                              onOpenFatwaModal();
+                                            }
+                                            if (child.tab) {
+                                              setCurrentTab(child.tab);
+                                            }
                                           }}
-                                          className="relative w-full text-right px-3.5 py-2.5 md:py-3 text-base md:text-lg font-bold bg-[#3C2E21] hover:bg-[#2A1D13] text-white hover:text-[#F3E5AB] transition-colors flex items-center justify-between cursor-pointer group/subitem overflow-hidden"
+                                          className="group/item relative w-full text-right px-4 md:px-4.5 py-3 md:py-3.5 bg-[#3C2E21] hover:bg-[#2E2116] active:bg-[#20150D] transition-colors duration-200 flex items-center justify-between gap-2.5 cursor-pointer text-white overflow-hidden select-none"
                                         >
-                                          <span className="leading-[1.9] text-white group-hover/subitem:text-[#F3E5AB] z-10">{sub.label}</span>
+                                          <div className="flex-1 min-w-0 flex items-center justify-between z-10">
+                                            <span className="text-base md:text-lg xl:text-xl font-bold text-white group-hover/item:text-[#F8E7B9] transition-colors duration-200 leading-[2.0] tracking-wide">
+                                              {child.label}
+                                            </span>
+                                            {child.subChildren ? (
+                                              <ChevronLeft className="w-3.5 h-3.5 text-amber-300/80 group-hover/item:text-amber-200 group-hover/item:-translate-x-1 transition-all duration-200 shrink-0 mr-1" />
+                                            ) : (
+                                              <span className="w-1.5 h-1.5 rounded-full bg-amber-400/40 opacity-0 group-hover/item:opacity-100 transition-opacity duration-200 shrink-0" />
+                                            )}
+                                          </div>
                                           
-                                          {/* Soft Golden Amber underline expanding smoothly from center to left & right on hover */}
-                                          <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-[1.5px] bg-[#D4AF37] shadow-[0_0_6px_rgba(212,175,55,0.35)] transition-all duration-600 ease-out group-hover/subitem:w-full" />
+                                          {/* Soft Golden Amber underline expanding smoothly from center on hover */}
+                                          <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-[1.5px] bg-[#D4AF37] shadow-[0_0_6px_rgba(212,175,55,0.35)] transition-all duration-400 ease-out group-hover/item:w-full" />
                                         </button>
-                                      ))}
-                                    </div>
-                                  )}
+
+                                        {/* Secondary Flyout Sub-menu with smooth motion animation */}
+                                        {child.subChildren && (
+                                          <AnimatePresence>
+                                            {isSubMenuOpen && (
+                                              <motion.div 
+                                                initial={{ opacity: 0, x: 8, scale: 0.97 }}
+                                                animate={{ opacity: 1, x: 0, scale: 1 }}
+                                                exit={{ opacity: 0, x: 8, scale: 0.97 }}
+                                                transition={{ duration: 0.24, ease: [0.16, 1, 0.3, 1] }}
+                                                className={`absolute ${index >= 3 ? 'left-auto right-full' : 'right-full'} top-0 w-56 md:w-64 bg-[#3C2E21] border border-[#543E29] rounded-xl shadow-[0_16px_40px_-6px_rgba(25,18,12,0.65)] divide-y divide-[#4D3C2D]/70 overflow-hidden z-50`}
+                                              >
+                                                {/* Top Golden Accent Line for Flyout */}
+                                                <div className="h-[2px] bg-gradient-to-r from-transparent via-[#D4AF37] to-transparent w-full" />
+
+                                                {child.subChildren.map((sub: any) => (
+                                                  <button
+                                                    key={sub.id}
+                                                    onClick={(e) => {
+                                                      e.stopPropagation();
+                                                      setOpenMenuId(null);
+                                                      setHoveredMenuId(null);
+                                                      setHoveredSubId(null);
+                                                      setCurrentTab(sub.tab);
+                                                    }}
+                                                    className="group/subitem relative w-full text-right px-4 py-2.5 md:py-3 text-base md:text-lg font-bold bg-[#3C2E21] hover:bg-[#2E2116] text-white hover:text-[#F8E7B9] transition-colors duration-200 flex items-center justify-between cursor-pointer overflow-hidden select-none"
+                                                  >
+                                                    <span className="leading-[1.9] text-white group-hover/subitem:text-[#F8E7B9] transition-colors duration-200 z-10">{sub.label}</span>
+                                                    
+                                                    {/* Soft Golden Amber underline */}
+                                                    <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-[1.5px] bg-[#D4AF37] shadow-[0_0_6px_rgba(212,175,55,0.35)] transition-all duration-400 ease-out group-hover/subitem:w-full" />
+                                                  </button>
+                                                ))}
+                                              </motion.div>
+                                            )}
+                                          </AnimatePresence>
+                                        )}
+                                      </div>
+                                    );
+                                  })}
                                 </div>
-                              );
-                            })}
-                          </div>
-                        </div>
+                              </div>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
                       )}
                     </li>
                   );
@@ -603,110 +695,135 @@ export const Navbar: React.FC<NavbarProps> = ({
         </div>
       </div>
 
-      {/* 5. MOBILE NAVIGATION DRAWER */}
-      {mobileMenuOpen && (
-        <div className="md:hidden bg-[#FAF7F2] dark:bg-slate-900 border-t-2 border-[#B88A3B] p-3 space-y-2.5 font-urdu shadow-2xl animate-in slide-in-from-top duration-300" dir={language === 'en' ? 'ltr' : 'rtl'}>
-          
-          {/* Nav Items */}
-          <div className="grid grid-cols-1 gap-2">
-            {navItems.map((item) => {
-              const isExpanded = expandedMobileItem === item.id;
-              const isCurrent = currentTab === item.id || (item.id === 'online-services' && (currentTab.startsWith('online-') || currentTab === 'results' || currentTab === 'news')) || (item.id === 'contact' && (currentTab === 'contact' || currentTab === 'donations'));
+      {/* 5. MOBILE NAVIGATION DRAWER WITH SMOOTH ACCORDION MOTION */}
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <motion.div 
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+            className="md:hidden bg-[#FAF7F2] dark:bg-slate-900 border-t-2 border-[#B88A3B] p-3 font-urdu shadow-2xl overflow-hidden" 
+            dir={language === 'en' ? 'ltr' : 'rtl'}
+          >
+            
+            {/* Nav Items */}
+            <div className="grid grid-cols-1 gap-2">
+              {navItems.map((item) => {
+                const isExpanded = expandedMobileItem === item.id;
+                const isCurrent = currentTab === item.id || (item.id === 'online-services' && (currentTab.startsWith('online-') || currentTab === 'results' || currentTab === 'news' || currentTab === 'donations')) || (item.id === 'contact' && currentTab === 'contact');
 
-              return (
-                <div key={item.id} className="space-y-1">
-                  <button
-                    onClick={() => {
-                      if (item.children) {
-                        setExpandedMobileItem(prev => prev === item.id ? null : item.id);
-                      } else {
-                        if ((item as any).isModal) {
-                          onOpenFatwaModal();
+                return (
+                  <div key={item.id} className="space-y-1">
+                    <button
+                      onClick={() => {
+                        if (item.children) {
+                          setExpandedMobileItem(prev => prev === item.id ? null : item.id);
                         } else {
-                          setCurrentTab(item.id);
+                          if ((item as any).isModal) {
+                            onOpenFatwaModal();
+                          } else {
+                            setCurrentTab(item.id);
+                          }
+                          setMobileMenuOpen(false);
                         }
-                        setMobileMenuOpen(false);
-                      }
-                    }}
-                    className={`w-full text-right px-4 py-2.5 rounded-lg font-bold text-sm sm:text-base transition-colors border flex items-center justify-between cursor-pointer shadow-xs ${
-                      isCurrent || isExpanded
-                        ? 'bg-[#3C2E21] text-white border-[#B88A3B]'
-                        : 'bg-white dark:bg-slate-800 text-stone-800 dark:text-stone-200 border-stone-200 dark:border-slate-700 hover:bg-[#3C2E21] hover:text-white'
-                    }`}
-                  >
-                    <span className="text-base sm:text-lg">{item.label}</span>
-                    {item.children && (
-                      isExpanded ? (
-                        <ChevronUp className="w-4 h-4 text-amber-200" />
-                      ) : (
-                        <ChevronDown className="w-4 h-4 text-stone-400" />
-                      )
-                    )}
-                  </button>
+                      }}
+                      className={`w-full text-right px-4 py-2.5 rounded-xl font-bold text-sm sm:text-base transition-all duration-200 border flex items-center justify-between cursor-pointer shadow-xs select-none ${
+                        isCurrent || isExpanded
+                          ? 'bg-[#3C2E21] text-white border-[#B88A3B]'
+                          : 'bg-white dark:bg-slate-800 text-stone-800 dark:text-stone-200 border-stone-200 dark:border-slate-700 hover:bg-[#3C2E21] hover:text-white'
+                      }`}
+                    >
+                      <span className="text-base sm:text-lg leading-normal">{item.label}</span>
+                      {item.children && (
+                        <ChevronDown 
+                          className={`w-4 h-4 transition-transform duration-300 ${
+                            isExpanded ? 'rotate-180 text-amber-200' : 'text-stone-400'
+                          }`} 
+                        />
+                      )}
+                    </button>
 
-                  {/* Mobile Sub-Items (Shown ONLY when clicked) */}
-                  {item.children && isExpanded && (
-                    <div className="mr-3 pl-2 pr-2 border-r-2 border-[#B88A3B] space-y-1 my-1.5 bg-stone-50/80 dark:bg-slate-900/80 rounded-l-md py-1">
-                      {item.children.map((child: any) => {
-                        const isSubExpanded = expandedMobileSubItem === child.id;
+                    {/* Mobile Sub-Items Accordion with Smooth Animation */}
+                    <AnimatePresence>
+                      {item.children && isExpanded && (
+                        <motion.div 
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: 'auto' }}
+                          exit={{ opacity: 0, height: 0 }}
+                          transition={{ duration: 0.26, ease: [0.16, 1, 0.3, 1] }}
+                          className="mr-2 pl-2 pr-2 border-r-2 border-[#B88A3B] space-y-1.5 my-1.5 bg-stone-100/90 dark:bg-slate-850/90 rounded-l-xl py-2 overflow-hidden"
+                        >
+                          {item.children.map((child: any) => {
+                            const isSubExpanded = expandedMobileSubItem === child.id;
 
-                        return (
-                          <div key={child.id} className="space-y-1">
-                            <button
-                              onClick={() => {
-                                if (child.subChildren) {
-                                  setExpandedMobileSubItem(prev => prev === child.id ? null : child.id);
-                                } else {
-                                  if (child.isModal) {
-                                    onOpenFatwaModal();
-                                  }
-                                  if (child.tab) {
-                                    setCurrentTab(child.tab);
-                                  }
-                                  setMobileMenuOpen(false);
-                                }
-                              }}
-                              className="w-full text-right px-3 py-2 text-sm font-bold text-slate-800 dark:text-slate-200 hover:text-[#B88A3B] flex items-center justify-between cursor-pointer rounded hover:bg-stone-200/50 dark:hover:bg-slate-800"
-                            >
-                              <span>• {child.label}</span>
-                              {child.subChildren && (
-                                isSubExpanded ? (
-                                  <ChevronUp className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
-                                ) : (
-                                  <ChevronDown className="w-3.5 h-3.5 text-stone-400" />
-                                )
-                              )}
-                            </button>
-
-                            {/* Sub-Sub Items (Only shown when that sub-item is clicked) */}
-                            {child.subChildren && isSubExpanded && (
-                              <div className="mr-3 pr-2 border-r-2 border-[#B88A3B]/40 space-y-1 py-1">
-                                {child.subChildren.map((sub: any) => (
-                                  <button
-                                    key={sub.id}
-                                    onClick={() => {
-                                      setCurrentTab(sub.tab);
+                            return (
+                              <div key={child.id} className="space-y-1">
+                                <button
+                                  onClick={() => {
+                                    if (child.subChildren) {
+                                      setExpandedMobileSubItem(prev => prev === child.id ? null : child.id);
+                                    } else {
+                                      if (child.isModal) {
+                                        onOpenFatwaModal();
+                                      }
+                                      if (child.tab) {
+                                        setCurrentTab(child.tab);
+                                      }
                                       setMobileMenuOpen(false);
-                                    }}
-                                    className="w-full text-right px-3 py-1.5 text-xs sm:text-sm text-slate-700 dark:text-slate-300 hover:text-[#B88A3B] cursor-pointer rounded hover:bg-amber-100/40 dark:hover:bg-slate-800"
-                                  >
-                                    ▫ {sub.label}
-                                  </button>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
+                                    }
+                                  }}
+                                  className="w-full text-right px-3.5 py-2 text-sm font-bold text-slate-850 dark:text-slate-200 hover:text-[#B88A3B] flex items-center justify-between cursor-pointer rounded-lg hover:bg-stone-200/60 dark:hover:bg-slate-800 transition-colors"
+                                >
+                                  <span className="leading-[1.8]">• {child.label}</span>
+                                  {child.subChildren && (
+                                    <ChevronDown 
+                                      className={`w-3.5 h-3.5 transition-transform duration-200 ${
+                                        isSubExpanded ? 'rotate-180 text-amber-600 dark:text-amber-400' : 'text-stone-400'
+                                      }`} 
+                                    />
+                                  )}
+                                </button>
 
-        </div>
-      )}
+                                {/* Sub-Sub Items Accordion with Smooth Animation */}
+                                <AnimatePresence>
+                                  {child.subChildren && isSubExpanded && (
+                                    <motion.div 
+                                      initial={{ opacity: 0, height: 0 }}
+                                      animate={{ opacity: 1, height: 'auto' }}
+                                      exit={{ opacity: 0, height: 0 }}
+                                      transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+                                      className="mr-3 pr-2.5 border-r-2 border-[#B88A3B]/40 space-y-1 py-1 overflow-hidden"
+                                    >
+                                      {child.subChildren.map((sub: any) => (
+                                        <button
+                                          key={sub.id}
+                                          onClick={() => {
+                                            setCurrentTab(sub.tab);
+                                            setMobileMenuOpen(false);
+                                          }}
+                                          className="w-full text-right px-3 py-1.5 text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-300 hover:text-[#B88A3B] cursor-pointer rounded-md hover:bg-amber-100/50 dark:hover:bg-slate-800 transition-colors"
+                                        >
+                                          ▫ {sub.label}
+                                        </button>
+                                      ))}
+                                    </motion.div>
+                                  )}
+                                </AnimatePresence>
+                              </div>
+                            );
+                          })}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                );
+              })}
+            </div>
+
+          </motion.div>
+        )}
+      </AnimatePresence>
 
     </header>
   );

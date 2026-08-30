@@ -372,9 +372,10 @@ export const AdminDashboard: React.FC = () => {
       setNewFatwaQuestionEn(res.questionEn);
       setNewFatwaAnswerEn(res.answerEn);
       setNewFatwaIsApproved(true);
-    } catch (e) {
+    } catch (e: any) {
       console.error(e);
-      alert('AI ترجمہ سروس سے رابطہ نہیں ہو سکا۔');
+      const msg = e?.message || 'AI ترجمہ سروس سے رابطہ نہیں ہو سکا۔';
+      alert(msg.startsWith('AI ترجمہ') || msg.startsWith('Cloudflare') || msg.startsWith('Gemini') ? msg : `AI ترجمہ سروس: ${msg}`);
     } finally {
       setIsGeneratingTranslation(false);
     }
@@ -2052,36 +2053,36 @@ export const AdminDashboard: React.FC = () => {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
             <div>
               <label className="block font-bold mb-1">جامعہ کا نام (اردو)</label>
-              <input type="text" value={settings.jamiaNameUrdu} onChange={(e) => setSettings({...settings, jamiaNameUrdu: e.target.value})} className="w-full p-2 border rounded" />
+              <input type="text" value={settings?.jamiaNameUrdu || ''} onChange={(e) => setSettings(prev => ({...prev, jamiaNameUrdu: e.target.value}))} className="w-full p-2 border rounded" />
             </div>
             <div>
               <label className="block font-bold mb-1">جامعہ کا نام (English)</label>
-              <input type="text" value={settings.jamiaNameEnglish} onChange={(e) => setSettings({...settings, jamiaNameEnglish: e.target.value})} className="w-full p-2 border rounded font-sans" />
+              <input type="text" value={settings?.jamiaNameEnglish || ''} onChange={(e) => setSettings(prev => ({...prev, jamiaNameEnglish: e.target.value}))} className="w-full p-2 border rounded font-sans" />
             </div>
             <div>
               <label className="block font-bold mb-1">جامعہ کا نام (عربی)</label>
-              <input type="text" value={settings.jamiaNameArabic} onChange={(e) => setSettings({...settings, jamiaNameArabic: e.target.value})} className="w-full p-2 border rounded font-arabic" />
+              <input type="text" value={settings?.jamiaNameArabic || ''} onChange={(e) => setSettings(prev => ({...prev, jamiaNameArabic: e.target.value}))} className="w-full p-2 border rounded font-arabic" />
             </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
             <div>
               <label className="block font-bold mb-1">فون نمبر (موبائل)</label>
-              <input type="text" value={settings.phonePrimary} onChange={(e) => setSettings({...settings, phonePrimary: e.target.value})} className="w-full p-2 border rounded font-mono" />
+              <input type="text" value={settings?.phonePrimary || ''} onChange={(e) => setSettings(prev => ({...prev, phonePrimary: e.target.value}))} className="w-full p-2 border rounded font-mono" />
             </div>
             <div>
               <label className="block font-bold mb-1">واٹس ایپ نمبر (رسیدیں وصول کرنے کے لیے)</label>
-              <input type="text" value={settings.whatsappNumber || ''} onChange={(e) => setSettings({...settings, whatsappNumber: e.target.value})} placeholder="+923000000000" className="w-full p-2 border rounded font-mono" />
+              <input type="text" value={settings?.whatsappNumber || ''} onChange={(e) => setSettings(prev => ({...prev, whatsappNumber: e.target.value}))} placeholder="+923000000000" className="w-full p-2 border rounded font-mono" />
             </div>
             <div>
               <label className="block font-bold mb-1">ای میل ایڈریس</label>
-              <input type="email" value={settings.email} onChange={(e) => setSettings({...settings, email: e.target.value})} className="w-full p-2 border rounded font-mono" />
+              <input type="email" value={settings?.email || ''} onChange={(e) => setSettings(prev => ({...prev, email: e.target.value}))} className="w-full p-2 border rounded font-mono" />
             </div>
           </div>
 
           <div>
             <label className="block text-xs font-bold mb-1">مرکزی پتہ (Address)</label>
-            <input type="text" value={settings.address} onChange={(e) => setSettings({...settings, address: e.target.value})} className="w-full p-2 text-xs border rounded" />
+            <input type="text" value={settings?.address || ''} onChange={(e) => setSettings(prev => ({...prev, address: e.target.value}))} className="w-full p-2 text-xs border rounded" />
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
@@ -2089,8 +2090,8 @@ export const AdminDashboard: React.FC = () => {
               <label className="block font-bold mb-1">رجسٹریشن نمبر (Registration No)</label>
               <input 
                 type="text" 
-                value={settings.registrationNumber || '1454/5/5183'} 
-                onChange={(e) => setSettings({...settings, registrationNumber: e.target.value})} 
+                value={settings?.registrationNumber || '1454/5/5183'} 
+                onChange={(e) => setSettings(prev => ({...prev, registrationNumber: e.target.value}))} 
                 placeholder="1454/5/5183" 
                 className="w-full p-2 border rounded font-mono" 
               />
@@ -2099,8 +2100,8 @@ export const AdminDashboard: React.FC = () => {
               <label className="block font-bold mb-1">الحاق نمبر وفاق المدارس (Affiliation No)</label>
               <input 
                 type="text" 
-                value={settings.affiliationNumber || '08-04-09345'} 
-                onChange={(e) => setSettings({...settings, affiliationNumber: e.target.value})} 
+                value={settings?.affiliationNumber || '08-04-09345'} 
+                onChange={(e) => setSettings(prev => ({...prev, affiliationNumber: e.target.value}))} 
                 placeholder="08-04-09345" 
                 className="w-full p-2 border rounded font-mono" 
               />
@@ -2129,8 +2130,8 @@ export const AdminDashboard: React.FC = () => {
                   </label>
                   <input 
                     type="email" 
-                    value={settings.notificationEmail || ''} 
-                    onChange={(e) => setSettings({...settings, notificationEmail: e.target.value})} 
+                    value={settings?.notificationEmail || ''} 
+                    onChange={(e) => setSettings(prev => ({...prev, notificationEmail: e.target.value}))} 
                     placeholder="usamasiddique105@gmail.com" 
                     className="w-full p-2.5 border rounded-lg font-mono bg-white dark:bg-slate-900 focus:outline-none focus:border-emerald-600" 
                   />
@@ -2143,8 +2144,8 @@ export const AdminDashboard: React.FC = () => {
                   </label>
                   <input 
                     type="text" 
-                    value={settings.notificationWhatsApp || ''} 
-                    onChange={(e) => setSettings({...settings, notificationWhatsApp: e.target.value})} 
+                    value={settings?.notificationWhatsApp || ''} 
+                    onChange={(e) => setSettings(prev => ({...prev, notificationWhatsApp: e.target.value}))} 
                     placeholder="03489002496 یا 923489002496" 
                     className="w-full p-2.5 border rounded-lg font-mono bg-white dark:bg-slate-900 focus:outline-none focus:border-emerald-600" 
                   />
@@ -2158,8 +2159,8 @@ export const AdminDashboard: React.FC = () => {
                 </label>
                 <input 
                   type="url" 
-                  value={settings.webhookUrl || ''} 
-                  onChange={(e) => setSettings({...settings, webhookUrl: e.target.value})} 
+                  value={settings?.webhookUrl || ''} 
+                  onChange={(e) => setSettings(prev => ({...prev, webhookUrl: e.target.value}))} 
                   placeholder="https://my-worker.myname.workers.dev (اختیاری)" 
                   className="w-full p-2.5 border rounded-lg font-mono bg-white dark:bg-slate-900 focus:outline-none focus:border-emerald-600" 
                 />
@@ -2169,8 +2170,8 @@ export const AdminDashboard: React.FC = () => {
                 <label className="inline-flex items-center gap-2 cursor-pointer">
                   <input 
                     type="checkbox" 
-                    checked={settings.emailNotificationEnabled !== false} 
-                    onChange={(e) => setSettings({...settings, emailNotificationEnabled: e.target.checked})} 
+                    checked={settings?.enableEmailNotifications !== false} 
+                    onChange={(e) => setSettings(prev => ({...prev, enableEmailNotifications: e.target.checked}))} 
                     className="rounded text-emerald-600 w-4 h-4"
                   />
                   <span className="font-bold text-stone-700 dark:text-stone-200">ای میل الرٹس فعال رکھیں</span>
@@ -2179,8 +2180,8 @@ export const AdminDashboard: React.FC = () => {
                 <label className="inline-flex items-center gap-2 cursor-pointer">
                   <input 
                     type="checkbox" 
-                    checked={settings.whatsappNotificationEnabled !== false} 
-                    onChange={(e) => setSettings({...settings, whatsappNotificationEnabled: e.target.checked})} 
+                    checked={settings?.enableWhatsAppNotifications !== false} 
+                    onChange={(e) => setSettings(prev => ({...prev, enableWhatsAppNotifications: e.target.checked}))} 
                     className="rounded text-emerald-600 w-4 h-4"
                   />
                   <span className="font-bold text-stone-700 dark:text-stone-200">واٹس ایپ نوٹیفکیشن لنکس فعال رکھیں</span>
@@ -2203,14 +2204,14 @@ export const AdminDashboard: React.FC = () => {
                   <label className="block font-bold mb-1">اکاؤنٹ ٹائٹل (Title)</label>
                   <input 
                     type="text" 
-                    value={settings.bankDetails.meezanBank.title} 
-                    onChange={(e) => setSettings({
-                      ...settings, 
+                    value={settings?.bankDetails?.meezanBank?.title || ''} 
+                    onChange={(e) => setSettings(prev => ({
+                      ...prev, 
                       bankDetails: {
-                        ...settings.bankDetails, 
-                        meezanBank: {...settings.bankDetails.meezanBank, title: e.target.value}
-                      }
-                    })} 
+                        ...(prev?.bankDetails || {}), 
+                        meezanBank: { ...(prev?.bankDetails?.meezanBank || {} as any), title: e.target.value }
+                      } as any
+                    }))} 
                     className="w-full p-2 border rounded bg-white dark:bg-slate-900" 
                   />
                 </div>
@@ -2218,14 +2219,14 @@ export const AdminDashboard: React.FC = () => {
                   <label className="block font-bold mb-1">اکاؤنٹ نمبر (Account No)</label>
                   <input 
                     type="text" 
-                    value={settings.bankDetails.meezanBank.accountNo} 
-                    onChange={(e) => setSettings({
-                      ...settings, 
+                    value={settings?.bankDetails?.meezanBank?.accountNo || ''} 
+                    onChange={(e) => setSettings(prev => ({
+                      ...prev, 
                       bankDetails: {
-                        ...settings.bankDetails, 
-                        meezanBank: {...settings.bankDetails.meezanBank, accountNo: e.target.value}
-                      }
-                    })} 
+                        ...(prev?.bankDetails || {}), 
+                        meezanBank: { ...(prev?.bankDetails?.meezanBank || {} as any), accountNo: e.target.value }
+                      } as any
+                    }))} 
                     placeholder="01020104859201"
                     className="w-full p-2 border rounded font-mono bg-white dark:bg-slate-900" 
                   />
@@ -2234,14 +2235,14 @@ export const AdminDashboard: React.FC = () => {
                   <label className="block font-bold mb-1">آئی بی اے این (IBAN)</label>
                   <input 
                     type="text" 
-                    value={settings.bankDetails.meezanBank.iban} 
-                    onChange={(e) => setSettings({
-                      ...settings, 
+                    value={settings?.bankDetails?.meezanBank?.iban || ''} 
+                    onChange={(e) => setSettings(prev => ({
+                      ...prev, 
                       bankDetails: {
-                        ...settings.bankDetails, 
-                        meezanBank: {...settings.bankDetails.meezanBank, iban: e.target.value}
-                      }
-                    })} 
+                        ...(prev?.bankDetails || {}), 
+                        meezanBank: { ...(prev?.bankDetails?.meezanBank || {} as any), iban: e.target.value }
+                      } as any
+                    }))} 
                     placeholder="PK36MEZN0001020104859201"
                     className="w-full p-2 border rounded font-mono bg-white dark:bg-slate-900" 
                   />
@@ -2250,14 +2251,14 @@ export const AdminDashboard: React.FC = () => {
                   <label className="block font-bold mb-1">برانچ نام (Branch Name)</label>
                   <input 
                     type="text" 
-                    value={settings.bankDetails.meezanBank.branch || ''} 
-                    onChange={(e) => setSettings({
-                      ...settings, 
+                    value={settings?.bankDetails?.meezanBank?.branch || ''} 
+                    onChange={(e) => setSettings(prev => ({
+                      ...prev, 
                       bankDetails: {
-                        ...settings.bankDetails, 
-                        meezanBank: {...settings.bankDetails.meezanBank, branch: e.target.value}
-                      }
-                    })} 
+                        ...(prev?.bankDetails || {}), 
+                        meezanBank: { ...(prev?.bankDetails?.meezanBank || {} as any), branch: e.target.value }
+                      } as any
+                    }))} 
                     placeholder="Abbottabad Branch"
                     className="w-full p-2 border rounded bg-white dark:bg-slate-900" 
                   />
@@ -2266,14 +2267,14 @@ export const AdminDashboard: React.FC = () => {
                   <label className="block font-bold mb-1">سوئفٹ کوڈ (Swift Code - optional)</label>
                   <input 
                     type="text" 
-                    value={settings.bankDetails.meezanBank.swift || ''} 
-                    onChange={(e) => setSettings({
-                      ...settings, 
+                    value={settings?.bankDetails?.meezanBank?.swift || ''} 
+                    onChange={(e) => setSettings(prev => ({
+                      ...prev, 
                       bankDetails: {
-                        ...settings.bankDetails, 
-                        meezanBank: {...settings.bankDetails.meezanBank, swift: e.target.value}
-                      }
-                    })} 
+                        ...(prev?.bankDetails || {}), 
+                        meezanBank: { ...(prev?.bankDetails?.meezanBank || {} as any), swift: e.target.value }
+                      } as any
+                    }))} 
                     placeholder="MEZNPKKA"
                     className="w-full p-2 border rounded font-mono bg-white dark:bg-slate-900" 
                   />
@@ -2290,14 +2291,14 @@ export const AdminDashboard: React.FC = () => {
                   <label className="block font-bold mb-1">اکاؤنٹ ٹائٹل (Title)</label>
                   <input 
                     type="text" 
-                    value={settings.bankDetails.easyPaisa.title} 
-                    onChange={(e) => setSettings({
-                      ...settings, 
+                    value={settings?.bankDetails?.easyPaisa?.title || ''} 
+                    onChange={(e) => setSettings(prev => ({
+                      ...prev, 
                       bankDetails: {
-                        ...settings.bankDetails, 
-                        easyPaisa: {...settings.bankDetails.easyPaisa, title: e.target.value}
-                      }
-                    })} 
+                        ...(prev?.bankDetails || {}), 
+                        easyPaisa: { ...(prev?.bankDetails?.easyPaisa || {} as any), title: e.target.value }
+                      } as any
+                    }))} 
                     className="w-full p-2 border rounded bg-white dark:bg-slate-900" 
                   />
                 </div>
@@ -2305,14 +2306,14 @@ export const AdminDashboard: React.FC = () => {
                   <label className="block font-bold mb-1">ایزی پیسہ نمبر (Mobile Number)</label>
                   <input 
                     type="text" 
-                    value={settings.bankDetails.easyPaisa.number} 
-                    onChange={(e) => setSettings({
-                      ...settings, 
+                    value={settings?.bankDetails?.easyPaisa?.number || ''} 
+                    onChange={(e) => setSettings(prev => ({
+                      ...prev, 
                       bankDetails: {
-                        ...settings.bankDetails, 
-                        easyPaisa: {...settings.bankDetails.easyPaisa, number: e.target.value}
-                      }
-                    })} 
+                        ...(prev?.bankDetails || {}), 
+                        easyPaisa: { ...(prev?.bankDetails?.easyPaisa || {} as any), number: e.target.value }
+                      } as any
+                    }))} 
                     placeholder="03000000000"
                     className="w-full p-2 border rounded font-mono bg-white dark:bg-slate-900" 
                   />
@@ -2326,14 +2327,14 @@ export const AdminDashboard: React.FC = () => {
                   <label className="block font-bold mb-1">اکاؤنٹ ٹائٹل (Title)</label>
                   <input 
                     type="text" 
-                    value={settings.bankDetails.jazzCash.title} 
-                    onChange={(e) => setSettings({
-                      ...settings, 
+                    value={settings?.bankDetails?.jazzCash?.title || ''} 
+                    onChange={(e) => setSettings(prev => ({
+                      ...prev, 
                       bankDetails: {
-                        ...settings.bankDetails, 
-                        jazzCash: {...settings.bankDetails.jazzCash, title: e.target.value}
-                      }
-                    })} 
+                        ...(prev?.bankDetails || {}), 
+                        jazzCash: { ...(prev?.bankDetails?.jazzCash || {} as any), title: e.target.value }
+                      } as any
+                    }))} 
                     className="w-full p-2 border rounded bg-white dark:bg-slate-900" 
                   />
                 </div>
@@ -2341,14 +2342,14 @@ export const AdminDashboard: React.FC = () => {
                   <label className="block font-bold mb-1">جاز کیش نمبر (Mobile Number)</label>
                   <input 
                     type="text" 
-                    value={settings.bankDetails.jazzCash.number} 
-                    onChange={(e) => setSettings({
-                      ...settings, 
+                    value={settings?.bankDetails?.jazzCash?.number || ''} 
+                    onChange={(e) => setSettings(prev => ({
+                      ...prev, 
                       bankDetails: {
-                        ...settings.bankDetails, 
-                        jazzCash: {...settings.bankDetails.jazzCash, number: e.target.value}
-                      }
-                    })} 
+                        ...(prev?.bankDetails || {}), 
+                        jazzCash: { ...(prev?.bankDetails?.jazzCash || {} as any), number: e.target.value }
+                      } as any
+                    }))} 
                     placeholder="03000000000"
                     className="w-full p-2 border rounded font-mono bg-white dark:bg-slate-900" 
                   />

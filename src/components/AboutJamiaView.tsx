@@ -30,8 +30,8 @@ export const AboutJamiaView: React.FC<AboutJamiaViewProps> = ({
   const isAr = language === 'ar';
 
   // Typography helpers based on active language
-  const textFontClass = isAr ? 'font-arabic' : isEn ? 'font-sans' : 'font-urdu';
-  const headingFontClass = isAr ? 'font-arabic' : isEn ? 'font-sans' : 'font-urdu';
+  const textFontClass = isAr ? 'font-arabic' : isEn ? 'font-sans' : 'font-urdu-body';
+  const headingFontClass = isAr ? 'font-arabic' : isEn ? 'font-serif-title font-playfair' : 'font-urdu-heading';
   const lineSpacingClass = isAr ? 'leading-[2.1]' : isEn ? 'leading-relaxed' : 'leading-[2.5]';
 
   // Mapping tab IDs to sections

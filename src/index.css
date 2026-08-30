@@ -61,11 +61,23 @@ img {
 }
 
 @layer utilities {
-  /* URDU: Pure Mehr Nastaliq Script System (Mehr Nastaliq / MehrNastaliqWeb / Mehr Nastaliq Web / Jameel Noori Nastaleeq / Noto Nastaliq Urdu / Gulzar) */
-  .font-urdu, .font-mehr {
+  /* 1. URDU HEADINGS: Pure Mehr Nastaliq Script for prominent titles */
+  .font-urdu-heading, .font-urdu, .font-mehr {
     font-family: 'Mehr Nastaliq', 'MehrNastaliqWeb', 'Mehr Nastaliq Web', 'Jameel Noori Nastaleeq', 'JameelNooriNastaliq', 'Noto Nastaliq Urdu', 'Gulzar', 'Urdu Typesetting', serif;
     line-height: 2.1;
     word-spacing: 0.03em;
+    font-feature-settings: "liga" 1, "calt" 1;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* 2. URDU BODY / PARAGRAPHS: Jameel Noori Nastaleeq for smooth, readable paragraphs without crowding/overlapping */
+  .font-urdu-body, .urdu-body {
+    font-family: 'Jameel Noori Nastaleeq', 'JameelNooriNastaliq', 'Noto Nastaliq Urdu', 'Gulzar', 'Mehr Nastaliq', 'MehrNastaliqWeb', 'Urdu Typesetting', serif;
+    line-height: 2.4;
+    text-align: right;
+    word-spacing: 0.06em;
+    letter-spacing: 0.01em;
     font-feature-settings: "liga" 1, "calt" 1;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
@@ -145,48 +157,44 @@ img {
 /* Document-level Language Font System (Cascade based on html[lang="..."]) */
 html[lang="ur"] body,
 html[lang="ur"] {
-  font-family: 'Mehr Nastaliq', 'MehrNastaliqWeb', 'Mehr Nastaliq Web', 'Jameel Noori Nastaleeq', 'JameelNooriNastaliq', 'Noto Nastaliq Urdu', 'Gulzar', 'Urdu Typesetting', serif;
-  line-height: 2.1;
-  word-spacing: 0.03em;
+  font-family: 'Jameel Noori Nastaleeq', 'JameelNooriNastaliq', 'Noto Nastaliq Urdu', 'Gulzar', 'Mehr Nastaliq', 'MehrNastaliqWeb', 'Urdu Typesetting', serif;
+  line-height: 2.3;
+  word-spacing: 0.05em;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
 }
 
-html[lang="ur"] .font-urdu,
-html[lang="ur"] .font-mehr,
 html[lang="ur"] h1, 
 html[lang="ur"] h2, 
 html[lang="ur"] h3, 
 html[lang="ur"] h4, 
 html[lang="ur"] h5, 
 html[lang="ur"] h6,
-html[lang="ur"] p,
-html[lang="ur"] span,
-html[lang="ur"] button,
-html[lang="ur"] input,
-html[lang="ur"] select,
-html[lang="ur"] textarea,
-html[lang="ur"] a,
-html[lang="ur"] li,
-html[lang="ur"] td,
-html[lang="ur"] th {
+html[lang="ur"] .font-urdu-heading,
+html[lang="ur"] .font-mehr {
   font-family: 'Mehr Nastaliq', 'MehrNastaliqWeb', 'Mehr Nastaliq Web', 'Jameel Noori Nastaleeq', 'JameelNooriNastaliq', 'Noto Nastaliq Urdu', 'Gulzar', 'Urdu Typesetting', serif;
-}
-
-html[lang="ur"] h1, 
-html[lang="ur"] h2, 
-html[lang="ur"] h3, 
-html[lang="ur"] h4, 
-html[lang="ur"] h5, 
-html[lang="ur"] h6 {
   font-weight: 700;
   line-height: 2.1;
+  word-spacing: 0.03em;
+}
+
+html[lang="ur"] p,
+html[lang="ur"] article,
+html[lang="ur"] .font-urdu-body,
+html[lang="ur"] .fatwa-body-text,
+html[lang="ur"] .urdu-article-text {
+  font-family: 'Jameel Noori Nastaleeq', 'JameelNooriNastaliq', 'Noto Nastaliq Urdu', 'Gulzar', 'Mehr Nastaliq', 'MehrNastaliqWeb', 'Urdu Typesetting', serif;
+  line-height: 2.4;
+  text-align: right;
+  word-spacing: 0.06em;
+  letter-spacing: 0.01em;
 }
 
 html[lang="ur"] button,
 html[lang="ur"] input,
 html[lang="ur"] select,
 html[lang="ur"] textarea {
+  font-family: 'Mehr Nastaliq', 'MehrNastaliqWeb', 'Mehr Nastaliq Web', 'Jameel Noori Nastaleeq', 'JameelNooriNastaliq', 'Noto Nastaliq Urdu', 'Gulzar', 'Urdu Typesetting', serif;
   line-height: 1.9;
 }
 

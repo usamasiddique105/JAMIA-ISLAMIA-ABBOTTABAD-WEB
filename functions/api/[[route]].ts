@@ -46,6 +46,7 @@ interface Env {
   RECAPTCHA_SECRET_KEY?: string;
   TURNSTILE_SECRET_KEY?: string;
   CLOUDFLARE_TURNSTILE_SECRET_KEY?: string;
+  GEMINI_API_KEY?: string;
 }
 
 const AUTHORIZED_ADMIN_EMAIL = 'jamiaislamia2003@gmail.com';
@@ -1204,6 +1205,103 @@ export const onRequest: PagesFunction<Env> = async (context) => {
       await d1.prepare('DELETE FROM site_visitors').run();
       return json({ success: true });
     }
+  }
+
+  // 17. Fatwa AI Translation Endpoint
+  if (path === '/api/translate-fatwa' && method === 'POST') {
+    const apiKey = env.GEMINI_API_KEY || env.GEMINI_KEY || env.GOOGLE_API_KEY || env.VITE_GEMINI_API_KEY;
+    const body = (await request.json().catch(() => ({}))) as {
+      fatwaId?: string;
+      titleUr?: string;
+      questionUr?: string;
+      answerUr?: string;
+    };
+
+    const { titleUr = '', questionUr = '', answerUr = '' } = body;
+
+    if (!titleUr && !questionUr && !answerUr) {
+      return json({ success: false, error: 'ترجمہ کے لیے اردو متن درکار ہے۔' }, 400);
+    }
+
+    if (!apiKey) {
+      return json({
+        success: false,
+        error: 'Cloudflare Pages میں GEMINI_API_KEY ترتیب نہیں دیا گیا۔ برائے مہربانی Cloudflare Pages Settings -> Environment Variables میں GEMINI_API_KEY کی قدر شامل فرمائیں۔',
+      }, 500);
+    }
+
+    const prompt = `You are a certified Islamic scholar and English translator for Darul Ifta, Jamia Islamia Abbottabad.
+Translate the following Urdu Fatwa (Islamic Legal Verdict) into clear, dignified, academic English.
+Accurately convey Hanafi jurisprudence terms (e.g., Nikah, Talaq, Wudu, Ghusl, Salah, Halal, Haram, Wajib, Makruh, Sunnah, Khuntha, Iddah, Zakat, Sadaqah).
+
+Urdu Input:
+Title: ${titleUr || 'N/A'}
+Question: ${questionUr || 'N/A'}
+Answer: ${answerUr || 'N/A'}
+
+Return ONLY a valid JSON object without markdown fences, with these exact keys:
+{
+  "titleEn": "...",
+  "questionEn": "...",
+  "answerEn": "..."
+}`;
+
+    const models = [
+      'gemini-2.5-flash',
+      'gemini-flash-latest',
+      'gemini-3.1-flash-lite',
+      'gemini-3.1-pro-preview',
+    ];
+
+    let lastErr = '';
+    let parsed: { titleEn?: string; questionEn?: string; answerEn?: string } | null = null;
+
+    for (const model of models) {
+      try {
+        const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+        const geminiRes = await fetch(geminiUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: prompt }] }],
+            generationConfig: {
+              responseMimeType: 'application/json',
+              temperature: 0.2,
+            },
+          }),
+        });
+
+        if (geminiRes.ok) {
+          const geminiData = (await geminiRes.json()) as any;
+          const rawText = geminiData.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || '';
+          if (rawText) {
+            const cleanJson = rawText.replace(/^```json\s*/i, '').replace(/```\s*$/, '').trim();
+            parsed = JSON.parse(cleanJson);
+            if (parsed) break;
+          }
+        } else {
+          lastErr = await geminiRes.text();
+        }
+      } catch (err: any) {
+        lastErr = err?.message || String(err);
+      }
+    }
+
+    if (!parsed) {
+      return json({ 
+        success: false, 
+        error: `Gemini API سے رابطہ میں مسئلہ پیش آیا: ${lastErr || 'No response generated'}` 
+      }, 502);
+    }
+
+    return json({
+      success: true,
+      data: {
+        titleEn: parsed.titleEn || titleUr,
+        questionEn: parsed.questionEn || questionUr,
+        answerEn: parsed.answerEn || answerUr,
+      },
+    });
   }
 
   // Default fallback

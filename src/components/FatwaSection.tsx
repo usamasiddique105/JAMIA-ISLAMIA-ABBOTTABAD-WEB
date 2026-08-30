@@ -596,20 +596,20 @@ export const FatwaSection: React.FC<FatwaSectionProps> = ({
                   {/* 3. Question Section */}
                   <div className="space-y-3">
                     <div className="w-full bg-[#FAF6EE] dark:bg-slate-800 px-4 sm:px-6 py-2.5 rounded-lg">
-                      <span className={`font-black text-lg sm:text-xl md:text-2xl text-[#5C4632] dark:text-amber-200 leading-none ${showingOriginal ? 'font-urdu' : headingFontClass}`}>
+                      <span className={`font-black text-lg sm:text-xl md:text-2xl text-[#5C4632] dark:text-amber-200 leading-none ${showingOriginal ? 'font-urdu-heading' : headingFontClass}`}>
                         {showingOriginal ? 'ســوال' : (language === 'ar' ? 'الســؤال' : language === 'en' ? 'Question' : 'ســوال')}
                       </span>
                     </div>
                     <div 
-                      className={`px-2 sm:px-3 py-1 space-y-4 text-stone-900 dark:text-stone-100 text-base sm:text-lg md:text-[19px] leading-relaxed text-justify ${showingOriginal ? 'font-urdu' : fontClass}`}
+                      className={`px-2 sm:px-3 py-1 space-y-4 text-stone-900 dark:text-stone-100 text-base sm:text-lg md:text-[19px] leading-[2.4] text-right ${showingOriginal ? 'font-urdu-body' : fontClass}`}
                       dir={showingOriginal ? 'rtl' : dir}
                     >
                       {formatParagraphs(
                         showingOriginal 
-                          ? (selectedFatwa.question.ur || selectedFatwa.question.en)
-                          : getLocalizedText(selectedFatwa.question, language)
+                           ? (selectedFatwa.question.ur || selectedFatwa.question.en)
+                           : getLocalizedText(selectedFatwa.question, language)
                       ).map((para, idx) => (
-                        <p key={idx} className="leading-relaxed text-justify indent-6 sm:indent-8">
+                        <p key={idx} className="leading-[2.4] text-right indent-6 sm:indent-8">
                           {para}
                         </p>
                       ))}
@@ -627,7 +627,7 @@ export const FatwaSection: React.FC<FatwaSectionProps> = ({
                     </div>
                     
                     <div 
-                      className={`px-2 sm:px-3 py-1 space-y-4 text-stone-900 dark:text-stone-100 text-base sm:text-lg md:text-[19px] leading-relaxed text-justify ${showingOriginal ? 'font-urdu' : fontClass}`}
+                      className={`px-2 sm:px-3 py-1 space-y-4 text-stone-900 dark:text-stone-100 text-base sm:text-lg md:text-[19px] leading-[2.4] text-right ${showingOriginal ? 'font-urdu-body' : fontClass}`}
                       dir={showingOriginal ? 'rtl' : dir}
                     >
                       
@@ -638,7 +638,7 @@ export const FatwaSection: React.FC<FatwaSectionProps> = ({
                           : getLocalizedText(selectedFatwa.answer, language), 
                         true
                       ).map((para, idx) => (
-                        <p key={idx} className="leading-relaxed text-justify indent-6 sm:indent-8">
+                        <p key={idx} className="leading-[2.4] text-right indent-6 sm:indent-8">
                           {para}
                         </p>
                       ))}
@@ -660,11 +660,11 @@ export const FatwaSection: React.FC<FatwaSectionProps> = ({
                                 </div>
                                 
                                 <div 
-                                  className="px-2 sm:px-3 pt-1 pb-0 font-arabic space-y-2 text-base sm:text-lg md:text-[19px] leading-[2.3] text-justify text-stone-800 dark:text-stone-200"
+                                  className="px-2 sm:px-3 pt-1 pb-0 font-arabic space-y-2 text-base sm:text-lg md:text-[19px] leading-[2.3] text-right text-stone-800 dark:text-stone-200"
                                   dir="rtl"
                                 >
                                   {paragraphs.map((arabicPara, aIdx) => (
-                                    <p key={aIdx} className="leading-[2.3] font-arabic text-justify indent-6 sm:indent-8">
+                                    <p key={aIdx} className="leading-[2.3] font-arabic text-right indent-6 sm:indent-8">
                                       {arabicPara}
                                     </p>
                                   ))}

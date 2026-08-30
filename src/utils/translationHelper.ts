@@ -241,13 +241,13 @@ export function getLocalizedText(
 
 /**
  * Returns the standard typographic class for the active language.
- * Urdu -> font-urdu (Mehr Nastaliq / Jameel Noori)
+ * Urdu -> font-urdu-heading (Mehr Nastaliq) for headings, font-urdu-body (Jameel Noori) for body
  * Arabic -> font-arabic (Amiri / Noto Naskh)
- * English -> font-english-body / font-sans (Inter / Playfair)
+ * English -> font-english-heading (Playfair) / font-english-body (Inter)
  */
 export function getLanguageFontClass(lang: Language, isHeading = false): string {
   if (lang === 'ur') {
-    return 'font-urdu';
+    return isHeading ? 'font-urdu-heading' : 'font-urdu-body';
   }
   if (lang === 'ar') {
     return 'font-arabic';

@@ -1243,11 +1243,10 @@ ${answerUr || "N/A"}
 You are an expert Islamic jurist and Arabic/Urdu-to-English scholarly translator representing Darul Ifta Jamia Islamia Abbottabad. Maintain complete fidelity to the original text without editorializing.`;
 
       const modelsToTry = [
-        "gemini-3.7-flash",
-        "gemini-3.6-flash",
+        "gemini-2.5-flash",
         "gemini-flash-latest",
-        "gemini-3.5-flash-lite",
         "gemini-3.1-flash-lite",
+        "gemini-3.1-pro-preview",
       ];
       let response = null;
       let lastErr: any = null;
@@ -1316,10 +1315,11 @@ You are an expert Islamic jurist and Arabic/Urdu-to-English scholarly translator
           translatedAt: new Date().toISOString(),
         },
       });
-    } catch {
+    } catch (e: any) {
+      console.error("Fatwa translation error detail:", e);
       res.status(200).json({
         success: false,
-        error: "عارضی طور پر ترجمہ سروس دستیاب نہیں ہے۔",
+        error: e?.message || "عارضی طور پر ترجمہ سروس دستیاب نہیں ہے۔",
         fallback: {
           titleEn: req.body?.titleUr || "",
           questionEn: req.body?.questionUr || "",
