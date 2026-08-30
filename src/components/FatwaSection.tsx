@@ -595,13 +595,13 @@ export const FatwaSection: React.FC<FatwaSectionProps> = ({
 
                   {/* 3. Question Section */}
                   <div className="space-y-3">
-                    <div className="w-full bg-[#FAF6EE] dark:bg-slate-800 px-4 sm:px-6 py-2.5 rounded-lg">
+                    <div className="w-full bg-[#FAF6EE] dark:bg-slate-800 px-4 sm:px-6 py-2.5 rounded-lg border-r-4 border-[#B88A3B]">
                       <span className={`font-black text-lg sm:text-xl md:text-2xl text-[#5C4632] dark:text-amber-200 leading-none ${showingOriginal ? 'font-urdu-heading' : headingFontClass}`}>
                         {showingOriginal ? 'ســوال' : (language === 'ar' ? 'الســؤال' : language === 'en' ? 'Question' : 'ســوال')}
                       </span>
                     </div>
                     <div 
-                      className={`px-2 sm:px-3 py-1 space-y-4 text-stone-900 dark:text-stone-100 text-base sm:text-lg md:text-[19px] leading-[2.4] text-right ${showingOriginal ? 'font-urdu-body' : fontClass}`}
+                      className={`px-4 sm:px-6 md:px-8 py-2 space-y-4 text-stone-900 dark:text-stone-100 text-[20px] sm:text-[22px] md:text-[23.5px] leading-[2.65] sm:leading-[2.75] text-right ${showingOriginal ? 'font-urdu-body' : fontClass}`}
                       dir={showingOriginal ? 'rtl' : dir}
                     >
                       {formatParagraphs(
@@ -609,7 +609,7 @@ export const FatwaSection: React.FC<FatwaSectionProps> = ({
                            ? (selectedFatwa.question.ur || selectedFatwa.question.en)
                            : getLocalizedText(selectedFatwa.question, language)
                       ).map((para, idx) => (
-                        <p key={idx} className="leading-[2.4] text-right indent-6 sm:indent-8">
+                        <p key={idx} className="leading-[2.65] sm:leading-[2.75] text-right">
                           {para}
                         </p>
                       ))}
@@ -618,7 +618,7 @@ export const FatwaSection: React.FC<FatwaSectionProps> = ({
 
                   {/* 4. Answer Section */}
                   <div className="space-y-4 pt-2">
-                    <div className="w-full bg-[#FAF6EE] dark:bg-slate-800 px-4 sm:px-6 py-2.5 rounded-lg flex items-center justify-center text-center">
+                    <div className="w-full bg-[#FAF6EE] dark:bg-slate-800 px-4 sm:px-6 py-2.5 rounded-lg flex items-center justify-center text-center border-r-4 border-[#B88A3B]">
                       <span 
                         className="font-black text-lg sm:text-xl md:text-2xl text-[#5C4632] dark:text-amber-200 leading-none text-center inline-block mx-auto font-arabic"
                       >
@@ -627,18 +627,18 @@ export const FatwaSection: React.FC<FatwaSectionProps> = ({
                     </div>
                     
                     <div 
-                      className={`px-2 sm:px-3 py-1 space-y-4 text-stone-900 dark:text-stone-100 text-base sm:text-lg md:text-[19px] leading-[2.4] text-right ${showingOriginal ? 'font-urdu-body' : fontClass}`}
+                      className={`px-4 sm:px-6 md:px-8 py-2 space-y-4 text-stone-900 dark:text-stone-100 text-[20px] sm:text-[22px] md:text-[23.5px] leading-[2.65] sm:leading-[2.75] text-right ${showingOriginal ? 'font-urdu-body' : fontClass}`}
                       dir={showingOriginal ? 'rtl' : dir}
                     >
                       
-                      {/* Rendered in distinct, well-spaced paragraphs with first-line indent */}
+                      {/* Rendered in distinct, well-spaced paragraphs with comfortable reading flow */}
                       {formatParagraphs(
                         showingOriginal
                           ? (selectedFatwa.answer.ur || selectedFatwa.answer.en)
                           : getLocalizedText(selectedFatwa.answer, language), 
                         true
                       ).map((para, idx) => (
-                        <p key={idx} className="leading-[2.4] text-right indent-6 sm:indent-8">
+                        <p key={idx} className="leading-[2.65] sm:leading-[2.75] text-right">
                           {para}
                         </p>
                       ))}
@@ -647,24 +647,24 @@ export const FatwaSection: React.FC<FatwaSectionProps> = ({
                       {(() => {
                         const { paragraphs, katabahu } = parseArabicReference(selectedFatwa.arabicText || '', selectedFatwa.answer.ur);
                         return (
-                          <div className="pt-2 space-y-2.5">
+                          <div className="pt-3 space-y-3">
                             {/* References / Dalail (if paragraphs exist) */}
                             {paragraphs.length > 0 && (
                               <>
-                                <div className="w-full bg-[#FAF6EE] dark:bg-slate-800 px-4 sm:px-6 py-2.5 rounded-lg">
+                                <div className="w-full bg-[#FAF6EE] dark:bg-slate-800 px-4 sm:px-6 py-2 rounded-lg border-r-3 border-[#B88A3B]/60">
                                   <span 
-                                    className="font-black text-lg sm:text-xl md:text-2xl text-[#5C4632] dark:text-amber-200 leading-none font-arabic"
+                                    className="font-black text-base sm:text-lg md:text-xl text-[#5C4632] dark:text-amber-200 leading-none font-arabic"
                                   >
                                     وَالدَّلِيلُ عَلَى ذَلِكَ
                                   </span>
                                 </div>
                                 
                                 <div 
-                                  className="px-2 sm:px-3 pt-1 pb-0 font-arabic space-y-2 text-base sm:text-lg md:text-[19px] leading-[2.3] text-right text-stone-800 dark:text-stone-200"
+                                  className="px-4 sm:px-6 py-3 font-arabic space-y-3 text-[14.5px] sm:text-[15.5px] md:text-[16.5px] leading-[2.1] sm:leading-[2.2] text-right text-stone-800 dark:text-stone-200 bg-[#FAF8F3] dark:bg-slate-800/60 rounded-lg border-r-3 border-[#B88A3B]/60 my-2"
                                   dir="rtl"
                                 >
                                   {paragraphs.map((arabicPara, aIdx) => (
-                                    <p key={aIdx} className="leading-[2.3] font-arabic text-right indent-6 sm:indent-8">
+                                    <p key={aIdx} className="leading-[2.1] sm:leading-[2.2] font-arabic text-right">
                                       {arabicPara}
                                     </p>
                                   ))}
@@ -673,12 +673,12 @@ export const FatwaSection: React.FC<FatwaSectionProps> = ({
                             )}
 
                             {/* Concluding Row */}
-                            <div className="pt-2 relative flex flex-col sm:flex-row items-center justify-center font-arabic min-h-[36px]">
-                              <div className="text-center font-bold text-stone-800 dark:text-stone-200 text-base sm:text-lg md:text-[19px] leading-[2.0]">
+                            <div className="pt-2 relative flex flex-col sm:flex-row items-center justify-between font-arabic min-h-[36px] px-1">
+                              <div className="text-center sm:text-right font-bold text-stone-800 dark:text-stone-200 text-sm sm:text-base md:text-[17px] leading-[2.0]">
                                 {showingOriginal ? 'فقط والله تعالی اعلم بالصواب' : (language === 'ar' ? 'فقط والله تعالى أعلم بالصواب' : language === 'en' ? 'And Allah Almighty knows best' : 'فقط والله تعالی اعلم بالصواب')}
                               </div>
                               {katabahu && (
-                                <div className="sm:absolute sm:left-0 text-left font-bold text-stone-800 dark:text-stone-200 text-base sm:text-lg md:text-[19px] leading-[2.0] pt-1 sm:pt-0">
+                                <div className="text-center sm:text-left font-bold text-stone-800 dark:text-stone-200 text-sm sm:text-base md:text-[17px] leading-[2.0] pt-1 sm:pt-0">
                                   <span>{katabahu}</span>
                                 </div>
                               )}

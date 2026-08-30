@@ -32,7 +32,7 @@ export const AboutJamiaView: React.FC<AboutJamiaViewProps> = ({
   // Typography helpers based on active language
   const textFontClass = isAr ? 'font-arabic' : isEn ? 'font-sans' : 'font-urdu-body';
   const headingFontClass = isAr ? 'font-arabic' : isEn ? 'font-serif-title font-playfair' : 'font-urdu-heading';
-  const lineSpacingClass = isAr ? 'leading-[2.1]' : isEn ? 'leading-relaxed' : 'leading-[2.5]';
+  const lineSpacingClass = isAr ? 'leading-[1.95] sm:leading-[2.05]' : isEn ? 'leading-relaxed' : 'leading-[2.1] sm:leading-[2.2] lg:leading-[2.25]';
 
   // Mapping tab IDs to sections
   const getSectionFromTabId = (tabId: string): string => {
@@ -287,10 +287,10 @@ export const AboutJamiaView: React.FC<AboutJamiaViewProps> = ({
 
         {/* MAIN CONTENT CANVAS */}
         <main className="order-1 lg:order-2 lg:col-span-8 xl:col-span-8 w-full">
-          <div className="bg-white dark:bg-slate-900 rounded-xs p-4 sm:p-7 lg:p-8 space-y-6">
+          <div className="bg-white dark:bg-slate-900 rounded-xs p-3.5 sm:p-7 lg:p-8 space-y-4 sm:space-y-6">
             
             {/* Box Title stretched horizontally across full width */}
-            <div className="w-full pb-2">
+            <div className="w-full pb-1 sm:pb-2">
               <div className="w-full text-center border border-[#C5B59E] dark:border-slate-700 bg-[#FAF7F0] dark:bg-slate-800/80 py-2 sm:py-2.5 px-4 rounded-xs shadow-xs">
                 <h2 className={`text-xl sm:text-2xl lg:text-3xl font-extrabold text-[#3C2E21] dark:text-amber-100 ${headingFontClass} tracking-wide`}>
                   {getCurrentTitle()}
@@ -299,22 +299,22 @@ export const AboutJamiaView: React.FC<AboutJamiaViewProps> = ({
             </div>
 
             {/* Content Body based on Active Section */}
-            <div className="pt-2">
+            <div className="pt-1 sm:pt-2">
 
               {/* ========================================= */}
               {/* 1. بانیِ جامعہ (Founder) */}
               {/* ========================================= */}
               {currentSection === 'founder' && (
-                <div className={`space-y-6 ${textFontClass}`}>
-                  <div className={`space-y-2 text-center ${isEn ? 'sm:text-left' : 'sm:text-right'} border-b border-[#EADFCF] dark:border-slate-800 pb-4`}>
-                    <h3 className={`text-2xl sm:text-3xl font-black text-[#5C4632] dark:text-amber-200 leading-snug ${headingFontClass}`}>
+                <div className={`space-y-2.5 sm:space-y-4 ${textFontClass}`}>
+                  <div className={`space-y-1.5 text-center ${isEn ? 'sm:text-left' : 'sm:text-right'} border-b border-[#EADFCF] dark:border-slate-800 pb-3`}>
+                    <h3 className={`text-xl sm:text-3xl font-black text-[#5C4632] dark:text-amber-200 leading-snug ${headingFontClass}`}>
                       {isAr 
                         ? 'فضيلة الشيخ المحدث مولانا فضل مولى رحمه الله' 
                         : isEn 
                         ? 'Shaykh-ul-Hadith Mawlana Fazl-e-Mowla (Rahimahullah)' 
                         : 'حضرت شیخ الحدیث مولانا فضل مولیٰ رحمہ اللہ'}
                     </h3>
-                    <p className="text-base sm:text-lg text-[#B88A3B] dark:text-amber-400 font-bold">
+                    <p className="text-sm sm:text-base text-[#B88A3B] dark:text-amber-400 font-bold">
                       {isAr 
                         ? '(مؤسس الجامعة الإسلامية ومرشدها الأول — المدفون في مقبرة المعلاة بمكة المكرمة)' 
                         : isEn 
@@ -323,7 +323,7 @@ export const AboutJamiaView: React.FC<AboutJamiaViewProps> = ({
                     </p>
                   </div>
 
-                  <p className={`text-base sm:text-lg lg:text-xl text-stone-800 dark:text-stone-200 ${lineSpacingClass} text-justify`}>
+                  <p className={`text-base sm:text-lg md:text-xl lg:text-[21.5px] xl:text-[22.5px] text-stone-800 dark:text-stone-200 ${lineSpacingClass} text-justify`}>
                     {isAr 
                       ? 'أسس فضيلة الشيخ المحدث مولانا فضل مولى رحمه الله الجامعة الإسلامية بأيبت آباد بدافع الإخلاص وخدمة الدين الحنيف ونشر تعاليم الإسلام الأصيلة. وقد كرّس حياته المباركة لتعليم كتاب الله وسنة نبيه ﷺ، وتزكية المجتمع، وإعداد أجيال من العلماء والفقهاء.'
                       : isEn 
@@ -331,11 +331,11 @@ export const AboutJamiaView: React.FC<AboutJamiaViewProps> = ({
                       : 'جامعہ اسلامیہ ایبٹ آباد کی بنیاد حضرت شیخ الحدیث مولانا فضل مولیٰ رحمہ اللہ نے خالص دینی جذبے، اخلاص اور خدمتِ اسلام کے عظیم مقصد کے تحت رکھی۔ آپ نے اپنی پوری زندگی قرآن و سنت کی تعلیم، اصلاحِ معاشرہ اور دینی علوم کی اشاعت میں صرف کی۔'}
                   </p>
 
-                  <div className="pt-4 border-t border-[#EADFCF] dark:border-slate-800 space-y-2">
-                    <span className="text-base font-bold text-[#5C4632] dark:text-amber-300 block">
+                  <div className="pt-3 border-t border-[#EADFCF] dark:border-slate-800 space-y-1.5">
+                    <span className="text-sm sm:text-base font-bold text-[#5C4632] dark:text-amber-300 block">
                       {isAr ? 'الرئيس والمهتم الحالي للجامعة:' : isEn ? 'Current Principal & Patron:' : 'موجودہ مہتمم و سرپرست:'}
                     </span>
-                    <h4 className={`text-xl sm:text-2xl font-black text-[#3C2E21] dark:text-emerald-300 ${headingFontClass}`}>
+                    <h4 className={`text-lg sm:text-2xl font-black text-[#3C2E21] dark:text-emerald-300 ${headingFontClass}`}>
                       {isAr ? 'فضيلة الشيخ المفتي رشيد أحمد حفظه الله ورعاه' : isEn ? 'Hadhrat Mawlana Mufti Rasheed Ahmad (Damat Barakatuhum)' : 'حضرت مولانا مفتی رشید احمد صاحب دامت برکاتہم'}
                     </h4>
                   </div>
@@ -346,8 +346,8 @@ export const AboutJamiaView: React.FC<AboutJamiaViewProps> = ({
               {/* 2. جامعہ کے اغراض و مقاصد (Objectives) */}
               {/* ========================================= */}
               {currentSection === 'objectives' && (
-                <div className={`space-y-6 ${textFontClass}`}>
-                  <p className={`text-base sm:text-lg lg:text-xl text-stone-800 dark:text-stone-200 ${lineSpacingClass} text-justify`}>
+                <div className={`space-y-2.5 sm:space-y-4 ${textFontClass}`}>
+                  <p className={`text-base sm:text-lg md:text-xl lg:text-[21.5px] xl:text-[22.5px] text-stone-800 dark:text-stone-200 ${lineSpacingClass} text-justify`}>
                     {isAr 
                       ? 'يتمثل الهدف الجوهري للجامعة الإسلامية بأيبت آباد في إعداد وتخريج علماء ومفتين ودعاة متميزين يجمعون بين الرسوخ العلمي والتقوى والإخلاص وحسن الخلق وروح التضحية لخدمة الدين الحنيف.'
                       : isEn 
@@ -355,9 +355,9 @@ export const AboutJamiaView: React.FC<AboutJamiaViewProps> = ({
                       : 'جامعہ اسلامیہ ایبٹ آباد کا بنیادی مقصد ایسے علماء، فضلاء اور داعیانِ اسلام تیار کرنا ہے جو علم کے ساتھ تقویٰ، اخلاص، للہیت، حسنِ اخلاق اور خدمتِ دین کے جذبے سے آراستہ ہوں۔'}
                   </p>
 
-                  <ul className={`space-y-4 pt-1 text-base sm:text-lg lg:text-xl text-stone-800 dark:text-stone-200 ${lineSpacingClass}`}>
-                    <li className="flex items-start gap-3">
-                      <span className="text-[#B88A3B] text-xl font-black shrink-0 leading-none mt-1.5">•</span>
+                  <ul className={`space-y-1.5 sm:space-y-2.5 pt-1 text-base sm:text-lg md:text-xl lg:text-[21.5px] xl:text-[22.5px] text-stone-800 dark:text-stone-200 ${lineSpacingClass}`}>
+                    <li className="flex items-start gap-2.5">
+                      <span className="text-[#B88A3B] text-lg font-black shrink-0 leading-none mt-1">•</span>
                       <span className="text-justify">
                         {isAr 
                           ? 'إعداد علماء ومفتين وخطباء وباحثين متسلحين بعلوم النبوة، سالمين من التعصبات الحزبية والفكرية الضيقة.'
@@ -366,8 +366,8 @@ export const AboutJamiaView: React.FC<AboutJamiaViewProps> = ({
                           : 'جامعہ کا اہم مقصد ایسے علماء، واعظین، مفتیانِ کرام اور اسلامی مفکرین تیار کرنا ہے جو علومِ نبوت کے حامل اور ہر قسم کے تعصبات سے پاک ہوں۔'}
                       </span>
                     </li>
-                    <li className="flex items-start gap-3">
-                      <span className="text-[#B88A3B] text-xl font-black shrink-0 leading-none mt-1.5">•</span>
+                    <li className="flex items-start gap-2.5">
+                      <span className="text-[#B88A3B] text-lg font-black shrink-0 leading-none mt-1">•</span>
                       <span className="text-justify">
                         {isAr 
                           ? 'تعزيز التعاون الأكاديمي والروابط الأخوية مع سائر الجامعات والمعاهد الإسلامية والمؤسسات البحثية لخدمة التعليم الشرعي.'
@@ -376,8 +376,8 @@ export const AboutJamiaView: React.FC<AboutJamiaViewProps> = ({
                           : 'دوسری جامعات، مدارس اور علمی و تحقیقی اداروں کے ساتھ ہمدردی، تعاون اور حسنِ تعلق قائم رکھنا اور دینی و تعلیمی میدان میں ان سے تعاون کرنا۔'}
                       </span>
                     </li>
-                    <li className="flex items-start gap-3">
-                      <span className="text-[#B88A3B] text-xl font-black shrink-0 leading-none mt-1.5">•</span>
+                    <li className="flex items-start gap-2.5">
+                      <span className="text-[#B88A3B] text-lg font-black shrink-0 leading-none mt-1">•</span>
                       <span className="text-justify">
                         {isAr 
                           ? 'ربط الأجيال الصاعدة بالدين الحنيف، وترسيخ العقيدة الصحيحة والآداب والأخلاق النبوية السامية في نفوسهم.'
@@ -386,8 +386,8 @@ export const AboutJamiaView: React.FC<AboutJamiaViewProps> = ({
                           : 'نئی نسل کو مذہب سے قریب کرنا اور دینی عقائد و اسلامی آداب و ثقافت سے روشناس کرانا۔'}
                       </span>
                     </li>
-                    <li className="flex items-start gap-3">
-                      <span className="text-[#B88A3B] text-xl font-black shrink-0 leading-none mt-1.5">•</span>
+                    <li className="flex items-start gap-2.5">
+                      <span className="text-[#B88A3B] text-lg font-black shrink-0 leading-none mt-1">•</span>
                       <span className="text-justify">
                         {isAr 
                           ? 'إرشاد المجتمع المسلم والتصدي العلمي والفكري للشبهات المعاصرة والإلحاد والأفكار المنحرفة بالحكمة والبرهان.'
@@ -396,8 +396,8 @@ export const AboutJamiaView: React.FC<AboutJamiaViewProps> = ({
                           : 'مسلمان عوام کی اصلاح و رہنمائی اور باطل عقائد، الحاد و لادینیت اور گمراہ کن نظریات کا علمی، تحقیقی اور فکری انداز میں سدِ باب کرنا۔'}
                       </span>
                     </li>
-                    <li className="flex items-start gap-3">
-                      <span className="text-[#B88A3B] text-xl font-black shrink-0 leading-none mt-1.5">•</span>
+                    <li className="flex items-start gap-2.5">
+                      <span className="text-[#B88A3B] text-lg font-black shrink-0 leading-none mt-1">•</span>
                       <span className="text-justify">
                         {isAr 
                           ? 'نشر الكتب والبحوث الفقهية والمجلات العلمية والفتاوى الشرعية باللغتين العربية والأردية لإفادة المسلمين وتوجيههم.'
@@ -414,8 +414,8 @@ export const AboutJamiaView: React.FC<AboutJamiaViewProps> = ({
               {/* 3. جامعہ کا نظم و نسق (Administration) */}
               {/* ========================================= */}
               {currentSection === 'administration' && (
-                <div className={`space-y-6 ${textFontClass}`}>
-                  <p className={`text-base sm:text-lg lg:text-xl text-stone-800 dark:text-stone-200 ${lineSpacingClass} text-justify`}>
+                <div className={`space-y-2.5 sm:space-y-4 ${textFontClass}`}>
+                  <p className={`text-base sm:text-lg md:text-xl lg:text-[21.5px] xl:text-[22.5px] text-stone-800 dark:text-stone-200 ${lineSpacingClass} text-justify`}>
                     {isAr 
                       ? 'تُدار الجامعة الإسلامية وفق منظومة إدارية دقيقة ومحكمة، حيث تُدار كافة الشؤون التعليمية والإدارية والمالية وفق الأحكام والضوابط الشرعية، مع الالتزام بالأمانة والشفافية التامة ومبدأ الشورى.'
                       : isEn 
@@ -423,11 +423,11 @@ export const AboutJamiaView: React.FC<AboutJamiaViewProps> = ({
                       : 'جامعہ کا انتظام ایک منظم اور باقاعدہ نظام کے تحت چلایا جاتا ہے۔ تمام تعلیمی، انتظامی اور مالی معاملات شریعت کے اصولوں، دیانت داری، شفافیت اور باہمی مشاورت کے مطابق انجام دیے جاتے ہیں۔'}
                   </p>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
-                    <div className="bg-[#FAF7F0] dark:bg-slate-800/60 p-4 border border-[#D5C7B2] dark:border-slate-700 rounded-xs space-y-2">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 pt-1">
+                    <div className="bg-[#FAF7F0] dark:bg-slate-800/60 p-3.5 sm:p-4 border border-[#D5C7B2] dark:border-slate-700 rounded-xs space-y-1.5">
                       <div className="flex items-center gap-2 text-[#3C2E21] dark:text-amber-300 font-bold">
-                        <Building2 className="w-5 h-5 text-[#B88A3B]" />
-                        <h4 className={`text-lg ${headingFontClass}`}>
+                        <Building2 className="w-4 h-4 sm:w-5 sm:h-5 text-[#B88A3B]" />
+                        <h4 className={`text-base sm:text-lg ${headingFontClass}`}>
                           {isAr ? 'مجلس الشورى والرعاية العليا' : isEn ? 'Shura Council & Advisory Board' : 'مجلسِ شوریٰ و سرپرستی'}
                         </h4>
                       </div>
@@ -440,10 +440,10 @@ export const AboutJamiaView: React.FC<AboutJamiaViewProps> = ({
                       </p>
                     </div>
 
-                    <div className="bg-[#FAF7F0] dark:bg-slate-800/60 p-4 border border-[#D5C7B2] dark:border-slate-700 rounded-xs space-y-2">
+                    <div className="bg-[#FAF7F0] dark:bg-slate-800/60 p-3.5 sm:p-4 border border-[#D5C7B2] dark:border-slate-700 rounded-xs space-y-1.5">
                       <div className="flex items-center gap-2 text-[#3C2E21] dark:text-amber-300 font-bold">
-                        <ShieldCheck className="w-5 h-5 text-[#B88A3B]" />
-                        <h4 className={`text-lg ${headingFontClass}`}>
+                        <ShieldCheck className="w-4 h-4 sm:w-5 sm:h-5 text-[#B88A3B]" />
+                        <h4 className={`text-base sm:text-lg ${headingFontClass}`}>
                           {isAr ? 'الإشراف الأكاديمي والتربوي' : isEn ? 'Academic & Supervisory Staff' : 'تعلیمی و انتظامی نگران'}
                         </h4>
                       </div>
@@ -457,7 +457,7 @@ export const AboutJamiaView: React.FC<AboutJamiaViewProps> = ({
                     </div>
                   </div>
 
-                  <p className={`text-base sm:text-lg text-stone-800 dark:text-stone-200 ${lineSpacingClass} text-justify`}>
+                  <p className={`text-base sm:text-lg md:text-xl lg:text-[21.5px] xl:text-[22.5px] text-stone-800 dark:text-stone-200 ${lineSpacingClass} text-justify`}>
                     {isAr 
                       ? 'يؤدي جميع الأساتذة والموظفين واجباتهم بدافع التقوى والإخلاص والتفاني، مما يوفر بيئة تعليمية وإيمانية مثالية لطلاب العلم الشريف.'
                       : isEn 
@@ -471,8 +471,8 @@ export const AboutJamiaView: React.FC<AboutJamiaViewProps> = ({
               {/* 4. ضروری ہدایات اور قواعد و ضوابط (Rules) */}
               {/* ========================================= */}
               {currentSection === 'rules' && (
-                <div className={`space-y-6 ${textFontClass}`}>
-                  <p className={`text-base sm:text-lg lg:text-xl text-stone-800 dark:text-stone-200 ${lineSpacingClass} text-justify`}>
+                <div className={`space-y-2.5 sm:space-y-4 ${textFontClass}`}>
+                  <p className={`text-base sm:text-lg md:text-xl lg:text-[21.5px] xl:text-[22.5px] text-stone-800 dark:text-stone-200 ${lineSpacingClass} text-justify`}>
                     {isAr 
                       ? 'يتعين على جميع الطلاب المنتظمين بالجامعة الإسلامية الالتزام التام بالضوابط الشرعية واللوائح والتعليمات التنظيمية الآتية:'
                       : isEn 
@@ -480,9 +480,9 @@ export const AboutJamiaView: React.FC<AboutJamiaViewProps> = ({
                       : 'جامعہ اسلامیہ ایبٹ آباد میں داخل تمام طلبہ کرام کے لیے درج ذیل شرعی و انتظامی قواعد و ضوابط کی پابندی لازمی ہے:'}
                   </p>
 
-                  <ul className={`space-y-4 pt-1 text-base sm:text-lg lg:text-xl text-stone-800 dark:text-stone-200 ${lineSpacingClass}`}>
-                    <li className="flex items-start gap-3">
-                      <span className="text-[#B88A3B] text-xl font-black shrink-0 leading-none mt-1.5">•</span>
+                  <ul className={`space-y-1.5 sm:space-y-2.5 pt-1 text-base sm:text-lg md:text-xl lg:text-[21.5px] xl:text-[22.5px] text-stone-800 dark:text-stone-200 ${lineSpacingClass}`}>
+                    <li className="flex items-start gap-2.5">
+                      <span className="text-[#B88A3B] text-lg font-black shrink-0 leading-none mt-1">•</span>
                       <span className="text-justify">
                         {isAr 
                           ? 'المحافظة التامة على أداء الصلوات الخمس جماعة في المسجد، والالتزام بالهدي النبوي الشريف والأخلاق الكريمة.'
@@ -491,8 +491,8 @@ export const AboutJamiaView: React.FC<AboutJamiaViewProps> = ({
                           : 'پنجگانہ نمازوں کی باجماعت ادائیگی اور مسنون آداب و اخلاق کی پابندی ہر طالب علم کے لیے لازمی ہے۔'}
                       </span>
                     </li>
-                    <li className="flex items-start gap-3">
-                      <span className="text-[#B88A3B] text-xl font-black shrink-0 leading-none mt-1.5">•</span>
+                    <li className="flex items-start gap-2.5">
+                      <span className="text-[#B88A3B] text-lg font-black shrink-0 leading-none mt-1">•</span>
                       <span className="text-justify">
                         {isAr 
                           ? 'الالتزام بالحضور التام والمواظبة على أوقات الدروس، وحلقات المذاكرة الجماعية والمطالعة المقررة.'
@@ -501,8 +501,8 @@ export const AboutJamiaView: React.FC<AboutJamiaViewProps> = ({
                           : 'تعلیمی اوقات (اوقاتِ تدریس، مطالعہ اور تکرار) میں مکمل حاضری اور وقت کی پابندی ضروری ہے۔'}
                       </span>
                     </li>
-                    <li className="flex items-start gap-3">
-                      <span className="text-[#B88A3B] text-xl font-black shrink-0 leading-none mt-1.5">•</span>
+                    <li className="flex items-start gap-2.5">
+                      <span className="text-[#B88A3B] text-lg font-black shrink-0 leading-none mt-1">•</span>
                       <span className="text-justify">
                         {isAr 
                           ? 'احترام لوائح السكن الداخلي (المهجع) ومراعاة أوقات النوم والراحة وتناول الوجبات الغذائية المحددة.'
@@ -511,8 +511,8 @@ export const AboutJamiaView: React.FC<AboutJamiaViewProps> = ({
                           : 'دارالاقامہ (ہاسٹل) میں قیام کے دوران جامعہ کے مقررہ اوقاتِ آرام و طعام کی پاسداری کی جائے۔'}
                       </span>
                     </li>
-                    <li className="flex items-start gap-3">
-                      <span className="text-[#B88A3B] text-xl font-black shrink-0 leading-none mt-1.5">•</span>
+                    <li className="flex items-start gap-2.5">
+                      <span className="text-[#B88A3B] text-lg font-black shrink-0 leading-none mt-1">•</span>
                       <span className="text-justify">
                         {isAr 
                           ? 'يُمنع منعاً باتاً ارتداء ما يخالف الزي الشرعي أو الانشغال بالملهيات، أو الانخراط في الخلافات السياسية والحزبية.'
@@ -521,8 +521,8 @@ export const AboutJamiaView: React.FC<AboutJamiaViewProps> = ({
                           : 'غیر شرعی لباس، لایعنی مصروفیات اور سیاسی و فروعی تنازعات میں شمولیت کی قطعی اجازت نہیں ہے۔'}
                       </span>
                     </li>
-                    <li className="flex items-start gap-3">
-                      <span className="text-[#B88A3B] text-xl font-black shrink-0 leading-none mt-1.5">•</span>
+                    <li className="flex items-start gap-2.5">
+                      <span className="text-[#B88A3B] text-lg font-black shrink-0 leading-none mt-1">•</span>
                       <span className="text-justify">
                         {isAr 
                           ? 'لا يُسمح بأي إجازة أو مغادرة لحرم الجامعة إلا بالحصول على إذن خطي مسبق من ناظر التعليمات.'
@@ -539,8 +539,8 @@ export const AboutJamiaView: React.FC<AboutJamiaViewProps> = ({
               {/* 5. جامعہ کا نظامِ تعلیم و شعبہ جات (Departments) */}
               {/* ========================================= */}
               {currentSection === 'departments' && (
-                <div className={`space-y-6 ${textFontClass}`}>
-                  <p className={`text-base sm:text-lg lg:text-xl text-stone-800 dark:text-stone-200 ${lineSpacingClass} text-justify`}>
+                <div className={`space-y-2.5 sm:space-y-4 ${textFontClass}`}>
+                  <p className={`text-base sm:text-lg md:text-xl lg:text-[21.5px] xl:text-[22.5px] text-stone-800 dark:text-stone-200 ${lineSpacingClass} text-justify`}>
                     {isAr 
                       ? 'ترتبط الجامعة الإسلامية بأيبت آباد رسمياً بـ "وفاق المدارس العربية بباكستان" (رقم الإلحاق: 08-04-09345، رقم التسجيل: 1454/5/5183)، وتقدم برامج دراسية متكاملة تمتد من المرحلة الابتدائية مروراً بدورة الحديث الشريف وانتهاءً بأقسام التخصص العالي.'
                       : isEn 
@@ -548,9 +548,9 @@ export const AboutJamiaView: React.FC<AboutJamiaViewProps> = ({
                       : 'جامعہ اسلامیہ ایبٹ آباد وفاق المدارس العربیہ پاکستان سے باقاعدہ الحاق شدہ ہے (الحاق نمبر: 08-04-09345، رجسٹریشن نمبر: 1454/5/5183)، اور یہاں درجہ ابتدائیہ سے لے کر دورۂ حدیث شریف اور تخصص تک مکمل تعلیم دی جاتی ہے۔'}
                   </p>
 
-                  <div className="space-y-3">
-                    <div className={`p-4 bg-[#FAF7F0] dark:bg-slate-800/60 ${isEn ? 'border-l-4' : 'border-r-4'} border-[#B88A3B] rounded-xs`}>
-                      <h4 className={`text-lg font-bold text-[#3C2E21] dark:text-amber-200 mb-1 ${headingFontClass}`}>
+                  <div className="space-y-2.5 sm:space-y-3">
+                    <div className={`p-3.5 sm:p-4 bg-[#FAF7F0] dark:bg-slate-800/60 ${isEn ? 'border-l-4' : 'border-r-4'} border-[#B88A3B] rounded-xs`}>
+                      <h4 className={`text-base sm:text-lg font-bold text-[#3C2E21] dark:text-amber-200 mb-1 ${headingFontClass}`}>
                         {isAr ? '١. قسم درس نظامي (برنامج العالمية في العلوم الإسلامية والعربية)' : isEn ? '1. Dars-e-Nizami (Shahadat-ul-Alimiyyah Degree)' : '۱. شعبہ درسِ نظامی (عالم و فاضل کورس)'}
                       </h4>
                       <p className={`text-sm sm:text-base text-stone-700 dark:text-stone-300 ${lineSpacingClass}`}>
@@ -562,8 +562,8 @@ export const AboutJamiaView: React.FC<AboutJamiaViewProps> = ({
                       </p>
                     </div>
 
-                    <div className={`p-4 bg-[#FAF7F0] dark:bg-slate-800/60 ${isEn ? 'border-l-4' : 'border-r-4'} border-[#B88A3B] rounded-xs`}>
-                      <h4 className={`text-lg font-bold text-[#3C2E21] dark:text-amber-200 mb-1 ${headingFontClass}`}>
+                    <div className={`p-3.5 sm:p-4 bg-[#FAF7F0] dark:bg-slate-800/60 ${isEn ? 'border-l-4' : 'border-r-4'} border-[#B88A3B] rounded-xs`}>
+                      <h4 className={`text-base sm:text-lg font-bold text-[#3C2E21] dark:text-amber-200 mb-1 ${headingFontClass}`}>
                         {isAr ? '٢. قسم التخصص في الإفتاء والبحوث الفقهية' : isEn ? '2. Department of Specialization in Ifta (Mufti Course)' : '۲. شعبہ تخصص فی الافتاء (مفتی کورس)'}
                       </h4>
                       <p className={`text-sm sm:text-base text-stone-700 dark:text-stone-300 ${lineSpacingClass}`}>
@@ -575,8 +575,8 @@ export const AboutJamiaView: React.FC<AboutJamiaViewProps> = ({
                       </p>
                     </div>
 
-                    <div className={`p-4 bg-[#FAF7F0] dark:bg-slate-800/60 ${isEn ? 'border-l-4' : 'border-r-4'} border-[#B88A3B] rounded-xs`}>
-                      <h4 className={`text-lg font-bold text-[#3C2E21] dark:text-amber-200 mb-1 ${headingFontClass}`}>
+                    <div className={`p-3.5 sm:p-4 bg-[#FAF7F0] dark:bg-slate-800/60 ${isEn ? 'border-l-4' : 'border-r-4'} border-[#B88A3B] rounded-xs`}>
+                      <h4 className={`text-base sm:text-lg font-bold text-[#3C2E21] dark:text-amber-200 mb-1 ${headingFontClass}`}>
                         {isAr ? '٣. قسم تحفيظ القرآن الكريم والتجويد والقراءات' : isEn ? '3. Department of Hifz & Tajweed al-Quran' : '۳. شعبہ حفظ و تجوید القرآن'}
                       </h4>
                       <p className={`text-sm sm:text-base text-stone-700 dark:text-stone-300 ${lineSpacingClass}`}>
@@ -605,9 +605,9 @@ export const AboutJamiaView: React.FC<AboutJamiaViewProps> = ({
               {/* 6. جامعہ کے مصارف و فنڈز (Expenses) */}
               {/* ========================================= */}
               {currentSection === 'expenses' && (
-                <div className={`space-y-6 ${textFontClass}`}>
-                  <div className="bg-[#FAF7F0] dark:bg-slate-800/60 p-4 border border-[#D5C7B2] dark:border-slate-700 rounded-xs space-y-2">
-                    <h4 className={`text-xl font-bold text-[#5C4632] dark:text-amber-300 ${headingFontClass}`}>
+                <div className={`space-y-2.5 sm:space-y-4 ${textFontClass}`}>
+                  <div className="bg-[#FAF7F0] dark:bg-slate-800/60 p-3.5 sm:p-4 border border-[#D5C7B2] dark:border-slate-700 rounded-xs space-y-1.5">
+                    <h4 className={`text-lg sm:text-xl font-bold text-[#5C4632] dark:text-amber-300 ${headingFontClass}`}>
                       {isAr ? 'الجامعة مؤسسة دينية تعليمية مستقلة' : isEn ? 'An Independent Charitable Islamic Institution' : 'جامعہ ایک خالص غیر سرکاری دینی ادارہ ہے'}
                     </h4>
                     <p className={`text-base sm:text-lg text-stone-800 dark:text-stone-200 ${lineSpacingClass} text-justify`}>
@@ -619,9 +619,9 @@ export const AboutJamiaView: React.FC<AboutJamiaViewProps> = ({
                     </p>
                   </div>
 
-                  <ul className={`space-y-4 pt-1 text-base sm:text-lg lg:text-xl text-stone-800 dark:text-stone-200 ${lineSpacingClass}`}>
-                    <li className="flex items-start gap-3">
-                      <span className="text-[#B88A3B] text-xl font-black shrink-0 leading-none mt-1.5">•</span>
+                  <ul className={`space-y-1.5 sm:space-y-2.5 pt-1 text-base sm:text-lg md:text-xl lg:text-[21.5px] xl:text-[22.5px] text-stone-800 dark:text-stone-200 ${lineSpacingClass}`}>
+                    <li className="flex items-start gap-2.5">
+                      <span className="text-[#B88A3B] text-lg font-black shrink-0 leading-none mt-1">•</span>
                       <span className="text-justify">
                         {isAr 
                           ? 'توفير التعليم المجاني، والإقامة الكاملة، والوجبات الغذائية، والكتب المنهجية للطلاب.'
@@ -630,8 +630,8 @@ export const AboutJamiaView: React.FC<AboutJamiaViewProps> = ({
                           : 'طلبہ کے لیے مفت تعلیم، رہائش، طعام اور کتب کی فراہمی۔'}
                       </span>
                     </li>
-                    <li className="flex items-start gap-3">
-                      <span className="text-[#B88A3B] text-xl font-black shrink-0 leading-none mt-1.5">•</span>
+                    <li className="flex items-start gap-2.5">
+                      <span className="text-[#B88A3B] text-lg font-black shrink-0 leading-none mt-1">•</span>
                       <span className="text-justify">
                         {isAr 
                           ? 'صرف رواتب الأساتذة الكرام والموظفين وتوفير الرعاية والاحتياجات الأساسية لهم.'
@@ -640,8 +640,8 @@ export const AboutJamiaView: React.FC<AboutJamiaViewProps> = ({
                           : 'اساتذہ و ملازمین کے مشاہرات اور بنیادی ضروریات کی کفالت۔'}
                       </span>
                     </li>
-                    <li className="flex items-start gap-3">
-                      <span className="text-[#B88A3B] text-xl font-black shrink-0 leading-none mt-1.5">•</span>
+                    <li className="flex items-start gap-2.5">
+                      <span className="text-[#B88A3B] text-lg font-black shrink-0 leading-none mt-1">•</span>
                       <span className="text-justify">
                         {isAr 
                           ? 'نفقات تشغيل وصيانة مباني الجامعة، ومشاريع التوسعة، وفواتير الكهرباء والمياه والنظافة.'
@@ -650,8 +650,8 @@ export const AboutJamiaView: React.FC<AboutJamiaViewProps> = ({
                           : 'جامعہ کی عمارات کی تعمیر، توسیع، بجلی، پانی اور صفائی کے اخراجات۔'}
                       </span>
                     </li>
-                    <li className="flex items-start gap-3">
-                      <span className="text-[#B88A3B] text-xl font-black shrink-0 leading-none mt-1.5">•</span>
+                    <li className="flex items-start gap-2.5">
+                      <span className="text-[#B88A3B] text-lg font-black shrink-0 leading-none mt-1">•</span>
                       <span className="text-justify">
                         {isAr 
                           ? 'وجود قسم حسابات ومراجعة مالية متخصصة يحتفظ بسجلات دقيقة ومفصلة لجميع الإيرادات والمصروفات.'
@@ -662,7 +662,7 @@ export const AboutJamiaView: React.FC<AboutJamiaViewProps> = ({
                     </li>
                   </ul>
 
-                  <div className={`p-4 bg-amber-50/80 dark:bg-amber-950/30 ${isEn ? 'border-l-4' : 'border-r-4'} border-[#B88A3B] text-stone-800 dark:text-stone-200 font-bold text-base sm:text-lg ${lineSpacingClass}`}>
+                  <div className={`p-3.5 sm:p-4 bg-amber-50/80 dark:bg-amber-950/30 ${isEn ? 'border-l-4' : 'border-r-4'} border-[#B88A3B] text-stone-800 dark:text-stone-200 font-bold text-sm sm:text-base ${lineSpacingClass}`}>
                     {isAr 
                       ? 'الإنفاق على طلاب العلم ودعم الجامعة صدقة جارية مباركة، فنرجو التبرع من الأموال الحلال الطيبة زكاةً وصدقة.'
                       : isEn 
@@ -676,8 +676,8 @@ export const AboutJamiaView: React.FC<AboutJamiaViewProps> = ({
               {/* 7. تعارف جامعہ (Overview) */}
               {/* ========================================= */}
               {currentSection === 'overview' && (
-                <div className={`space-y-6 ${textFontClass}`}>
-                  <p className={`text-base sm:text-lg lg:text-xl text-stone-800 dark:text-stone-200 ${lineSpacingClass} text-justify`}>
+                <div className={`space-y-2 sm:space-y-2.5 md:space-y-3 ${textFontClass}`}>
+                  <p className={`text-base sm:text-lg md:text-xl lg:text-[21.5px] xl:text-[22.5px] text-stone-800 dark:text-stone-200 ${lineSpacingClass} text-justify`}>
                     {isAr 
                       ? 'تُعدّ الجامعة الإسلامية بأيبت آباد (باكستان) منارة دينية وعلمية وبحثية رائدة، تضطلع منذ عقود مديدة بأداء رسالتها السامية في تعليم القرآن الكريم والسنة النبوية الشريفة، ونشر العلوم الشرعية الأصيلة، وإصلاح المجتمع، وقيادة الأمة الإسلامية نحو الرشاد.'
                       : isEn 
@@ -685,22 +685,21 @@ export const AboutJamiaView: React.FC<AboutJamiaViewProps> = ({
                       : 'جامعہ اسلامیہ ایبٹ آباد پاکستان ایک ممتاز دینی، علمی اور تحقیقی ادارہ ہے جو گزشتہ کئی دہائیوں سے قرآن و سنت کی تعلیم، دینی علوم کی اشاعت، اصلاحِ معاشرہ اور امت مسلمہ کی رہنمائی کا عظیم فریضہ انجام دے رہا ہے۔'}
                   </p>
 
-                  <div className={`space-y-4 text-base sm:text-lg lg:text-xl text-stone-800 dark:text-stone-200 ${lineSpacingClass}`}>
-                    <p className="text-justify">
-                      {isAr 
-                        ? 'تضم الجامعة أقساماً تعليمية وتربوية متكاملة، تشمل: قسم درس نظامي (الشهادة العالمية المعادلة لشهادة الماجستير في العلوم الإسلامية واللغة العربية)، وقسم تحفيظ القرآن الكريم وتجويده، وقسم التخصص في الفقه والإفتاء والبحوث العلمية.'
-                        : isEn 
-                        ? 'The institution houses comprehensive educational wings, including the traditional Dars-e-Nizami program (Shahadat-ul-Alimiyyah, recognized as equivalent to an M.A. in Arabic & Islamic Studies), the Department of Quranic Memorization & Tajweed, and the Advanced Specialization in Islamic Jurisprudence & Ifta.'
-                        : 'جامعہ میں درسِ نظامی (شہادتِ عالمیہ ایم اے عربی و اسلامیات کے مساوی)، شعبہ حفظ و تجوید، اور تخصص فی الافتاء سمیت مختلف تعلیمی و تربیتی شعبہ جات قائم ہیں۔'}
-                    </p>
-                    <p className="text-justify">
-                      {isAr 
-                        ? 'تتمثل رسالة الجامعة الأساسية في إعداد علماء ودعاة راسخين في العلوم الشرعية، يجمعون بين التقوى والورع ومحاسن الأخلاق، مع امتلاك الكفاءة العلمية والفكرية العالية لتوجيه الأمة وتفنيد الشبهات والأفكار المنحرفة.'
-                        : isEn 
-                        ? 'The primary mission of the Jamia is to nurture graduates who combine depth in sacred Islamic knowledge with piety, exemplary morals, and intellectual competence to address contemporary questions and serve humanity.'
-                        : 'جامعہ کا بنیادی مشن یہ ہے کہ یہاں سے فارغ التحصیل ہونے والے طلبہ علومِ شرعیہ میں پختگی کے ساتھ ساتھ اخلاقِ حسنہ، تقویٰ، للہیت اور باطل نظریات کے رد کی مکمل صلاحیت رکھتے ہوں۔'}
-                    </p>
-                  </div>
+                  <p className={`text-base sm:text-lg md:text-xl lg:text-[21.5px] xl:text-[22.5px] text-stone-800 dark:text-stone-200 ${lineSpacingClass} text-justify`}>
+                    {isAr 
+                      ? 'تضم الجامعة أقساماً تعليمية وتربوية متكاملة، تشمل: قسم درس نظامي (الشهادة العالمية المعادلة لشهادة الماجستير في العلوم الإسلامية واللغة العربية)، وقسم تحفيظ القرآن الكريم وتجويده، وقسم التخصص في الفقه والإفتاء والبحوث العلمية.'
+                      : isEn 
+                      ? 'The institution houses comprehensive educational wings, including the traditional Dars-e-Nizami program (Shahadat-ul-Alimiyyah, recognized as equivalent to an M.A. in Arabic & Islamic Studies), the Department of Quranic Memorization & Tajweed, and the Advanced Specialization in Islamic Jurisprudence & Ifta.'
+                      : 'جامعہ میں درسِ نظامی (شہادتِ عالمیہ ایم اے عربی و اسلامیات کے مساوی)، شعبہ حفظ و تجوید، اور تخصص فی الافتاء سمیت مختلف تعلیمی و تربیتی شعبہ جات قائم ہیں۔'}
+                  </p>
+
+                  <p className={`text-base sm:text-lg md:text-xl lg:text-[21.5px] xl:text-[22.5px] text-stone-800 dark:text-stone-200 ${lineSpacingClass} text-justify`}>
+                    {isAr 
+                      ? 'تتمثل رسالة الجامعة الأساسية في إعداد علماء ودعاة راسخين في العلوم الشرعية، يجمعون بين التقوى والورع ومحاسن الأخلاق، مع امتلاك الكفاءة العلمية والفكرية العالية لتوجيه الأمة وتفنيد الشبهات والأفكار المنحرفة.'
+                      : isEn 
+                      ? 'The primary mission of the Jamia is to nurture graduates who combine depth in sacred Islamic knowledge with piety, exemplary morals, and intellectual competence to address contemporary questions and serve humanity.'
+                      : 'جامعہ کا بنیادی مشن یہ ہے کہ یہاں سے فارغ التحصیل ہونے والے طلبہ علومِ شرعیہ میں پختگی کے ساتھ ساتھ اخلاقِ حسنہ، تقویٰ، للہیت اور باطل نظریات کے رد کی مکمل صلاحیت رکھتے ہوں۔'}
+                  </p>
                 </div>
               )}
 
