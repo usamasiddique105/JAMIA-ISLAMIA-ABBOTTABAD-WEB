@@ -296,9 +296,14 @@ export const ThemeLanguageProvider: React.FC<{ children: React.ReactNode }> = ({
     return 'ur';
   });
 
+  // Always default to false (standard institutional light theme) for visitors
   const [darkMode, setDarkMode] = useState<boolean>(() => {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem('jia_dark') === 'true';
+    if (typeof window !== 'undefined' && typeof sessionStorage !== 'undefined') {
+      try {
+        return sessionStorage.getItem('jia_dark') === 'true';
+      } catch {
+        return false;
+      }
     }
     return false;
   });
@@ -341,7 +346,12 @@ export const ThemeLanguageProvider: React.FC<{ children: React.ReactNode }> = ({
   }, [language]);
 
   useEffect(() => {
-    localStorage.setItem('jia_dark', String(darkMode));
+    try {
+      sessionStorage.setItem('jia_dark', String(darkMode));
+      localStorage.setItem('jia_dark', String(darkMode));
+    } catch {
+      // ignore storage errors
+    }
     if (darkMode) {
       document.documentElement.classList.add('dark');
     } else {

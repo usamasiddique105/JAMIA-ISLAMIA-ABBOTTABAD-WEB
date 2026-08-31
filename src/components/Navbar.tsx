@@ -11,6 +11,7 @@ import {
   ChevronDown, 
   ChevronUp,
   ChevronLeft,
+  ChevronRight,
   Menu, 
   X, 
   Moon, 
@@ -63,6 +64,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   const [isScrolled, setIsScrolled] = useState(false);
   const [expandedMobileItem, setExpandedMobileItem] = useState<string | null>(null);
   const [expandedMobileSubItem, setExpandedMobileSubItem] = useState<string | null>(null);
+  const [activeMobileCategory, setActiveMobileCategory] = useState<string | null>(null);
   const headerRef = useRef<HTMLElement>(null);
   const langDropdownRef = useRef<HTMLDivElement>(null);
   const closeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -89,6 +91,7 @@ export const Navbar: React.FC<NavbarProps> = ({
     setOpenMenuId(null);
     setExpandedMobileItem(null);
     setExpandedMobileSubItem(null);
+    setActiveMobileCategory(null);
   }, [currentTab]);
 
   useEffect(() => {
@@ -260,26 +263,9 @@ export const Navbar: React.FC<NavbarProps> = ({
         { 
           id: 'online-quran-dars', 
           label: language === 'ur' ? 'آن لائن قرآن کریم و درسِ نظامی' : language === 'ar' ? 'أكاديمية القرآن الكريم والدرس النظامي' : 'Online Quran & Dars-e-Nizami', 
-          desc: language === 'ur' ? 'ناظرہ، تجوید، حفظ اور مکمل درسِ نظامی آن لائن' : language === 'ar' ? 'القرآن الكريم والعلوم الإسلامية والدرس النظامي عبر الإنترنت' : 'Online Quran recitation, Tajweed, Hifz & Dars-e-Nizami',
+          desc: language === 'ur' ? 'ناظرہ، تجوید، حفظ اور مکمل درسِ نظامی آن لائن' : language === 'ar' ? 'القرآن الكريم والعلوم الإسلامية والدرس النظامي عبر الإنترنت' : 'Online Quran recitation, Tajweed, Hifz & Dars-e-Nizami', 
           icon: BookOpen,
-          tab: 'online-services',
-          subChildren: [
-            { 
-              id: 'sub-online-quran', 
-              label: language === 'ur' ? 'آن لائن قرآن اکیڈمی' : language === 'ar' ? 'أكاديمية القرآن الكريم' : 'Online Quran Academy', 
-              tab: 'online-quran' 
-            },
-            { 
-              id: 'sub-online-dars', 
-              label: language === 'ur' ? 'آن لائن درسِ نظامی' : language === 'ar' ? 'الدرس النظامي عبر الإنترنت' : 'Online Dars-e-Nizami', 
-              tab: 'online-dars-nizami' 
-            },
-            { 
-              id: 'sub-ask-scholar', 
-              label: language === 'ur' ? 'Ask a Scholar (انگریزی سوال)' : language === 'ar' ? 'اسأل المفتي (بالإنكليزية)' : 'Ask a Scholar (English)', 
-              tab: 'ask-scholar' 
-            },
-          ]
+          tab: 'online-services'
         },
         { 
           id: 'online-contact', 
@@ -449,7 +435,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               <img 
                 src={JAMIA_HEADER_LOGO_DATA_URI || headerLogoCalligraphy} 
                 alt="جامعہ اسلامیہ ایبٹ آباد" 
-                className="h-[32px] xs:h-[38px] sm:h-[48px] md:h-[58px] lg:h-[64px] w-auto max-w-full object-contain dark:brightness-0 dark:invert dark:opacity-90"
+                className="h-[46px] xs:h-[52px] sm:h-[54px] md:h-[58px] lg:h-[64px] w-auto max-w-[210px] xs:max-w-[270px] sm:max-w-none object-contain dark:brightness-0 dark:invert dark:opacity-90 transition-all"
                 loading="eager"
                 decoding="sync"
                 onError={(e) => {
@@ -717,7 +703,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         </div>
       </div>
 
-      {/* 5. MOBILE NAVIGATION DRAWER WITH SMOOTH ACCORDION MOTION */}
+      {/* 5. MOBILE NAVIGATION DRAWER WITH SMOOTH SLIDING DRILL-DOWN MOTION */}
       <AnimatePresence>
         {mobileMenuOpen && (
           <motion.div 
@@ -729,119 +715,178 @@ export const Navbar: React.FC<NavbarProps> = ({
             dir={language === 'en' ? 'ltr' : 'rtl'}
           >
             
-            {/* Nav Items */}
-            <div className="grid grid-cols-1 gap-2">
-              {navItems.map((item) => {
-                const isExpanded = expandedMobileItem === item.id;
-                const isCurrent = currentTab === item.id || (item.id === 'online-services' && (currentTab.startsWith('online-') || currentTab === 'results' || currentTab === 'news' || currentTab === 'donations')) || (item.id === 'contact' && currentTab === 'contact');
-
-                return (
-                  <div key={item.id} className="space-y-1">
-                    <button
-                      onClick={() => {
-                        if (item.children) {
-                          setExpandedMobileItem(prev => prev === item.id ? null : item.id);
-                        } else {
-                          if ((item as any).isModal) {
-                            onOpenFatwaModal();
-                          } else {
-                            setCurrentTab(item.id);
-                          }
-                          setMobileMenuOpen(false);
-                        }
-                      }}
-                      className={`w-full text-right px-4 py-2.5 rounded-xl font-bold text-sm sm:text-base transition-all duration-200 border flex items-center justify-between cursor-pointer shadow-xs select-none ${
-                        isCurrent || isExpanded
-                          ? 'bg-[#3C2E21] text-white border-[#B88A3B]'
-                          : 'bg-white dark:bg-slate-800 text-stone-800 dark:text-stone-200 border-stone-200 dark:border-slate-700 hover:bg-[#3C2E21] hover:text-white'
-                      }`}
-                    >
-                      <span className="text-base sm:text-lg leading-normal">{item.label}</span>
-                      {item.children && (
-                        <ChevronDown 
-                          className={`w-4 h-4 transition-transform duration-300 ${
-                            isExpanded ? 'rotate-180 text-amber-200' : 'text-stone-400'
-                          }`} 
-                        />
-                      )}
-                    </button>
-
-                    {/* Mobile Sub-Items Accordion with Smooth Animation */}
-                    <AnimatePresence>
-                      {item.children && isExpanded && (
-                        <motion.div 
-                          initial={{ opacity: 0, height: 0 }}
-                          animate={{ opacity: 1, height: 'auto' }}
-                          exit={{ opacity: 0, height: 0 }}
-                          transition={{ duration: 0.26, ease: [0.16, 1, 0.3, 1] }}
-                          className="mr-2 pl-2 pr-2 border-r-2 border-[#B88A3B] space-y-1.5 my-1.5 bg-stone-100/90 dark:bg-slate-850/90 rounded-l-xl py-2 overflow-hidden"
-                        >
-                          {item.children.map((child: any) => {
-                            const isSubExpanded = expandedMobileSubItem === child.id;
-
-                            return (
-                              <div key={child.id} className="space-y-1">
-                                <button
-                                  onClick={() => {
-                                    if (child.subChildren) {
-                                      setExpandedMobileSubItem(prev => prev === child.id ? null : child.id);
-                                    } else {
-                                      if (child.isModal) {
-                                        onOpenFatwaModal();
-                                      }
-                                      if (child.tab) {
-                                        setCurrentTab(child.tab);
-                                      }
-                                      setMobileMenuOpen(false);
-                                    }
-                                  }}
-                                  className="w-full text-right px-3.5 py-2 text-sm font-bold text-slate-850 dark:text-slate-200 hover:text-[#B88A3B] flex items-center justify-between cursor-pointer rounded-lg hover:bg-stone-200/60 dark:hover:bg-slate-800 transition-colors"
-                                >
-                                  <span className="leading-[1.8]">• {child.label}</span>
-                                  {child.subChildren && (
-                                    <ChevronDown 
-                                      className={`w-3.5 h-3.5 transition-transform duration-200 ${
-                                        isSubExpanded ? 'rotate-180 text-amber-600 dark:text-amber-400' : 'text-stone-400'
-                                      }`} 
-                                    />
-                                  )}
-                                </button>
-
-                                {/* Sub-Sub Items Accordion with Smooth Animation */}
-                                <AnimatePresence>
-                                  {child.subChildren && isSubExpanded && (
-                                    <motion.div 
-                                      initial={{ opacity: 0, height: 0 }}
-                                      animate={{ opacity: 1, height: 'auto' }}
-                                      exit={{ opacity: 0, height: 0 }}
-                                      transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
-                                      className="mr-3 pr-2.5 border-r-2 border-[#B88A3B]/40 space-y-1 py-1 overflow-hidden"
-                                    >
-                                      {child.subChildren.map((sub: any) => (
-                                        <button
-                                          key={sub.id}
-                                          onClick={() => {
-                                            setCurrentTab(sub.tab);
-                                            setMobileMenuOpen(false);
-                                          }}
-                                          className="w-full text-right px-3 py-1.5 text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-300 hover:text-[#B88A3B] cursor-pointer rounded-md hover:bg-amber-100/50 dark:hover:bg-slate-800 transition-colors"
-                                        >
-                                          ▫ {sub.label}
-                                        </button>
-                                      ))}
-                                    </motion.div>
-                                  )}
-                                </AnimatePresence>
-                              </div>
-                            );
-                          })}
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
+            <AnimatePresence mode="wait">
+              {/* LEVEL 1: TOP-LEVEL MAIN CATEGORIES */}
+              {activeMobileCategory === null ? (
+                <motion.div 
+                  key="main-categories"
+                  initial={{ opacity: 0, x: language === 'en' ? -25 : 25 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: language === 'en' ? 25 : -25 }}
+                  transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+                  className="grid grid-cols-1 gap-2.5"
+                >
+                  <div className="pb-1 px-1 flex items-center justify-between text-xs text-stone-600 dark:text-stone-400 font-bold border-b border-stone-200 dark:border-slate-750">
+                    <span>{language === 'ar' ? 'اختر القسم المطلوب لتصفحه:' : language === 'en' ? 'Select section to browse:' : 'متعلقہ شعبہ یا مینو کا انتخاب کریں:'}</span>
+                    <span className="text-[#B88A3B]">{navItems.length} {language === 'ar' ? 'أقسام' : language === 'en' ? 'sections' : 'شعبہ جات'}</span>
                   </div>
-                );
-              })}
-            </div>
+
+                  {navItems.map((item) => {
+                    const isCurrent = currentTab === item.id || 
+                      (item.id === 'online-services' && (currentTab.startsWith('online-') || currentTab === 'results' || currentTab === 'news' || currentTab === 'donations' || currentTab === 'ask-scholar')) || 
+                      (item.id === 'about' && currentTab.startsWith('about-')) ||
+                      (item.id === 'fatwas' && (currentTab === 'fatwas' || currentTab.startsWith('fatwa-'))) ||
+                      (item.id === 'library' && currentTab === 'library');
+
+                    return (
+                      <button
+                        key={item.id}
+                        onClick={() => {
+                          if (item.children && item.children.length > 0) {
+                            setActiveMobileCategory(item.id);
+                          } else {
+                            if ((item as any).isModal) {
+                              onOpenFatwaModal();
+                            } else {
+                              setCurrentTab(item.id);
+                            }
+                            setMobileMenuOpen(false);
+                            setActiveMobileCategory(null);
+                          }
+                        }}
+                        className={`w-full text-right px-4 py-3 rounded-xl font-bold text-base transition-all duration-200 border flex items-center justify-between cursor-pointer shadow-xs select-none ${
+                          isCurrent
+                            ? 'bg-[#3C2E21] text-white border-[#B88A3B]'
+                            : 'bg-white dark:bg-slate-800 text-stone-800 dark:text-stone-200 border-stone-200 dark:border-slate-700 active:bg-[#3C2E21] active:text-white'
+                        }`}
+                      >
+                        <span className="text-base sm:text-lg leading-normal font-bold">{item.label}</span>
+                        
+                        <div className="flex items-center gap-2">
+                          <span className={`text-xs px-2 py-0.5 rounded-full ${isCurrent ? 'bg-[#B88A3B] text-slate-950 font-bold' : 'bg-stone-100 dark:bg-slate-700 text-[#B88A3B]'}`}>
+                            {item.children?.length || 0} {language === 'ar' ? 'فروع' : language === 'en' ? 'items' : 'صفحات'}
+                          </span>
+                          {language === 'en' ? (
+                            <ChevronRight className="w-5 h-5 text-amber-500 shrink-0" />
+                          ) : (
+                            <ChevronLeft className="w-5 h-5 text-amber-500 shrink-0" />
+                          )}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </motion.div>
+              ) : (
+                /* LEVEL 2: FOCUSED SUB-MENU VIEW FOR SELECTED CATEGORY */
+                (() => {
+                  const selectedCategory = navItems.find(item => item.id === activeMobileCategory);
+                  if (!selectedCategory) return null;
+
+                  return (
+                    <motion.div
+                      key={`category-${activeMobileCategory}`}
+                      initial={{ opacity: 0, x: language === 'en' ? 25 : -25 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: language === 'en' ? -25 : 25 }}
+                      transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+                      className="space-y-2.5"
+                    >
+                      {/* Top Bar with Back Button & Current Category Badge */}
+                      <div className="flex items-center justify-between pb-2 border-b border-stone-300 dark:border-slate-700">
+                        <button
+                          onClick={() => setActiveMobileCategory(null)}
+                          className="flex items-center gap-1.5 px-3 py-1.5 bg-[#5C4632] hover:bg-[#433324] text-[#F8F4EC] rounded-lg text-xs sm:text-sm font-bold border border-[#B88A3B] transition-colors cursor-pointer shadow-xs"
+                        >
+                          {language === 'en' ? (
+                            <ChevronLeft className="w-4 h-4 text-amber-300" />
+                          ) : (
+                            <ChevronRight className="w-4 h-4 text-amber-300" />
+                          )}
+                          <span>{language === 'ar' ? 'الرجوع للقائمة' : language === 'en' ? 'Back to Menu' : 'واپس تمام مینو'}</span>
+                        </button>
+
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm sm:text-base font-bold text-[#5C4632] dark:text-amber-300 font-urdu">
+                            {selectedCategory.label}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Sub-Items List */}
+                      <div className="grid grid-cols-1 gap-2 pt-1">
+                        {selectedCategory.children?.map((child: any) => {
+                          const ChildIcon = child.icon || Bookmark;
+                          const isChildCurrent = currentTab === child.tab;
+
+                          return (
+                            <div key={child.id} className="space-y-1.5">
+                              <button
+                                onClick={() => {
+                                  if (child.isModal) {
+                                    onOpenFatwaModal();
+                                  }
+                                  if (child.tab) {
+                                    setCurrentTab(child.tab);
+                                  }
+                                  setMobileMenuOpen(false);
+                                  setActiveMobileCategory(null);
+                                }}
+                                className={`w-full text-right p-3 rounded-xl transition-all duration-200 border flex items-center justify-between cursor-pointer shadow-xs select-none ${
+                                  isChildCurrent
+                                    ? 'bg-[#3C2E21] text-white border-[#B88A3B]'
+                                    : 'bg-white dark:bg-slate-800 text-stone-800 dark:text-stone-200 border-stone-200 dark:border-slate-700 active:bg-stone-100'
+                                }`}
+                              >
+                                <div className="flex items-start gap-2.5">
+                                  <div className="p-1.5 rounded-lg bg-[#B88A3B]/15 text-[#B88A3B] shrink-0 mt-0.5">
+                                    <ChildIcon className="w-4 h-4" />
+                                  </div>
+                                  <div>
+                                    <span className="text-sm sm:text-base font-bold block leading-snug">
+                                      {child.label}
+                                    </span>
+                                    {child.desc && (
+                                      <span className="text-[11px] text-stone-500 dark:text-stone-400 block leading-tight mt-0.5 line-clamp-1">
+                                        {child.desc}
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+                                {language === 'en' ? (
+                                  <ChevronRight className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
+                                ) : (
+                                  <ChevronLeft className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
+                                )}
+                              </button>
+
+                              {/* Department Sub-Faculty tags if applicable */}
+                              {child.subChildren && (
+                                <div className="mr-2 sm:mr-3 pr-2 border-r-2 border-[#B88A3B]/40 grid grid-cols-1 gap-1 pt-1">
+                                  {child.subChildren.map((sub: any) => (
+                                    <button
+                                      key={sub.id}
+                                      onClick={() => {
+                                        setCurrentTab(sub.tab);
+                                        setMobileMenuOpen(false);
+                                        setActiveMobileCategory(null);
+                                      }}
+                                      className="w-full text-right px-3 py-1.5 text-xs font-bold text-stone-700 dark:text-stone-300 hover:text-[#B88A3B] bg-stone-100 dark:bg-slate-800/60 rounded-md border border-stone-200 dark:border-slate-700 cursor-pointer flex items-center justify-between"
+                                    >
+                                      <span>▫ {sub.label}</span>
+                                      <span className="text-[10px] text-amber-600 dark:text-amber-400">{sub.desc ? '←' : ''}</span>
+                                    </button>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </motion.div>
+                  );
+                })()
+              )}
+            </AnimatePresence>
 
           </motion.div>
         )}

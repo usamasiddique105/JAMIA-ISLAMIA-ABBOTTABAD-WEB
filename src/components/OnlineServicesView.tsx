@@ -219,6 +219,7 @@ export const OnlineServicesView: React.FC<OnlineServicesViewProps> = ({
     { 
       id: 'online-quran', 
       label: isAr ? 'القرآن الكريم عبر الإنترنت (تجويد وحفظ)' : isEn ? 'Online Quran (Tajweed & Hifz)' : 'آن لائن قرآن کریم (تجوید و حفظ)', 
+      shortLabel: isAr ? 'القرآن الكريم' : isEn ? 'Online Quran' : 'آن لائن قرآن',
       icon: BookOpen,
       badge: isAr ? 'شائع' : isEn ? 'Popular' : 'پاپولر',
       desc: isAr ? 'ناظرة، تجويد، حفظ وأدعية مأثورة' : isEn ? 'Nazra, Tajweed, Hifz & Masnoon Duas' : 'ناظرہ، تجوید، حفظ اور مسنون دعائیں'
@@ -226,6 +227,7 @@ export const OnlineServicesView: React.FC<OnlineServicesViewProps> = ({
     { 
       id: 'online-dars-nizami', 
       label: isAr ? 'الدرس النظامي عبر الإنترنت' : isEn ? 'Online Dars-e-Nizami' : 'درسِ نظامی آن لائن', 
+      shortLabel: isAr ? 'الدرس النظامي' : isEn ? 'Dars-e-Nizami' : 'درسِ نظامی',
       icon: GraduationCap,
       badge: isAr ? 'دورة شاملة' : isEn ? 'Full Course' : 'جامع کورس',
       desc: isAr ? 'النحو، الصرف، الفقه، التفسير والحديث الشريف' : isEn ? 'Grammar, Fiqh, Tafseer & Hadith' : 'نحو، صرف، فقہ، تفسیر و حدیث شریف'
@@ -233,6 +235,7 @@ export const OnlineServicesView: React.FC<OnlineServicesViewProps> = ({
     { 
       id: 'online-trial', 
       label: isAr ? 'حصة تجريبية مجانية' : isEn ? 'Free Trial Class' : 'مفت آزمائشی کلاس', 
+      shortLabel: isAr ? 'حصة تجريبية' : isEn ? 'Free Trial' : 'مفت آزمائشی کلاس',
       icon: Zap,
       badge: isAr ? '٣ أيام مجاناً' : isEn ? '3 Days Free' : '۳ دن مفت',
       desc: isAr ? 'احصل على حصة تجريبية مجانية لمدة 3 أيام' : isEn ? 'Get a 3-day free trial class' : '3 دن کی مفت ٹرائل کلاس حاصل کریں'
@@ -246,6 +249,7 @@ export const OnlineServicesView: React.FC<OnlineServicesViewProps> = ({
     { id: 'online-fiqh', label: isAr ? 'الفقه والعلوم الإسلامية' : isEn ? 'Fiqh & Islamic Law' : 'فقہ و اسلامیات', icon: ShieldCheck },
     { id: 'online-tafseer', label: isAr ? 'تفسير القرآن الكريم' : isEn ? 'Quran Tafseer' : 'تفسیر القرآن', icon: Sparkles },
     { id: 'online-hadith', label: isAr ? 'الحديث الشريف وأصوله' : isEn ? 'Hadith Studies' : 'حدیث شریف', icon: Book },
+    { id: 'ask-scholar', label: isAr ? 'اسأل المفتي (Ask a Scholar)' : isEn ? 'Ask a Scholar' : 'اسک اے مفتی (Ask a Scholar)', icon: HelpCircle },
   ];
 
   const onlineFaqs = [
@@ -362,8 +366,45 @@ export const OnlineServicesView: React.FC<OnlineServicesViewProps> = ({
       </div>
 
       {/* 3 CORE ACADEMIC TABS (آن لائن قرآن، درسِ نظامی، مفت آزمائشی کلاس) */}
-      <div className="bg-[#F8F4EC] dark:bg-slate-900 border-2 border-[#B88A3B] rounded-2xl p-2.5 sm:p-4 shadow-md">
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
+      {/* Mobile Compact Tab Bar (Single row, prevents huge vertical stacking) */}
+      <div className="sm:hidden bg-[#F8F4EC] dark:bg-slate-900 border-2 border-[#B88A3B] rounded-2xl p-1.5 shadow-md">
+        <div className="grid grid-cols-3 gap-1.5">
+          {primaryTabsList.map((tab) => {
+            const IconComponent = tab.icon;
+            const isSelected = primaryTab === tab.id;
+
+            return (
+              <button
+                key={tab.id}
+                onClick={() => handlePrimaryTabChange(tab.id)}
+                className={`py-2 px-1 rounded-xl text-center transition-all flex flex-col items-center justify-center gap-1 cursor-pointer relative ${
+                  isSelected
+                    ? 'bg-[#5C4632] text-[#F8F4EC] border-2 border-[#B88A3B] shadow-md'
+                    : 'bg-white dark:bg-slate-800 text-stone-800 dark:text-stone-300 border border-stone-200 dark:border-slate-700 active:bg-stone-50'
+                }`}
+              >
+                <div className={`p-1.5 rounded-lg ${isSelected ? 'bg-[#B88A3B] text-slate-950 shadow-xs' : 'bg-[#5C4632]/10 dark:bg-slate-700 text-[#5C4632] dark:text-amber-300'}`}>
+                  <IconComponent className="w-4 h-4" />
+                </div>
+                <span className={`text-[11px] leading-tight font-bold ${fontClass} line-clamp-1 ${isSelected ? 'text-[#B88A3B]' : 'text-stone-900 dark:text-stone-100'}`}>
+                  {tab.shortLabel || tab.label}
+                </span>
+                <span className={`text-[9px] ${fontClass} font-semibold px-1.5 py-0.2 rounded-full border ${
+                  isSelected 
+                    ? 'bg-[#B88A3B]/30 text-[#B88A3B] border-[#B88A3B]/50' 
+                    : 'bg-stone-100 dark:bg-slate-700 text-stone-500 dark:text-stone-400 border-stone-200 dark:border-slate-600'
+                }`}>
+                  {tab.badge}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Desktop Rich Cards (Visible on tablet & desktop) */}
+      <div className="hidden sm:block bg-[#F8F4EC] dark:bg-slate-900 border-2 border-[#B88A3B] rounded-2xl p-3 sm:p-4 shadow-md">
+        <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
           {primaryTabsList.map((tab) => {
             const IconComponent = tab.icon;
             const isSelected = primaryTab === tab.id;
@@ -725,6 +766,44 @@ export const OnlineServicesView: React.FC<OnlineServicesViewProps> = ({
                   </ul>
                   <button onClick={() => handlePrimaryTabChange('online-trial')} className={`w-full mt-2 py-1.5 bg-[#5C4632] text-white text-xs ${fontClass} font-bold rounded-lg hover:bg-[#433324] cursor-pointer`}>
                     {isAr ? 'التسجيل في مادة الحديث' : isEn ? 'Enroll in Hadith Course' : 'اس مضمون میں داخلہ لیں'}
+                  </button>
+                </div>
+              )}
+
+              {/* 5. Ask a Mufti / Scholar */}
+              {(darsSubCourse === 'all' || darsSubCourse === 'ask-scholar') && (
+                <div className="bg-[#F8F4EC] dark:bg-slate-900 border-2 border-[#B88A3B]/60 rounded-xl p-5 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className={`px-2.5 py-0.5 bg-[#B88A3B] text-slate-950 text-xs font-bold ${fontClass} rounded-full`}>
+                      {isAr ? 'خدمة الاستفتاء' : isEn ? 'Ask a Mufti' : 'اسک اے مفتی'}
+                    </span>
+                    <HelpCircle className="w-5 h-5 text-[#B88A3B]" />
+                  </div>
+                  <h3 className={`text-lg font-bold ${fontClass} text-[#5C4632] dark:text-amber-300`}>
+                    {isAr ? 'اسأل المفتي والعالم (Ask a Scholar)' : isEn ? 'Ask a Scholar (Direct Questioning)' : 'اسک اے مفتی و عالم (Ask a Scholar)'}
+                  </h3>
+                  <p className={`text-xs ${fontClass} text-stone-700 dark:text-stone-300 leading-relaxed`}>
+                    {isAr 
+                      ? 'طرح الأسئلة الشرعية والفقهية باللغة الإنكليزية والأردية وتلقي الإجابات الفقهية المعتمدة من علماء ومفتيي الجامعة.' 
+                      : isEn 
+                      ? 'Submit religious and Fiqhi questions in English or Urdu directly to qualified scholars and Muftis of Jamia Islamia.' 
+                      : 'انگریزی یا اردو میں مفتیانِ کرام اور علماءِ جامعہ سے دینی و شرعی رہنمائی اور سوالات کا فوری مصدقہ جواب حاصل کریں۔'}
+                  </p>
+                  <ul className={`space-y-1.5 text-xs ${fontClass} text-stone-800 dark:text-stone-200`}>
+                    <li className="flex items-center gap-2"><CheckCircle2 className="w-3.5 h-3.5 text-[#B88A3B]" /> {isAr ? 'إجابات شرعية معتمدة ومحققة' : isEn ? 'Authentic certified Islamic answers' : 'مستند اور محقق شرعی جوابات'}</li>
+                    <li className="flex items-center gap-2"><CheckCircle2 className="w-3.5 h-3.5 text-[#B88A3B]" /> {isAr ? 'تواصل باللغتين الأردية والإنكليزية' : isEn ? 'Support in English and Urdu' : 'اردو اور انگریزی زبان میں سوال کی سہولت'}</li>
+                  </ul>
+                  <button 
+                    onClick={() => {
+                      if (setCurrentTab) {
+                        setCurrentTab('ask-scholar');
+                      } else if (onOpenFatwaModal) {
+                        onOpenFatwaModal();
+                      }
+                    }} 
+                    className={`w-full mt-2 py-1.5 bg-[#B88A3B] hover:bg-[#a17831] text-slate-950 text-xs ${fontClass} font-bold rounded-lg transition-colors cursor-pointer`}
+                  >
+                    {isAr ? 'طرح سؤالك الآن (Ask a Scholar)' : isEn ? 'Ask a Scholar Now' : 'سوال پوچھیں (Ask a Scholar)'}
                   </button>
                 </div>
               )}
