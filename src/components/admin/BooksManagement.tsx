@@ -273,8 +273,8 @@ export const BooksManagement: React.FC<BooksManagementProps> = ({
 
       {/* Add / Edit Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-white dark:bg-slate-900 rounded-3xl border-2 border-[#B88A3B]/40 max-w-2xl w-full p-6 sm:p-8 space-y-5 shadow-2xl my-8">
+        <div className="fixed inset-0 z-[9999] bg-slate-950/80 backdrop-blur-xs flex items-center justify-center p-3 sm:p-6 overflow-y-auto" dir="rtl">
+          <div className="bg-white dark:bg-slate-900 rounded-3xl border-2 border-[#B88A3B]/40 max-w-2xl w-full p-5 sm:p-8 space-y-5 shadow-2xl my-auto max-h-[calc(100vh-2rem)] overflow-y-auto">
             
             <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
               <h3 className="text-lg font-black text-[#5C4632] dark:text-amber-300 flex items-center gap-2">

@@ -175,7 +175,7 @@ export const FatwaDetailModal: React.FC<FatwaDetailModalProps> = ({ fatwa: initi
 
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center p-2 sm:p-4 bg-slate-950/80 backdrop-blur-xs overflow-y-auto" dir={activeDir}>
-      <div className={`bg-[#FCFAF6] dark:bg-slate-900 text-stone-900 dark:text-stone-100 rounded-2xl max-w-4xl w-full border-2 border-[#D5C29E] dark:border-slate-800 shadow-2xl overflow-hidden my-4 max-h-[92vh] flex flex-col ${fontClass}`}>
+      <div className={`bg-[#FCFAF6] dark:bg-slate-900 text-stone-900 dark:text-stone-100 rounded-2xl max-w-4xl w-full border-2 border-[#D5C29E] dark:border-slate-800 shadow-2xl overflow-hidden my-auto max-h-[calc(100vh-2rem)] flex flex-col ${fontClass}`}>
         
         {/* Top Control Bar (No Print) */}
         <div className="bg-[#3D2817] dark:bg-slate-950 text-amber-100 p-3 px-5 flex items-center justify-between border-b border-[#B88A3B]/40 no-print">

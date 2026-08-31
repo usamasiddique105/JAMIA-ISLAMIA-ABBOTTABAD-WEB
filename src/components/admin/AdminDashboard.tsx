@@ -384,7 +384,8 @@ export const AdminDashboard: React.FC = () => {
       if (res.titleAr) setNewFatwaTitleAr(res.titleAr);
       if (res.questionAr) setNewFatwaQuestionAr(res.questionAr);
       if (res.answerAr) setNewFatwaAnswerAr(res.answerAr);
-      setNewFatwaIsApproved(true);
+      // STRICT RULE: Do not auto-approve AI translations. Keep as pending review draft unless explicitly checked.
+      setNewFatwaIsApproved(false);
     } catch (e: any) {
       console.error(e);
       const msg = e?.message || 'AI ترجمہ سروس سے رابطہ نہیں ہو سکا۔';
@@ -397,6 +398,8 @@ export const AdminDashboard: React.FC = () => {
   const handleCreateFatwa = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newFatwaTitleUr || !newFatwaAnswerUr) return;
+
+    const hasTranslation = Boolean(newFatwaTitleEn || newFatwaAnswerEn || newFatwaTitleAr || newFatwaAnswerAr);
 
     if (editingFatwa) {
       // Update existing fatwa
@@ -422,7 +425,8 @@ export const AdminDashboard: React.FC = () => {
         },
         arabicText: newFatwaArabic || undefined,
         muftiName: newFatwaMufti || editingFatwa.muftiName || 'جامعہ اسلامیہ ایبٹ آباد',
-        isTranslationApproved: newFatwaIsApproved,
+        isAiTranslatedEn: hasTranslation ? true : editingFatwa.isAiTranslatedEn,
+        isTranslationApproved: Boolean(newFatwaIsApproved),
         translationApprovedBy: newFatwaIsApproved ? (currentUser?.email || AUTHORIZED_ADMIN_EMAIL) : undefined,
       };
 
@@ -453,7 +457,8 @@ export const AdminDashboard: React.FC = () => {
         muftiName: newFatwaMufti || 'جامعہ اسلامیہ ایبٹ آباد',
         status: 'Published',
         views: 1,
-        isTranslationApproved: newFatwaIsApproved,
+        isAiTranslatedEn: hasTranslation,
+        isTranslationApproved: Boolean(newFatwaIsApproved),
         translationApprovedBy: newFatwaIsApproved ? (currentUser?.email || AUTHORIZED_ADMIN_EMAIL) : undefined,
       };
 
@@ -1791,8 +1796,8 @@ export const AdminDashboard: React.FC = () => {
 
       {/* Add / Edit Fatwa Modal */}
       {showAddFatwa && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-xs font-urdu" dir="rtl">
-          <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl max-w-2xl w-full border border-amber-300 dark:border-amber-700 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-6 bg-slate-950/80 backdrop-blur-xs font-urdu overflow-y-auto" dir="rtl">
+          <div className="bg-white dark:bg-slate-900 p-5 sm:p-6 rounded-2xl max-w-2xl w-full border border-amber-300 dark:border-amber-700 shadow-2xl space-y-4 my-auto max-h-[calc(100vh-2rem)] overflow-y-auto">
             <div className="flex items-center justify-between border-b border-stone-200 dark:border-slate-800 pb-3">
               <h3 className="font-bold text-lg text-emerald-950 dark:text-emerald-100 flex items-center gap-2">
                 {editingFatwa ? (
@@ -2065,8 +2070,8 @@ export const AdminDashboard: React.FC = () => {
 
       {/* Add Result Modal */}
       {showAddResult && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-xs font-urdu">
-          <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl max-w-xl w-full border border-amber-300 space-y-4">
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-6 bg-slate-950/80 backdrop-blur-xs font-urdu overflow-y-auto" dir="rtl">
+          <div className="bg-white dark:bg-slate-900 p-5 sm:p-6 rounded-2xl max-w-xl w-full border border-amber-300 dark:border-slate-700 shadow-2xl space-y-4 my-auto max-h-[calc(100vh-2rem)] overflow-y-auto">
             <h3 className="font-bold text-lg text-emerald-950 dark:text-emerald-100">امتحانی نتیجہ شامل کریں</h3>
 
             <form onSubmit={handleCreateResult} className="space-y-3 text-xs">

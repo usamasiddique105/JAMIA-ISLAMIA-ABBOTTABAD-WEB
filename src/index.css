@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* Enforce class-based dark mode so OS dark mode does not override default light theme */
+@custom-variant dark (&:where(.dark, .dark *));
+
 /* 1. Mehr Nastaliq Web Font System (Top Priority) */
 @font-face {
   font-family: 'Mehr Nastaliq';

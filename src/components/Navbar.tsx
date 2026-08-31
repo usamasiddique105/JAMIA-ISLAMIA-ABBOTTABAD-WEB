@@ -421,7 +421,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             <button 
               onClick={() => setDarkMode(!darkMode)}
               className="h-6 w-6 sm:h-7 sm:w-7 flex items-center justify-center rounded border border-[#85674B]/70 sm:border-transparent text-amber-200 hover:text-white bg-[#6B5138]/60 hover:bg-[#6B5138] sm:bg-transparent transition-all cursor-pointer shrink-0 active:scale-95"
-              title="Toggle theme"
+              title={darkMode ? (language === 'ur' ? 'دن کا موڈ (Light Mode)' : language === 'ar' ? 'الوضع النهاري' : 'Switch to Light Mode') : (language === 'ur' ? 'رات کا موڈ (Dark Mode)' : language === 'ar' ? 'الوضع الليلي' : 'Switch to Dark Mode')}
               aria-label="Toggle dark/light mode"
             >
               {darkMode ? <Sun className="w-3.5 h-3.5" /> : <Moon className="w-3.5 h-3.5" />}

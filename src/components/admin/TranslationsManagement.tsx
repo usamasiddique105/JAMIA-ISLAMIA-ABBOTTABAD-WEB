@@ -592,8 +592,8 @@ export const TranslationsManagement: React.FC<TranslationsManagementProps> = ({
 
       {/* FATWA EDIT & APPROVAL MODAL */}
       {editingFatwa && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-5 overflow-y-auto">
-          <div className="bg-white dark:bg-slate-900 border border-stone-300 dark:border-slate-700 rounded-2xl w-full max-w-4xl p-5 sm:p-6 shadow-2xl space-y-5 my-8">
+        <div className="fixed inset-0 z-[9999] bg-slate-950/80 backdrop-blur-xs flex items-center justify-center p-3 sm:p-6 overflow-y-auto" dir="rtl">
+          <div className="bg-white dark:bg-slate-900 border border-stone-300 dark:border-slate-700 rounded-2xl w-full max-w-4xl p-5 sm:p-6 shadow-2xl space-y-5 my-auto max-h-[calc(100vh-2rem)] overflow-y-auto">
             
             <div className="flex items-center justify-between border-b border-stone-200 dark:border-slate-800 pb-3">
               <div className="flex items-center gap-2">
@@ -707,8 +707,8 @@ export const TranslationsManagement: React.FC<TranslationsManagementProps> = ({
 
       {/* NEWS EDIT & APPROVAL MODAL */}
       {editingNews && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-5 overflow-y-auto">
-          <div className="bg-white dark:bg-slate-900 border border-stone-300 dark:border-slate-700 rounded-2xl w-full max-w-3xl p-5 sm:p-6 shadow-2xl space-y-4 my-8">
+        <div className="fixed inset-0 z-[9999] bg-slate-950/80 backdrop-blur-xs flex items-center justify-center p-3 sm:p-6 overflow-y-auto" dir="rtl">
+          <div className="bg-white dark:bg-slate-900 border border-stone-300 dark:border-slate-700 rounded-2xl w-full max-w-3xl p-5 sm:p-6 shadow-2xl space-y-4 my-auto max-h-[calc(100vh-2rem)] overflow-y-auto">
             <div className="flex items-center justify-between border-b border-stone-200 dark:border-slate-800 pb-3">
               <h3 className="text-lg font-bold font-nastaliq">مضمون/خبر کے ترجمہ کی تصدیق</h3>
               <button onClick={() => setEditingNews(null)} className="p-1 text-stone-400">
