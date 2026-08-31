@@ -244,6 +244,7 @@ export interface SiteSettings {
   webhookUrl?: string;
   enableEmailNotifications?: boolean;
   enableWhatsAppNotifications?: boolean;
+  geminiApiKey?: string;
   address: string;
   city: string;
   registrationNumber?: string;

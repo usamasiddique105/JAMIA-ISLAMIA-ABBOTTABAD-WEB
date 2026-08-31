@@ -1209,12 +1209,15 @@ export const onRequest: PagesFunction<Env> = async (context) => {
 
   // 17. Fatwa AI Translation Endpoint
   if (path === '/api/translate-fatwa' && method === 'POST') {
-    const apiKey = env.GEMINI_API_KEY || env.GEMINI_KEY || env.GOOGLE_API_KEY || env.VITE_GEMINI_API_KEY;
+    let apiKey = env.GEMINI_API_KEY || env.GEMINI_KEY || env.GOOGLE_API_KEY || env.VITE_GEMINI_API_KEY;
     const body = (await request.json().catch(() => ({}))) as {
       fatwaId?: string;
+      contentType?: string;
       titleUr?: string;
       questionUr?: string;
       answerUr?: string;
+      contentUr?: string;
+      geminiApiKey?: string;
     };
 
     const { 
@@ -1223,8 +1226,23 @@ export const onRequest: PagesFunction<Env> = async (context) => {
       titleUr = '', 
       questionUr = '', 
       answerUr = '',
-      contentUr = ''
+      contentUr = '',
+      geminiApiKey = ''
     } = body;
+
+    if (!apiKey && geminiApiKey) {
+      apiKey = geminiApiKey.trim();
+    }
+
+    if (!apiKey) {
+      try {
+        const row = await d1.prepare("SELECT data_json FROM site_settings WHERE id = 'main'").first<{ data_json: string }>();
+        if (row?.data_json) {
+          const parsed = JSON.parse(row.data_json);
+          if (parsed.geminiApiKey) apiKey = parsed.geminiApiKey.trim();
+        }
+      } catch {}
+    }
 
     const isArticle = contentType === 'article' || Boolean(contentUr && !answerUr);
     const effectiveContent = isArticle ? (contentUr || answerUr) : answerUr;
@@ -1236,7 +1254,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     if (!apiKey) {
       return json({
         success: false,
-        error: 'Cloudflare Pages میں GEMINI_API_KEY ترتیب نہیں دیا گیا۔ برائے مہربانی Cloudflare Pages Settings -> Environment Variables میں GEMINI_API_KEY کی قدر شامل فرمائیں۔',
+        error: 'Cloudflare Pages میں GEMINI_API_KEY ترتیب نہیں دیا گیا۔ برائے مہربانی Cloudflare Pages Settings -> Environment Variables میں GEMINI_API_KEY شامل فرمائیں، یا ایڈمن سیٹنگز میں Gemini API Key درج کریں۔',
       }, 500);
     }
 

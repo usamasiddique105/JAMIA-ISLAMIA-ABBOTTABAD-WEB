@@ -17,18 +17,36 @@ export const onRequestPost = async (context: PagesContext<Env>): Promise<Respons
   };
 
   try {
-    const apiKey = context.env.GEMINI_API_KEY || (context.env as any).GEMINI_KEY || (context.env as any).GOOGLE_API_KEY || (context.env as any).VITE_GEMINI_API_KEY;
+    let apiKey = context.env.GEMINI_API_KEY || (context.env as any).GEMINI_KEY || (context.env as any).GOOGLE_API_KEY || (context.env as any).VITE_GEMINI_API_KEY;
 
     const body = (await context.request.json().catch(() => ({}))) as {
       fatwaId?: string;
+      contentType?: string;
       titleUr?: string;
       questionUr?: string;
       answerUr?: string;
+      contentUr?: string;
+      geminiApiKey?: string;
     };
 
-    const { titleUr = '', questionUr = '', answerUr = '' } = body;
+    const { 
+      fatwaId = null,
+      contentType = 'fatwa',
+      titleUr = '', 
+      questionUr = '', 
+      answerUr = '',
+      contentUr = '',
+      geminiApiKey = ''
+    } = body;
 
-    if (!titleUr && !questionUr && !answerUr) {
+    if (!apiKey && geminiApiKey) {
+      apiKey = geminiApiKey.trim();
+    }
+
+    const isArticle = contentType === 'article' || Boolean(contentUr && !answerUr);
+    const effectiveContent = isArticle ? (contentUr || answerUr) : answerUr;
+
+    if (!titleUr && !questionUr && !effectiveContent) {
       return new Response(
         JSON.stringify({ success: false, error: 'ترجمہ کے لیے اردو متن درکار ہے۔' }),
         { status: 400, headers }
@@ -39,26 +57,46 @@ export const onRequestPost = async (context: PagesContext<Env>): Promise<Respons
       return new Response(
         JSON.stringify({
           success: false,
-          error: 'Cloudflare Pages میں GEMINI_API_KEY ترتیب نہیں دیا گیا۔ برائے مہربانی Cloudflare Pages Settings -> Environment Variables میں GEMINI_API_KEY کی قدر شامل فرمائیں۔',
+          error: 'Cloudflare Pages میں GEMINI_API_KEY ترتیب نہیں دیا گیا۔ برائے مہربانی Cloudflare Pages Settings -> Environment Variables میں GEMINI_API_KEY شامل فرمائیں، یا ایڈمن سیٹنگز میں Gemini API Key درج کریں۔',
         }),
         { status: 500, headers }
       );
     }
 
-    const prompt = `You are a certified Islamic scholar and English translator for Darul Ifta, Jamia Islamia Abbottabad.
-Translate the following Urdu Fatwa (Islamic Legal Verdict) into clear, dignified, academic English.
+    const prompt = isArticle
+      ? `You are an expert Islamic scholar and scholarly translator for Darul Ifta Jamia Islamia Abbottabad.
+Translate the following Islamic Article / News from Urdu into clear, formal, academic English AND authentic classical Islamic Arabic.
+System Directive: یہ ایک اسلامی فتویٰ/مضمون کا متن ہے۔ اسے واضح، رسمی اور مکمل درست [انگریزی/عربی] میں ترجمہ کریں۔ فقہی اصطلاحات (حلال، حرام، مکروہ، واجب وغیرہ) کا مفہوم ہرگز تبدیل نہ کریں، نہ کوئی نیا مفہوم شامل کریں۔
+
+Urdu Input:
+Title: ${titleUr || 'N/A'}
+Content: ${effectiveContent || 'N/A'}
+
+Return ONLY a valid JSON object without markdown fences:
+{
+  "titleEn": "...",
+  "contentEn": "...",
+  "titleAr": "...",
+  "contentAr": "..."
+}`
+      : `You are an expert Islamic jurist and scholarly translator for Darul Ifta Jamia Islamia Abbottabad.
+Translate the following Islamic Fatwa (Sharia ruling) from Urdu into clear, dignified English AND authentic classical Islamic Arabic.
 Accurately convey Hanafi jurisprudence terms (e.g., Nikah, Talaq, Wudu, Ghusl, Salah, Halal, Haram, Wajib, Makruh, Sunnah, Khuntha, Iddah, Zakat, Sadaqah).
+System Directive: یہ ایک اسلامی فتویٰ/مضمون کا متن ہے۔ اسے واضح، رسمی اور مکمل درست [انگریزی/عربی] میں ترجمہ کریں۔ فقہی اصطلاحات (حلال، حرام، مکروہ، واجب وغیرہ) کا مفہوم ہرگز تبدیل نہ کریں، نہ کوئی نیا مفہوم شامل کریں۔
 
 Urdu Input:
 Title: ${titleUr || 'N/A'}
 Question: ${questionUr || 'N/A'}
-Answer: ${answerUr || 'N/A'}
+Answer: ${effectiveContent || 'N/A'}
 
-Return ONLY a valid JSON object without markdown fences, with these exact keys:
+Return ONLY a valid JSON object without markdown fences:
 {
   "titleEn": "...",
   "questionEn": "...",
-  "answerEn": "..."
+  "answerEn": "...",
+  "titleAr": "...",
+  "questionAr": "...",
+  "answerAr": "..."
 }`;
 
     const models = [
@@ -116,9 +154,16 @@ Return ONLY a valid JSON object without markdown fences, with these exact keys:
       JSON.stringify({
         success: true,
         data: {
+          id: fatwaId,
           titleEn: parsed.titleEn || titleUr,
           questionEn: parsed.questionEn || questionUr,
-          answerEn: parsed.answerEn || answerUr,
+          answerEn: parsed.answerEn || parsed.contentEn || effectiveContent,
+          contentEn: parsed.contentEn || parsed.answerEn || effectiveContent,
+          titleAr: parsed.titleAr || titleUr,
+          questionAr: parsed.questionAr || questionUr,
+          answerAr: parsed.answerAr || parsed.contentAr || effectiveContent,
+          contentAr: parsed.contentAr || parsed.answerAr || effectiveContent,
+          translatedAt: new Date().toISOString(),
         },
       }),
       { status: 200, headers }

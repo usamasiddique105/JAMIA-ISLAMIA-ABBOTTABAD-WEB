@@ -172,10 +172,13 @@ export const AdminDashboard: React.FC = () => {
   const [newFatwaDate, setNewFatwaDate] = useState(new Date().toISOString().split('T')[0]);
   const [newFatwaTitleUr, setNewFatwaTitleUr] = useState('');
   const [newFatwaTitleEn, setNewFatwaTitleEn] = useState('');
+  const [newFatwaTitleAr, setNewFatwaTitleAr] = useState('');
   const [newFatwaQuestionUr, setNewFatwaQuestionUr] = useState('');
   const [newFatwaQuestionEn, setNewFatwaQuestionEn] = useState('');
+  const [newFatwaQuestionAr, setNewFatwaQuestionAr] = useState('');
   const [newFatwaAnswerUr, setNewFatwaAnswerUr] = useState('');
   const [newFatwaAnswerEn, setNewFatwaAnswerEn] = useState('');
+  const [newFatwaAnswerAr, setNewFatwaAnswerAr] = useState('');
   const [newFatwaArabic, setNewFatwaArabic] = useState('');
   const [newFatwaCat, setNewFatwaCat] = useState<FatwaCategory>('General Fiqh');
   const [newFatwaMufti, setNewFatwaMufti] = useState('جامعہ اسلامیہ ایبٹ آباد');
@@ -310,10 +313,13 @@ export const AdminDashboard: React.FC = () => {
     setNewFatwaDate(new Date().toISOString().split('T')[0]);
     setNewFatwaTitleUr('');
     setNewFatwaTitleEn('');
+    setNewFatwaTitleAr('');
     setNewFatwaQuestionUr('');
     setNewFatwaQuestionEn('');
+    setNewFatwaQuestionAr('');
     setNewFatwaAnswerUr('');
     setNewFatwaAnswerEn('');
+    setNewFatwaAnswerAr('');
     setNewFatwaArabic('');
     setNewFatwaCat('General Fiqh');
     setNewFatwaMufti('جامعہ اسلامیہ ایبٹ آباد');
@@ -327,10 +333,13 @@ export const AdminDashboard: React.FC = () => {
     setNewFatwaDate(f.date || new Date().toISOString().split('T')[0]);
     setNewFatwaTitleUr(f.title?.ur || f.title?.en || '');
     setNewFatwaTitleEn(f.title?.en || '');
+    setNewFatwaTitleAr(f.title?.ar || '');
     setNewFatwaQuestionUr(f.question?.ur || f.question?.en || '');
     setNewFatwaQuestionEn(f.question?.en || '');
+    setNewFatwaQuestionAr(f.question?.ar || '');
     setNewFatwaAnswerUr(f.answer?.ur || f.answer?.en || '');
     setNewFatwaAnswerEn(f.answer?.en || '');
+    setNewFatwaAnswerAr(f.answer?.ar || '');
     setNewFatwaArabic(f.arabicText || '');
     setNewFatwaCat(f.category || 'General Fiqh');
     setNewFatwaMufti(f.muftiName || 'جامعہ اسلامیہ ایبٹ آباد');
@@ -372,6 +381,9 @@ export const AdminDashboard: React.FC = () => {
       setNewFatwaTitleEn(res.titleEn);
       setNewFatwaQuestionEn(res.questionEn);
       setNewFatwaAnswerEn(res.answerEn);
+      if (res.titleAr) setNewFatwaTitleAr(res.titleAr);
+      if (res.questionAr) setNewFatwaQuestionAr(res.questionAr);
+      if (res.answerAr) setNewFatwaAnswerAr(res.answerAr);
       setNewFatwaIsApproved(true);
     } catch (e: any) {
       console.error(e);
@@ -395,18 +407,18 @@ export const AdminDashboard: React.FC = () => {
         title: { 
           ur: newFatwaTitleUr, 
           en: newFatwaTitleEn || editingFatwa.title?.en || newFatwaTitleUr, 
-          ar: editingFatwa.title?.ar || newFatwaTitleUr 
+          ar: newFatwaTitleAr || editingFatwa.title?.ar || newFatwaTitleUr 
         },
         question: { 
           ur: newFatwaQuestionUr || 'سوال', 
           en: newFatwaQuestionEn || editingFatwa.question?.en || newFatwaQuestionUr, 
-          ar: editingFatwa.question?.ar || newFatwaQuestionUr 
+          ar: newFatwaQuestionAr || editingFatwa.question?.ar || newFatwaQuestionUr 
         },
         category: newFatwaCat,
         answer: { 
           ur: newFatwaAnswerUr, 
           en: newFatwaAnswerEn || editingFatwa.answer?.en || newFatwaAnswerUr, 
-          ar: editingFatwa.answer?.ar || newFatwaAnswerUr 
+          ar: newFatwaAnswerAr || editingFatwa.answer?.ar || newFatwaAnswerUr 
         },
         arabicText: newFatwaArabic || undefined,
         muftiName: newFatwaMufti || editingFatwa.muftiName || 'جامعہ اسلامیہ ایبٹ آباد',
@@ -423,18 +435,18 @@ export const AdminDashboard: React.FC = () => {
         title: { 
           ur: newFatwaTitleUr, 
           en: newFatwaTitleEn || newFatwaTitleUr, 
-          ar: newFatwaTitleUr 
+          ar: newFatwaTitleAr || newFatwaTitleUr 
         },
         question: { 
           ur: newFatwaQuestionUr || 'سوال', 
           en: newFatwaQuestionEn || newFatwaQuestionUr, 
-          ar: newFatwaQuestionUr 
+          ar: newFatwaQuestionAr || newFatwaQuestionUr 
         },
         category: newFatwaCat,
         answer: { 
           ur: newFatwaAnswerUr, 
           en: newFatwaAnswerEn || newFatwaAnswerUr, 
-          ar: newFatwaAnswerUr 
+          ar: newFatwaAnswerAr || newFatwaAnswerUr 
         },
         arabicText: newFatwaArabic || undefined,
         date: newFatwaDate || new Date().toISOString().split('T')[0],
@@ -1887,58 +1899,106 @@ export const AdminDashboard: React.FC = () => {
                 ></textarea>
               </div>
 
-              {/* English Translation Section */}
-              <div className="pt-3 border-t border-dashed border-stone-300 dark:border-slate-700 space-y-3 bg-amber-50/40 dark:bg-slate-800/40 p-3.5 rounded-xl">
+              {/* AI Auto Translation Section (English & Arabic) */}
+              <div className="pt-3 border-t border-dashed border-stone-300 dark:border-slate-700 space-y-4 bg-amber-50/40 dark:bg-slate-800/40 p-3.5 rounded-xl">
                 <div className="flex items-center justify-between">
                   <span className="font-bold text-stone-800 dark:text-amber-300 text-xs flex items-center gap-1.5">
                     <Globe className="w-4 h-4 text-[#B88A3B]" />
-                    <span>انگریزی ترجمہ (English Translation - Optional / AI Auto)</span>
+                    <span>انگریزی و عربی ترجمہ (English & Arabic Translation - Gemini AI)</span>
                   </span>
                   <button
                     type="button"
                     onClick={handleAutoTranslateInModal}
                     disabled={isGeneratingTranslation}
-                    className="px-3 py-1 bg-purple-700 hover:bg-purple-800 text-white rounded-lg text-[11px] font-bold flex items-center gap-1 disabled:opacity-50"
+                    className="px-3 py-1.5 bg-purple-700 hover:bg-purple-800 text-white rounded-lg text-[11px] font-bold flex items-center gap-1.5 disabled:opacity-50 transition-colors shadow-xs"
                   >
                     {isGeneratingTranslation ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
-                    <span>Gemini AI سے ترجمہ جنریٹ کریں</span>
+                    <span>Gemini AI سے ترجمہ جنریٹ کریں (English + Arabic)</span>
                   </button>
                 </div>
 
-                <div>
-                  <label className="block font-bold mb-1 text-stone-700 dark:text-stone-300">English Title</label>
-                  <input
-                    type="text"
-                    dir="ltr"
-                    value={newFatwaTitleEn}
-                    onChange={(e) => setNewFatwaTitleEn(e.target.value)}
-                    placeholder="Ruling regarding..."
-                    className="w-full p-2 border border-stone-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-stone-900 dark:text-white font-sans text-xs"
-                  />
+                {/* English Section */}
+                <div className="space-y-2.5 p-2.5 bg-white/70 dark:bg-slate-900/60 rounded-lg border border-stone-200 dark:border-slate-700">
+                  <div className="font-bold text-[11px] text-purple-900 dark:text-purple-300 flex items-center gap-1">
+                    <span>🇬🇧 انگریزی ترجمہ (English Translation)</span>
+                  </div>
+                  <div>
+                    <label className="block font-bold mb-1 text-stone-700 dark:text-stone-300">English Title</label>
+                    <input
+                      type="text"
+                      dir="ltr"
+                      value={newFatwaTitleEn}
+                      onChange={(e) => setNewFatwaTitleEn(e.target.value)}
+                      placeholder="Ruling regarding..."
+                      className="w-full p-2 border border-stone-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-stone-900 dark:text-white font-sans text-xs"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block font-bold mb-1 text-stone-700 dark:text-stone-300">English Question</label>
+                    <textarea
+                      rows={2}
+                      dir="ltr"
+                      value={newFatwaQuestionEn}
+                      onChange={(e) => setNewFatwaQuestionEn(e.target.value)}
+                      placeholder="Question in English..."
+                      className="w-full p-2 border border-stone-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-stone-900 dark:text-white font-sans text-xs"
+                    ></textarea>
+                  </div>
+
+                  <div>
+                    <label className="block font-bold mb-1 text-stone-700 dark:text-stone-300">English Answer</label>
+                    <textarea
+                      rows={3}
+                      dir="ltr"
+                      value={newFatwaAnswerEn}
+                      onChange={(e) => setNewFatwaAnswerEn(e.target.value)}
+                      placeholder="In the Name of Allah, the Most Gracious, the Most Merciful..."
+                      className="w-full p-2 border border-stone-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-stone-900 dark:text-white font-sans text-xs"
+                    ></textarea>
+                  </div>
                 </div>
 
-                <div>
-                  <label className="block font-bold mb-1 text-stone-700 dark:text-stone-300">English Question</label>
-                  <textarea
-                    rows={2}
-                    dir="ltr"
-                    value={newFatwaQuestionEn}
-                    onChange={(e) => setNewFatwaQuestionEn(e.target.value)}
-                    placeholder="Question in English..."
-                    className="w-full p-2 border border-stone-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-stone-900 dark:text-white font-sans text-xs"
-                  ></textarea>
-                </div>
+                {/* Arabic Section */}
+                <div className="space-y-2.5 p-2.5 bg-white/70 dark:bg-slate-900/60 rounded-lg border border-stone-200 dark:border-slate-700" dir="rtl">
+                  <div className="font-bold text-[11px] text-emerald-900 dark:text-emerald-300 flex items-center gap-1">
+                    <span>🇸🇦 الترجمة العربية (Arabic Translation)</span>
+                  </div>
+                  <div>
+                    <label className="block font-bold mb-1 text-stone-700 dark:text-stone-300">عنوان الفتوى (Arabic Title)</label>
+                    <input
+                      type="text"
+                      dir="rtl"
+                      value={newFatwaTitleAr}
+                      onChange={(e) => setNewFatwaTitleAr(e.target.value)}
+                      placeholder="حكم بخصوص..."
+                      className="w-full p-2 border border-stone-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-stone-900 dark:text-white font-arabic text-xs"
+                    />
+                  </div>
 
-                <div>
-                  <label className="block font-bold mb-1 text-stone-700 dark:text-stone-300">English Answer</label>
-                  <textarea
-                    rows={3}
-                    dir="ltr"
-                    value={newFatwaAnswerEn}
-                    onChange={(e) => setNewFatwaAnswerEn(e.target.value)}
-                    placeholder="In the Name of Allah, the Most Gracious, the Most Merciful..."
-                    className="w-full p-2 border border-stone-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-stone-900 dark:text-white font-sans text-xs"
-                  ></textarea>
+                  <div>
+                    <label className="block font-bold mb-1 text-stone-700 dark:text-stone-300">نص السؤال بالعربية (Arabic Question)</label>
+                    <textarea
+                      rows={2}
+                      dir="rtl"
+                      value={newFatwaQuestionAr}
+                      onChange={(e) => setNewFatwaQuestionAr(e.target.value)}
+                      placeholder="نص السؤال بالعربية..."
+                      className="w-full p-2 border border-stone-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-stone-900 dark:text-white font-arabic text-xs"
+                    ></textarea>
+                  </div>
+
+                  <div>
+                    <label className="block font-bold mb-1 text-stone-700 dark:text-stone-300">نص الجواب والفتوى بالعربية (Arabic Answer)</label>
+                    <textarea
+                      rows={3}
+                      dir="rtl"
+                      value={newFatwaAnswerAr}
+                      onChange={(e) => setNewFatwaAnswerAr(e.target.value)}
+                      placeholder="بسم الله الرحمن الرحيم، الجواب حامداً ومصلياً..."
+                      className="w-full p-2 border border-stone-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-stone-900 dark:text-white font-arabic text-xs"
+                    ></textarea>
+                  </div>
                 </div>
 
                 <div className="flex items-center gap-2 pt-1">
@@ -1950,7 +2010,7 @@ export const AdminDashboard: React.FC = () => {
                     className="w-4 h-4 accent-emerald-700 rounded"
                   />
                   <label htmlFor="approve_en" className="font-bold text-stone-800 dark:text-stone-200 cursor-pointer">
-                    اس انگریزی ترجمہ کو دارالافتاء سے تصدیق شدہ (Verified & Approved) نشان زد کریں
+                    اس ترجمہ (انگریزی وعربی) کو دارالافتاء سے تصدیق شدہ (Verified & Approved) نشان زد کریں
                   </label>
                 </div>
               </div>
@@ -2211,6 +2271,40 @@ export const AdminDashboard: React.FC = () => {
                   />
                   <span className="font-bold text-stone-700 dark:text-stone-200">واٹس ایپ نوٹیفکیشن لنکس فعال رکھیں</span>
                 </label>
+              </div>
+            </div>
+          </div>
+
+          {/* Gemini AI Translation Settings */}
+          <div className="pt-4 border-t border-slate-200 dark:border-slate-800 space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-base font-bold text-[#5C4632] dark:text-amber-300 font-urdu flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                <span>گوگل جیمینائی اے آئی خودکار ترجمہ سیٹنگز (Gemini AI Translation Settings)</span>
+              </h3>
+              <span className="text-[11px] px-2.5 py-0.5 rounded-full bg-purple-100 text-purple-800 dark:bg-purple-950 dark:text-purple-300 font-sans font-bold">
+                Auto Translation
+              </span>
+            </div>
+            <p className="text-xs text-stone-600 dark:text-stone-300">
+              فتاویٰ اور مضامین کے انگریزی و عربی میں خودکار ترجمہ کے لیے اپنی مفت Google Gemini API Key یہاں درج کریں (یا Cloudflare Pages Settings میں GEMINI_API_KEY شامل کریں):
+            </p>
+
+            <div className="p-4 bg-purple-50/40 dark:bg-slate-800/40 rounded-2xl border border-purple-200 dark:border-slate-700 space-y-3 text-xs">
+              <div>
+                <label className="block font-bold mb-1 text-stone-800 dark:text-stone-200">
+                  گوگل جیمینائی اے آئی کی (Google Gemini API Key)
+                </label>
+                <input 
+                  type="password" 
+                  value={settings?.geminiApiKey || ''} 
+                  onChange={(e) => setSettings(prev => ({...prev, geminiApiKey: e.target.value}))} 
+                  placeholder="AIzaSy..." 
+                  className="w-full p-2.5 border rounded-lg font-mono bg-white dark:bg-slate-900 focus:outline-none focus:border-purple-600" 
+                />
+                <span className="text-[10px] text-stone-500 mt-1 block">
+                  اگر آپ نے Cloudflare Pages میں GEMINI_API_KEY شامل نہیں کیا، تو آپ اپنی Google AI Studio کی مفت Key یہاں درج کر کے نیچے "تبدیلیاں محفوظ کریں" پر کلک کر سکتے ہیں۔
+                </span>
               </div>
             </div>
           </div>

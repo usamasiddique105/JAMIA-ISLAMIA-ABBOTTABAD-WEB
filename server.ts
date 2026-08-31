@@ -19,12 +19,22 @@ dotenv.config();
 
 let aiClient: GoogleGenAI | null = null;
 
-function getGeminiClient(): GoogleGenAI {
+function getGeminiClient(customKey?: string): GoogleGenAI {
+  const apiKey = customKey || process.env.GEMINI_API_KEY || process.env.GEMINI_KEY || process.env.GOOGLE_API_KEY;
+  if (!apiKey) {
+    throw new Error("GEMINI_API_KEY is not configured.");
+  }
+  if (customKey) {
+    return new GoogleGenAI({
+      apiKey: customKey,
+      httpOptions: {
+        headers: {
+          'User-Agent': 'aistudio-build',
+        },
+      },
+    });
+  }
   if (!aiClient) {
-    const apiKey = process.env.GEMINI_API_KEY;
-    if (!apiKey) {
-      throw new Error("GEMINI_API_KEY is not configured.");
-    }
     aiClient = new GoogleGenAI({
       apiKey,
       httpOptions: {
@@ -1252,7 +1262,18 @@ async function startServer() {
         });
       }
 
-      const ai = getGeminiClient();
+      let keyToUse = req.body?.geminiApiKey;
+      if (!keyToUse) {
+        try {
+          const row = db.prepare("SELECT data_json FROM site_settings WHERE id = 'main'").get() as any;
+          if (row?.data_json) {
+            const parsed = JSON.parse(row.data_json);
+            if (parsed.geminiApiKey) keyToUse = parsed.geminiApiKey;
+          }
+        } catch {}
+      }
+
+      const ai = getGeminiClient(keyToUse);
 
       const prompt = isArticle 
         ? `Please translate the following Islamic Article / News from Urdu into clear, dignified, academic English AND classical Islamic Arabic:

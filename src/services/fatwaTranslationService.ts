@@ -44,6 +44,7 @@ export const translateFatwaServerSide = async (
   questionUr: string,
   answerUr: string
 ): Promise<TranslationResult> => {
+  const settings = StorageService.getSiteSettings();
   const response = await fetch('/api/translate-fatwa', {
     method: 'POST',
     headers: {
@@ -54,6 +55,7 @@ export const translateFatwaServerSide = async (
       titleUr: titleUr || '',
       questionUr: questionUr || '',
       answerUr: answerUr || '',
+      geminiApiKey: settings?.geminiApiKey || undefined,
     }),
   });
 
@@ -81,6 +83,7 @@ export const translateArticleServerSide = async (
   titleUr: string,
   contentUr: string
 ): Promise<TranslationResult> => {
+  const settings = StorageService.getSiteSettings();
   const response = await fetch('/api/translate-content', {
     method: 'POST',
     headers: {
@@ -90,6 +93,7 @@ export const translateArticleServerSide = async (
       contentType: 'article',
       titleUr: titleUr || '',
       contentUr: contentUr || '',
+      geminiApiKey: settings?.geminiApiKey || undefined,
     }),
   });
 
