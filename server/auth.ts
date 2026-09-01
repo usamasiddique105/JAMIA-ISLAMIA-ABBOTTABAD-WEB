@@ -1,6 +1,12 @@
 import crypto from 'crypto';
 
 export const AUTHORIZED_ADMIN_EMAIL = 'jamiaislamia2003@gmail.com';
+export const AUTHORIZED_ADMIN_USERNAME = 'jamiaislamia';
+
+export function isAuthorizedAdminUser(identifier: string): boolean {
+  const clean = (identifier || '').trim().toLowerCase();
+  return clean === 'jamiaislamia';
+}
 const ITERATIONS = 100000;
 const KEY_LEN = 64;
 const DIGEST = 'sha512';

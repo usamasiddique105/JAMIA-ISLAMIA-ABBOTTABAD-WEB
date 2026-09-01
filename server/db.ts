@@ -252,19 +252,32 @@ function initDatabaseSchema(db: Database.Database) {
   try { db.exec("ALTER TABLE news ADD COLUMN isTranslationApproved INTEGER NOT NULL DEFAULT 0;"); } catch {}
   try { db.exec("ALTER TABLE news ADD COLUMN translationApprovedBy TEXT;"); } catch {}
 
-  // Seed/Sync default admin user strictly with authorized password 'islamia2003'
+  // Seed/Sync default admin user strictly with authorized password 'jamiaislamia2003'
   const adminRow = db.prepare('SELECT id FROM admin_users WHERE email = ?').get(AUTHORIZED_ADMIN_EMAIL);
-  const { hash, salt } = hashPassword('islamia2003');
+  const { hash, salt } = hashPassword('jamiaislamia2003');
   if (!adminRow) {
     db.prepare(`
       INSERT INTO admin_users (id, email, password_hash, password_salt, role, created_at)
       VALUES (?, ?, ?, ?, 'superadmin', ?)
     `).run('admin-default', AUTHORIZED_ADMIN_EMAIL, hash, salt, new Date().toISOString());
   } else {
-    // Ensure active password hash matches 'islamia2003'
+    // Ensure active password hash matches 'jamiaislamia2003'
     db.prepare(`
       UPDATE admin_users SET password_hash = ?, password_salt = ? WHERE email = ?
     `).run(hash, salt, AUTHORIZED_ADMIN_EMAIL);
+  }
+
+  // Also seed/sync username 'jamiaislamia'
+  const usernameRow = db.prepare('SELECT id FROM admin_users WHERE email = ?').get('jamiaislamia');
+  if (!usernameRow) {
+    db.prepare(`
+      INSERT INTO admin_users (id, email, password_hash, password_salt, role, created_at)
+      VALUES (?, ?, ?, ?, 'superadmin', ?)
+    `).run('admin-user-default', 'jamiaislamia', hash, salt, new Date().toISOString());
+  } else {
+    db.prepare(`
+      UPDATE admin_users SET password_hash = ?, password_salt = ? WHERE email = ?
+    `).run(hash, salt, 'jamiaislamia');
   }
 
   // Seed Fatwas if empty

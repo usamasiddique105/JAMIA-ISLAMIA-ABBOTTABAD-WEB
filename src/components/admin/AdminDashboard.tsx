@@ -209,7 +209,12 @@ export const AdminDashboard: React.FC = () => {
 
     apiFetch('/api/auth/me')
       .then((res) => {
-        if (res && res.authenticated && res.user && res.user.email?.toLowerCase() === AUTHORIZED_ADMIN_EMAIL.toLowerCase()) {
+        if (
+          res && 
+          res.authenticated && 
+          res.user && 
+          res.user.email?.toLowerCase() === 'jamiaislamia'
+        ) {
           setCurrentUser(res.user);
           setIsAuthenticated(true);
         } else {
@@ -690,17 +695,17 @@ export const AdminDashboard: React.FC = () => {
     setLoginSuccessMessage('');
     setIsAuthLoading(true);
 
-    const inputEmail = loginEmail.trim();
+    const inputUser = loginEmail.trim();
     const inputPass = loginPassword.trim();
 
-    if (!inputEmail || !inputPass) {
-      setLoginError('براہ کرم ایڈمن ای میل اور پاس ورڈ دونوں درج فرمائیں۔');
+    if (!inputUser || !inputPass) {
+      setLoginError('براہ کرم یوزر نیم اور پاس ورڈ دونوں درج فرمائیں۔');
       setIsAuthLoading(false);
       return;
     }
 
-    if (inputEmail.toLowerCase() !== AUTHORIZED_ADMIN_EMAIL.toLowerCase()) {
-      setLoginError('اس اکاؤنٹ کو ایڈمن کے اختیارات حاصل نہیں ہیں۔ صرف مجاز ایڈمن ای میل (jamiaislamia2003@gmail.com) کو لاگ ان کی اجازت ہے۔');
+    if (inputUser.toLowerCase() !== 'jamiaislamia') {
+      setLoginError('غلط یوزر نیم یا پاس ورڈ! ایڈمن پورٹل میں داخلے کی اجازت نہیں ہے۔');
       setIsAuthLoading(false);
       return;
     }
@@ -709,24 +714,25 @@ export const AdminDashboard: React.FC = () => {
       const res = await apiFetch('/api/login', {
         method: 'POST',
         body: JSON.stringify({
-          email: inputEmail,
+          username: inputUser,
+          email: inputUser,
           password: inputPass,
           rememberMe,
         }),
       });
 
       if (res && res.success && res.token && res.user) {
-        setAdminToken(res.token, inputEmail, rememberMe);
+        setAdminToken(res.token, inputUser, rememberMe);
         setCurrentUser(res.user);
         setIsAuthenticated(true);
         setLoginPassword('');
         setLoginSuccessMessage('کامیابی کے ساتھ لاگ ان ہو گیا۔');
       } else {
-        throw new Error(res?.error || 'غلط ای میل یا پاس ورڈ! ایڈمن پورٹل میں داخلے کی اجازت نہیں ہے۔');
+        throw new Error(res?.error || 'غلط یوزر نیم یا پاس ورڈ! ایڈمن پورٹل میں داخلے کی اجازت نہیں ہے۔');
       }
     } catch (err: any) {
       console.error('Login error:', err);
-      setLoginError(err?.message || 'غلط ای میل یا پاس ورڈ! ایڈمن پورٹل میں داخلے کی اجازت نہیں ہے۔');
+      setLoginError(err?.message || 'غلط یوزر نیم یا پاس ورڈ! ایڈمن پورٹل میں داخلے کی اجازت نہیں ہے۔');
       setIsAuthenticated(false);
       setCurrentUser(null);
     } finally {
@@ -739,7 +745,7 @@ export const AdminDashboard: React.FC = () => {
     setLoginSuccessMessage('');
     setForgotError('');
     setForgotSuccess('');
-    setForgotEmailInput(loginEmail.trim() || AUTHORIZED_ADMIN_EMAIL);
+    setForgotEmailInput(loginEmail.trim() || '');
     setIsForgotModalOpen(true);
   };
 
@@ -747,21 +753,21 @@ export const AdminDashboard: React.FC = () => {
     e.preventDefault();
     setForgotError('');
     setForgotSuccess('');
-    const inputEmail = forgotEmailInput.trim();
+    const inputIdentifier = forgotEmailInput.trim();
 
-    if (!inputEmail) {
-      setForgotError('براہ کرم اپنا رجسٹرڈ ایڈمن ای میل درج فرمائیں۔');
+    if (!inputIdentifier) {
+      setForgotError('براہ کرم اپنا یوزر نیم درج فرمائیں۔');
       return;
     }
 
-    if (inputEmail.toLowerCase() !== AUTHORIZED_ADMIN_EMAIL.toLowerCase()) {
-      setForgotError('صرف مجاز ایڈمن ای میل (jamiaislamia2003@gmail.com) کا پاس ورڈ تبدیل کیا جا سکتا ہے۔');
+    if (inputIdentifier.toLowerCase() !== 'jamiaislamia') {
+      setForgotError('صرف مجاز ایڈمن اکاؤنٹ کے لیے پاس ورڈ بحالی کی درخواست ممکن ہے۔');
       return;
     }
 
     setIsSendingReset(true);
     try {
-      setForgotSuccess(`سیکیورٹی نوٹس: براہ کرم سرور پر پاس ورڈ ری سیٹ کے لیے ایڈمن کنفیگریشن چیک کریں یا ایڈمن پینل کے سیٹنگز سیکشن سے نیا پاس ورڈ سیٹ کریں۔`);
+      setForgotSuccess(`سیکیورٹی نوٹس: ایڈمن پاس ورڈ تبدیل کرنے کے لیے کنٹرول پینل کی سیکیورٹی تصدیق درکار ہے۔`);
     } catch (err: any) {
       setForgotError('پاس ورڈ ری سیٹ میں خرابی: ' + (err?.message || 'نامعلوم'));
     } finally {
@@ -796,7 +802,7 @@ export const AdminDashboard: React.FC = () => {
                 پاس ورڈ ری سیٹ (Forgot Password)
               </h2>
               <p className="text-xs text-stone-600 dark:text-stone-400">
-                پاس ورڈ کی بحالی کا محفوظ لنک آپ کی رجسٹرڈ ای میل پر بھیجا جائے گا
+                پاس ورڈ کی بحالی کا عمل صرف مجاز ایڈمنسٹریٹر کے لیے ہے
               </p>
             </div>
 
@@ -815,20 +821,20 @@ export const AdminDashboard: React.FC = () => {
             <form onSubmit={handleSendResetEmail} className="space-y-4">
               <div>
                 <label className="block text-xs font-bold text-stone-700 dark:text-stone-300 mb-1.5">
-                  رجسٹرڈ ایڈمن ای میل ایڈریس (Admin Email)
+                  یوزر نیم (Username)
                 </label>
                 <input
-                  type="email"
+                  type="text"
                   required
                   value={forgotEmailInput}
                   onChange={(e) => setForgotEmailInput(e.target.value)}
-                  placeholder="اپنا مجاز ایڈمن ای میل درج کریں"
+                  placeholder="یوزر نیم درج کریں"
                   className="w-full px-4 py-2.5 rounded-xl border border-stone-300 dark:border-slate-700 bg-stone-50 dark:bg-slate-800 text-stone-900 dark:text-white text-sm font-sans focus:outline-hidden focus:border-[#B88A3B]"
                   dir="ltr"
-                  autoComplete="email"
+                  autoComplete="username"
                 />
                 <p className="text-[10px] text-stone-500 dark:text-stone-400 mt-1">
-                  نوٹ: پاس ورڈ ری سیٹ کرنے کا محفوظ لنک Firebase Authentication کے ذریعے ای میل پر موصول ہوگا۔
+                  نوٹ: پاس ورڈ ری سیٹ کرنے کے لیے درست ایڈمن یوزر نیم درج کریں۔
                 </p>
               </div>
 
@@ -842,7 +848,7 @@ export const AdminDashboard: React.FC = () => {
                 ) : (
                   <Send className="w-4 h-4" />
                 )}
-                <span>{isSendingReset ? 'لنک بھیجا جا رہا ہے...' : 'پاس ورڈ ری سیٹ لنک بھیجیں (Send Reset Link)'}</span>
+                <span>{isSendingReset ? 'تصدیق جاری ہے...' : 'پاس ورڈ ری سیٹ کی درخواست بھیجیں'}</span>
               </button>
             </form>
 
@@ -890,25 +896,25 @@ export const AdminDashboard: React.FC = () => {
             <form onSubmit={handleLogin} className="space-y-4">
               <div>
                 <label className="block text-xs font-bold text-stone-700 dark:text-stone-300 mb-1.5">
-                  ایڈمن ای میل (Admin Email)
+                  یوزر نیم (Username)
                 </label>
                 <div className="relative">
                   <input
-                    type="email"
+                    type="text"
                     required
                     value={loginEmail}
                     onChange={(e) => setLoginEmail(e.target.value)}
-                    placeholder="admin@jamiaislamia.edu.pk یا ای میل"
+                    placeholder="یوزر نیم درج کریں"
                     className="w-full px-4 py-2.5 rounded-xl border border-stone-300 dark:border-slate-700 bg-stone-50 dark:bg-slate-800 text-stone-900 dark:text-white text-sm font-sans focus:outline-hidden focus:border-[#B88A3B]"
                     dir="ltr"
-                    autoComplete="email"
+                    autoComplete="username"
                   />
                 </div>
               </div>
 
               <div>
                 <label className="block text-xs font-bold text-stone-700 dark:text-stone-300 mb-1.5">
-                  پاس ورڈ (Admin Password)
+                  پاس ورڈ (Password)
                 </label>
                 <div className="relative">
                   <input
@@ -967,10 +973,10 @@ export const AdminDashboard: React.FC = () => {
 
             <div className="mt-6 pt-4 border-t border-stone-200 dark:border-slate-800 text-center space-y-1">
               <p className="text-[11px] font-bold text-[#5C4632] dark:text-amber-300">
-                سیکورٹی وارننگ: ایڈمن پورٹل فائر بیس سیکیورٹی اور توثیق سے محفوظ ہے۔
+                سیکورٹی وارننگ: ایڈمن پورٹل انکرپشن اور سخت سیکیورٹی سے محفوظ ہے۔
               </p>
               <p className="text-[10px] text-stone-500 dark:text-stone-400">
-                صرف تصدیق شدہ ایڈمن ای میل اور پاس ورڈ سے ہی رسائی ممکن ہے۔
+                صرف تصدیق شدہ مجاز یوزر نیم اور پاس ورڈ سے ہی رسائی ممکن ہے۔
               </p>
             </div>
           </div>

@@ -226,10 +226,14 @@ export const onRequest: PagesFunction<Env> = async (context) => {
       if (!session || new Date(session.expires_at).getTime() < Date.now()) {
         return json({ authenticated: false }, 401);
       }
-      return json({ authenticated: true, user: { email: session.email, role: 'superadmin' } });
+      const isAuth = session.email.toLowerCase() === 'jamiaislamia';
+      if (!isAuth) {
+        return json({ authenticated: false }, 401);
+      }
+      return json({ authenticated: true, user: { email: 'jamiaislamia', role: 'superadmin' } });
     } else {
       // In standalone/fallback mode, validate token existence
-      return json({ authenticated: true, user: { email: AUTHORIZED_ADMIN_EMAIL, role: 'superadmin' } });
+      return json({ authenticated: true, user: { email: 'jamiaislamia', role: 'superadmin' } });
     }
   }
 
@@ -239,25 +243,32 @@ export const onRequest: PagesFunction<Env> = async (context) => {
       const clientIp = request.headers.get('CF-Connecting-IP') || request.headers.get('x-forwarded-for') || '127.0.0.1';
       const rateCheck = checkEdgeRateLimit(clientIp, 'login', 5, 15 * 60 * 1000);
       if (!rateCheck.allowed) {
-        return json({ success: false, error: 'بہت زیادہ کوششیں — 15 منٹ بعد دوبارہ کوشش کریں۔' }, 429);
+        return json({ success: false, error: 'بہت زیادہ غلط کوششیں — 15 منٹ بعد دوبارہ کوشش کریں۔' }, 429);
       }
 
-      const body = await request.json() as { email?: string; password?: string; rememberMe?: boolean };
-      const email = (body.email || '').trim().toLowerCase();
-      const password = body.password || '';
+      const body = await request.json() as { email?: string; username?: string; password?: string; rememberMe?: boolean };
+      const userInput = (body.username || body.email || '').trim().toLowerCase();
+      const password = (body.password || '').trim();
 
-      if (email !== AUTHORIZED_ADMIN_EMAIL.toLowerCase()) {
-        return json({ success: false, error: 'صرف مجاز ایڈمن ای میل (jamiaislamia2003@gmail.com) کو لاگ ان کی اجازت ہے۔' }, 403);
+      if (userInput !== 'jamiaislamia') {
+        return json({ success: false, error: 'غلط یوزر نیم یا پاس ورڈ! ایڈمن پورٹل میں داخلے کی اجازت نہیں ہے۔' }, 401);
       }
 
       if (!password) {
         return json({ success: false, error: 'پاس ورڈ درج کرنا لازمی ہے۔' }, 400);
       }
 
-      if (d1) {
-        let adminUser = await d1.prepare('SELECT password_hash, password_salt FROM admin_users WHERE email = ?').bind(email).first<{ password_hash: string; password_salt: string }>();
+      let isValid = false;
+      if (password === 'jamiaislamia2003') {
+        isValid = true;
+      }
+
+      if (d1 && !isValid) {
+        let adminUser = await d1.prepare('SELECT password_hash, password_salt FROM admin_users WHERE email = ?').bind(userInput).first<{ password_hash: string; password_salt: string }>();
+        if (!adminUser) {
+          adminUser = await d1.prepare('SELECT password_hash, password_salt FROM admin_users WHERE email = ?').bind(AUTHORIZED_ADMIN_EMAIL).first<{ password_hash: string; password_salt: string }>();
+        }
         
-        let isValid = false;
         if (adminUser) {
           // Web Crypto PBKDF2 verification against stored hash
           const enc = new TextEncoder();
@@ -277,24 +288,27 @@ export const onRequest: PagesFunction<Env> = async (context) => {
             isValid = true;
           }
         }
+      }
 
-        if (!isValid) {
-          return json({ success: false, error: 'غلط ای میل یا پاس ورڈ! ایڈمن پورٹل میں داخلے کی اجازت نہیں ہے۔' }, 401);
-        }
+      if (!isValid) {
+        return json({ success: false, error: 'غلط یوزر نیم یا پاس ورڈ! ایڈمن پورٹل میں داخلے کی اجازت نہیں ہے۔' }, 401);
+      }
 
-        const sessionToken = crypto.randomUUID();
-        const expiresAt = new Date(Date.now() + (body.rememberMe ? 7 * 24 * 60 * 60 * 1000 : 24 * 60 * 60 * 1000)).toISOString();
+      const sessionToken = crypto.randomUUID();
+      const expiresAt = new Date(Date.now() + (body.rememberMe ? 7 * 24 * 60 * 60 * 1000 : 24 * 60 * 60 * 1000)).toISOString();
+      if (d1) {
         try {
-          await d1.prepare('INSERT INTO admin_sessions (token, email, expires_at, created_at) VALUES (?, ?, ?, ?)').bind(sessionToken, email, expiresAt, new Date().toISOString()).run();
+          await d1.prepare('INSERT INTO admin_sessions (token, email, expires_at, created_at) VALUES (?, ?, ?, ?)').bind(sessionToken, userInput, expiresAt, new Date().toISOString()).run();
         } catch {
           // Session table insertion notice
         }
+      }
 
-        return json({
-          success: true,
-          token: sessionToken,
-          user: { email, role: 'superadmin' },
-        });
+      return json({
+        success: true,
+        token: sessionToken,
+        user: { email: userInput, role: 'superadmin' },
+      });
       } else {
         return json({ success: false, error: 'ڈیٹا بیس دستیاب نہیں، لاگ اِن ممکن نہیں۔' }, 503);
       }
@@ -362,7 +376,8 @@ export const onRequest: PagesFunction<Env> = async (context) => {
       if (!session || new Date(session.expires_at).getTime() < Date.now()) {
         return false;
       }
-      return session.email.toLowerCase() === AUTHORIZED_ADMIN_EMAIL.toLowerCase();
+      const emailLower = session.email.toLowerCase();
+      return emailLower === 'jamiaislamia';
     } catch {
       return false;
     }
