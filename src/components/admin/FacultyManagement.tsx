@@ -95,7 +95,7 @@ export const FacultyManagement: React.FC<FacultyManagementProps> = ({
     setIsModalOpen(true);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!nameUr.trim()) {
       alert('براہ کرم استاد محترم کا نام درج فرمائیں۔');
@@ -122,10 +122,15 @@ export const FacultyManagement: React.FC<FacultyManagementProps> = ({
       bio: bio.trim() || undefined
     };
 
-    if (editingMember) {
-      StorageService.updateFaculty(memberData);
-    } else {
-      StorageService.addFaculty(memberData);
+    try {
+      if (editingMember) {
+        await StorageService.updateFaculty(memberData);
+      } else {
+        await StorageService.addFaculty(memberData);
+      }
+    } catch (err: any) {
+      alert('استاد محترم کا ریکارڈ سرور پر محفوظ کرنے میں خرابی پیش آئی: ' + (err?.message || 'نامعلوم خرابی') + '\nڈیٹا کلاؤڈ ڈیٹا بیس میں محفوظ نہیں ہو سکا، براہ کرم دوبارہ کوشش کریں۔');
+      return;
     }
 
     setIsModalOpen(false);
@@ -133,9 +138,14 @@ export const FacultyManagement: React.FC<FacultyManagementProps> = ({
     if (onUpdate) onUpdate();
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (window.confirm('کیا آپ واقعی اس استاد محترم کا ریکارڈ حذف کرنا چاہتے ہیں؟')) {
-      StorageService.deleteFaculty(id);
+      try {
+        await StorageService.deleteFaculty(id);
+      } catch (err: any) {
+        alert('استاد محترم کا ریکارڈ حذف کرنے میں سرور پر خرابی پیش آئی: ' + (err?.message || 'نامعلوم خرابی'));
+        return;
+      }
       loadData();
       if (onUpdate) onUpdate();
     }

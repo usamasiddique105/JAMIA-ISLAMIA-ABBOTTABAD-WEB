@@ -331,7 +331,7 @@ export class CloudApiAdapter implements IDatabaseService {
       throw new Error(res.error || 'فتویٰ حذف کرنے کا عمل سرور پر ناکام رہا۔');
     }
     const list = this.getFatwas().filter(item => item.id !== id);
-    setLocal(D1_STORAGE_KEYS.FATWAS, updatedList(list, id));
+    setLocal(D1_STORAGE_KEYS.FATWAS, list);
     notifyUpdate();
   }
 
@@ -343,6 +343,13 @@ export class CloudApiAdapter implements IDatabaseService {
   }
 
   async saveQuestions(data: OnlineQuestion[]): Promise<void> {
+    const res = await apiFetch('/api/questions/batch', {
+      method: 'POST',
+      body: JSON.stringify({ questions: data }),
+    });
+    if (!res.success) {
+      throw new Error(res.error || 'سوالات کا ریکارڈ سرور پر محفوظ نہ ہو سکا۔');
+    }
     setLocal(D1_STORAGE_KEYS.QUESTIONS, data);
     notifyUpdate();
   }
@@ -389,6 +396,13 @@ export class CloudApiAdapter implements IDatabaseService {
   }
 
   async saveClassBookings(data: ClassBooking[]): Promise<void> {
+    const res = await apiFetch('/api/bookings/batch', {
+      method: 'POST',
+      body: JSON.stringify({ bookings: data }),
+    });
+    if (!res.success) {
+      throw new Error(res.error || 'داخلہ درخواستوں کا ریکارڈ سرور پر محفوظ نہ ہو سکا۔');
+    }
     setLocal(D1_STORAGE_KEYS.BOOKINGS, data);
     notifyUpdate();
   }
@@ -447,6 +461,13 @@ export class CloudApiAdapter implements IDatabaseService {
   }
 
   async saveExamResults(data: ExamResult[]): Promise<void> {
+    const res = await apiFetch('/api/results/batch', {
+      method: 'POST',
+      body: JSON.stringify({ results: data }),
+    });
+    if (!res.success) {
+      throw new Error(res.error || 'امتحانی نتائج سرور پر محفوظ نہ ہو سکے۔');
+    }
     setLocal(D1_STORAGE_KEYS.RESULTS, data);
     notifyUpdate();
   }
@@ -788,6 +809,13 @@ export class CloudApiAdapter implements IDatabaseService {
   }
 
   async saveDonations(data: DonationRecord[]): Promise<void> {
+    const res = await apiFetch('/api/donations/batch', {
+      method: 'POST',
+      body: JSON.stringify({ donations: data }),
+    });
+    if (!res.success) {
+      throw new Error(res.error || 'عطیات کا ریکارڈ سرور پر محفوظ نہ ہو سکا۔');
+    }
     setLocal(D1_STORAGE_KEYS.DONATIONS, data);
     notifyUpdate();
   }

@@ -263,7 +263,7 @@ export const AdminDashboard: React.FC = () => {
     );
   };
 
-  const handleSaveBookingReply = (openWhatsApp: boolean = false) => {
+  const handleSaveBookingReply = async (openWhatsApp: boolean = false) => {
     if (!selectedBooking) return;
 
     const updatedBooking: ClassBooking = {
@@ -274,7 +274,13 @@ export const AdminDashboard: React.FC = () => {
       replyDate: new Date().toISOString().split('T')[0],
     };
 
-    StorageService.updateClassBooking(updatedBooking);
+    try {
+      await StorageService.updateClassBooking(updatedBooking);
+    } catch (err: any) {
+      alert('داخلہ درخواست کی کیفیت محفوظ کرنے میں سرور پر خرابی پیش آئی: ' + (err?.message || 'نامعلوم خرابی') + '\nڈیٹا کلاؤڈ ڈیٹا بیس میں محفوظ نہیں ہو سکا۔');
+      return;
+    }
+
     refreshData();
 
     if (openWhatsApp) {
@@ -289,19 +295,29 @@ export const AdminDashboard: React.FC = () => {
     setBookingAdminNotes('');
   };
 
-  const handleQuickStatusChange = (bookingId: string, status: BookingStatus) => {
+  const handleQuickStatusChange = async (bookingId: string, status: BookingStatus) => {
     const booking = bookings.find(b => b.id === bookingId);
     if (!booking) return;
-    StorageService.updateClassBooking({
-      ...booking,
-      status
-    });
+    try {
+      await StorageService.updateClassBooking({
+        ...booking,
+        status
+      });
+    } catch (err: any) {
+      alert('کیفیت تبدیل کرنے میں سرور پر خرابی پیش آئی: ' + (err?.message || 'نامعلوم خرابی'));
+      return;
+    }
     refreshData();
   };
 
-  const handleDeleteBooking = (bookingId: string) => {
+  const handleDeleteBooking = async (bookingId: string) => {
     if (window.confirm('کیا آپ واقعی اس داخلہ/کلاس بکنگ کو حذف کرنا چاہتے ہیں؟')) {
-      StorageService.deleteClassBooking(bookingId);
+      try {
+        await StorageService.deleteClassBooking(bookingId);
+      } catch (err: any) {
+        alert('داخلہ درخواست حذف کرنے میں سرور پر خرابی پیش آئی: ' + (err?.message || 'نامعلوم خرابی'));
+        return;
+      }
       refreshData();
     }
   };
@@ -347,13 +363,18 @@ export const AdminDashboard: React.FC = () => {
     setShowAddFatwa(true);
   };
 
-  const handleApproveTranslation = (f: Fatwa) => {
+  const handleApproveTranslation = async (f: Fatwa) => {
     const updated: Fatwa = {
       ...f,
       isTranslationApproved: true,
       translationApprovedBy: currentUser?.email || AUTHORIZED_ADMIN_EMAIL,
     };
-    StorageService.updateFatwa(updated);
+    try {
+      await StorageService.updateFatwa(updated);
+    } catch (err: any) {
+      alert('ترجمہ تصدیق کرنے میں سرور پر خرابی پیش آئی: ' + (err?.message || 'نامعلوم خرابی'));
+      return;
+    }
     refreshData();
   };
 
@@ -395,74 +416,79 @@ export const AdminDashboard: React.FC = () => {
     }
   };
 
-  const handleCreateFatwa = (e: React.FormEvent) => {
+  const handleCreateFatwa = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newFatwaTitleUr || !newFatwaAnswerUr) return;
 
     const hasTranslation = Boolean(newFatwaTitleEn || newFatwaAnswerEn || newFatwaTitleAr || newFatwaAnswerAr);
 
-    if (editingFatwa) {
-      // Update existing fatwa
-      const updatedF: Fatwa = {
-        ...editingFatwa,
-        fatwaNumber: newFatwaNum || editingFatwa.fatwaNumber,
-        date: newFatwaDate || editingFatwa.date || new Date().toISOString().split('T')[0],
-        title: { 
-          ur: newFatwaTitleUr, 
-          en: newFatwaTitleEn || editingFatwa.title?.en || newFatwaTitleUr, 
-          ar: newFatwaTitleAr || editingFatwa.title?.ar || newFatwaTitleUr 
-        },
-        question: { 
-          ur: newFatwaQuestionUr || 'سوال', 
-          en: newFatwaQuestionEn || editingFatwa.question?.en || newFatwaQuestionUr, 
-          ar: newFatwaQuestionAr || editingFatwa.question?.ar || newFatwaQuestionUr 
-        },
-        category: newFatwaCat,
-        answer: { 
-          ur: newFatwaAnswerUr, 
-          en: newFatwaAnswerEn || editingFatwa.answer?.en || newFatwaAnswerUr, 
-          ar: newFatwaAnswerAr || editingFatwa.answer?.ar || newFatwaAnswerUr 
-        },
-        arabicText: newFatwaArabic || undefined,
-        muftiName: newFatwaMufti || editingFatwa.muftiName || 'جامعہ اسلامیہ ایبٹ آباد',
-        isAiTranslatedEn: hasTranslation ? true : editingFatwa.isAiTranslatedEn,
-        isTranslationApproved: Boolean(newFatwaIsApproved),
-        translationApprovedBy: newFatwaIsApproved ? (currentUser?.email || AUTHORIZED_ADMIN_EMAIL) : undefined,
-      };
+    try {
+      if (editingFatwa) {
+        // Update existing fatwa
+        const updatedF: Fatwa = {
+          ...editingFatwa,
+          fatwaNumber: newFatwaNum || editingFatwa.fatwaNumber,
+          date: newFatwaDate || editingFatwa.date || new Date().toISOString().split('T')[0],
+          title: { 
+            ur: newFatwaTitleUr, 
+            en: newFatwaTitleEn || editingFatwa.title?.en || newFatwaTitleUr, 
+            ar: newFatwaTitleAr || editingFatwa.title?.ar || newFatwaTitleUr 
+          },
+          question: { 
+            ur: newFatwaQuestionUr || 'سوال', 
+            en: newFatwaQuestionEn || editingFatwa.question?.en || newFatwaQuestionUr, 
+            ar: newFatwaQuestionAr || editingFatwa.question?.ar || newFatwaQuestionUr 
+          },
+          category: newFatwaCat,
+          answer: { 
+            ur: newFatwaAnswerUr, 
+            en: newFatwaAnswerEn || editingFatwa.answer?.en || newFatwaAnswerUr, 
+            ar: newFatwaAnswerAr || editingFatwa.answer?.ar || newFatwaAnswerUr 
+          },
+          arabicText: newFatwaArabic || undefined,
+          muftiName: newFatwaMufti || editingFatwa.muftiName || 'جامعہ اسلامیہ ایبٹ آباد',
+          isAiTranslatedEn: hasTranslation ? true : editingFatwa.isAiTranslatedEn,
+          isTranslationApproved: Boolean(newFatwaIsApproved),
+          translationApprovedBy: newFatwaIsApproved ? (currentUser?.email || AUTHORIZED_ADMIN_EMAIL) : undefined,
+        };
 
-      StorageService.updateFatwa(updatedF);
-    } else {
-      // Add new fatwa
-      const newF: Fatwa = {
-        id: `fatwa-${Date.now()}`,
-        fatwaNumber: newFatwaNum || `JIA-IFTA-2026-${Math.floor(1000 + Math.random() * 9000)}`,
-        title: { 
-          ur: newFatwaTitleUr, 
-          en: newFatwaTitleEn || newFatwaTitleUr, 
-          ar: newFatwaTitleAr || newFatwaTitleUr 
-        },
-        question: { 
-          ur: newFatwaQuestionUr || 'سوال', 
-          en: newFatwaQuestionEn || newFatwaQuestionUr, 
-          ar: newFatwaQuestionAr || newFatwaQuestionUr 
-        },
-        category: newFatwaCat,
-        answer: { 
-          ur: newFatwaAnswerUr, 
-          en: newFatwaAnswerEn || newFatwaAnswerUr, 
-          ar: newFatwaAnswerAr || newFatwaAnswerUr 
-        },
-        arabicText: newFatwaArabic || undefined,
-        date: newFatwaDate || new Date().toISOString().split('T')[0],
-        muftiName: newFatwaMufti || 'جامعہ اسلامیہ ایبٹ آباد',
-        status: 'Published',
-        views: 1,
-        isAiTranslatedEn: hasTranslation,
-        isTranslationApproved: Boolean(newFatwaIsApproved),
-        translationApprovedBy: newFatwaIsApproved ? (currentUser?.email || AUTHORIZED_ADMIN_EMAIL) : undefined,
-      };
+        await StorageService.updateFatwa(updatedF);
+      } else {
+        // Add new fatwa
+        const newF: Fatwa = {
+          id: `fatwa-${Date.now()}`,
+          fatwaNumber: newFatwaNum || `JIA-IFTA-2026-${Math.floor(1000 + Math.random() * 9000)}`,
+          title: { 
+            ur: newFatwaTitleUr, 
+            en: newFatwaTitleEn || newFatwaTitleUr, 
+            ar: newFatwaTitleAr || newFatwaTitleUr 
+          },
+          question: { 
+            ur: newFatwaQuestionUr || 'سوال', 
+            en: newFatwaQuestionEn || newFatwaQuestionUr, 
+            ar: newFatwaQuestionAr || newFatwaQuestionUr 
+          },
+          category: newFatwaCat,
+          answer: { 
+            ur: newFatwaAnswerUr, 
+            en: newFatwaAnswerEn || newFatwaAnswerUr, 
+            ar: newFatwaAnswerAr || newFatwaAnswerUr 
+          },
+          arabicText: newFatwaArabic || undefined,
+          date: newFatwaDate || new Date().toISOString().split('T')[0],
+          muftiName: newFatwaMufti || 'جامعہ اسلامیہ ایبٹ آباد',
+          status: 'Published',
+          views: 1,
+          isAiTranslatedEn: hasTranslation,
+          isTranslationApproved: Boolean(newFatwaIsApproved),
+          translationApprovedBy: newFatwaIsApproved ? (currentUser?.email || AUTHORIZED_ADMIN_EMAIL) : undefined,
+        };
 
-      StorageService.addFatwa(newF);
+        await StorageService.addFatwa(newF);
+      }
+    } catch (err: any) {
+      alert('فتویٰ سرور پر محفوظ کرنے میں خرابی پیش آئی: ' + (err?.message || 'نامعلوم خرابی') + '\nڈیٹا کلاؤڈ ڈیٹا بیس میں محفوظ نہیں ہو سکا، براہ کرم دوبارہ کوشش کریں۔');
+      return;
     }
 
     setEditingFatwa(null);
@@ -471,7 +497,7 @@ export const AdminDashboard: React.FC = () => {
   };
 
   // Answer Online Question
-  const handleAnswerQuestion = (e: React.FormEvent) => {
+  const handleAnswerQuestion = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedQuestion || !replyText) return;
 
@@ -481,23 +507,29 @@ export const AdminDashboard: React.FC = () => {
       reply: replyText,
       isPublishedToArchive: publishToArchive
     };
-    StorageService.updateQuestion(updatedQ);
 
-    if (publishToArchive) {
-      const pubFatwa: Fatwa = {
-        id: `fatwa-q-${selectedQuestion.id}`,
-        fatwaNumber: `JIA-IFTA-2026-${Math.floor(1000 + Math.random() * 9000)}`,
-        title: { ur: selectedQuestion.subject, en: selectedQuestion.subject, ar: selectedQuestion.subject },
-        question: { ur: selectedQuestion.question, en: selectedQuestion.question, ar: selectedQuestion.question },
-        questionerName: selectedQuestion.questionerName,
-        category: selectedQuestion.category,
-        answer: { ur: replyText, en: replyText, ar: replyText },
-        date: new Date().toISOString().split('T')[0],
-        muftiName: 'جامعہ اسلامیہ ایبٹ آباد',
-        status: 'Published',
-        views: 1
-      };
-      StorageService.addFatwa(pubFatwa);
+    try {
+      await StorageService.updateQuestion(updatedQ);
+
+      if (publishToArchive) {
+        const pubFatwa: Fatwa = {
+          id: `fatwa-q-${selectedQuestion.id}`,
+          fatwaNumber: `JIA-IFTA-2026-${Math.floor(1000 + Math.random() * 9000)}`,
+          title: { ur: selectedQuestion.subject, en: selectedQuestion.subject, ar: selectedQuestion.subject },
+          question: { ur: selectedQuestion.question, en: selectedQuestion.question, ar: selectedQuestion.question },
+          questionerName: selectedQuestion.questionerName,
+          category: selectedQuestion.category,
+          answer: { ur: replyText, en: replyText, ar: replyText },
+          date: new Date().toISOString().split('T')[0],
+          muftiName: 'جامعہ اسلامیہ ایبٹ آباد',
+          status: 'Published',
+          views: 1
+        };
+        await StorageService.addFatwa(pubFatwa);
+      }
+    } catch (err: any) {
+      alert('سوال کا جواب سرور پر محفوظ کرنے میں خرابی پیش آئی: ' + (err?.message || 'نامعلوم خرابی') + '\nڈیٹا کلاؤڈ ڈیٹا بیس میں محفوظ نہیں ہو سکا۔');
+      return;
     }
 
     setSelectedQuestion(null);
@@ -506,7 +538,7 @@ export const AdminDashboard: React.FC = () => {
   };
 
   // Create Exam Result
-  const handleCreateResult = (e: React.FormEvent) => {
+  const handleCreateResult = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newRoll || !newStudentName) return;
 
@@ -539,16 +571,26 @@ export const AdminDashboard: React.FC = () => {
       remarks: 'کامیاب طالب علم'
     };
 
-    StorageService.addExamResult(newR);
+    try {
+      await StorageService.addExamResult(newR);
+    } catch (err: any) {
+      alert('امتحانی نتیجہ سرور پر محفوظ کرنے میں خرابی پیش آئی: ' + (err?.message || 'نامعلوم خرابی') + '\nڈیٹا کلاؤڈ ڈیٹا بیس میں محفوظ نہیں ہو سکا۔');
+      return;
+    }
+
     setShowAddResult(false);
     refreshData();
   };
 
   // Save Site Settings
-  const handleSaveSettings = (e: React.FormEvent) => {
+  const handleSaveSettings = async (e: React.FormEvent) => {
     e.preventDefault();
-    StorageService.saveSiteSettings(settings);
-    alert('جامعہ اسلامیہ ایبٹ آباد کی ویب سائٹ سیٹنگز محفوظ ہو گئیں!');
+    try {
+      await StorageService.saveSiteSettings(settings);
+      alert('جامعہ اسلامیہ ایبٹ آباد کی ویب سائٹ سیٹنگز محفوظ ہو گئیں!');
+    } catch (err: any) {
+      alert('سیٹنگز محفوظ کرنے میں خرابی پیش آئی: ' + (err?.message || 'نامعلوم خرابی') + '\nڈیٹا کلاؤڈ ڈیٹا بیس میں محفوظ نہیں ہو سکا۔');
+    }
   };
 
   // Full Database Backup Export (JSON)
@@ -596,7 +638,7 @@ export const AdminDashboard: React.FC = () => {
     if (!file) return;
 
     const reader = new FileReader();
-    reader.onload = (event) => {
+    reader.onload = async (event) => {
       try {
         const content = event.target?.result as string;
         const data = JSON.parse(content);
@@ -607,17 +649,17 @@ export const AdminDashboard: React.FC = () => {
         }
 
         if (confirm('کیا آپ واقعی یہ بیک اپ بحال کرنا چاہتے ہیں؟ اس سے موجودہ ڈیٹا فائل کے ڈیٹا کے ساتھ اپڈیٹ ہو جائے گا۔')) {
-          if (Array.isArray(data.fatwas)) StorageService.saveFatwas(data.fatwas);
-          if (Array.isArray(data.questions)) StorageService.saveQuestions(data.questions);
-          if (Array.isArray(data.classBookings)) StorageService.saveClassBookings(data.classBookings);
-          if (Array.isArray(data.examResults)) StorageService.saveExamResults(data.examResults);
-          if (Array.isArray(data.departments)) StorageService.saveDepartments(data.departments);
-          if (Array.isArray(data.faculty)) StorageService.saveFaculty(data.faculty);
-          if (Array.isArray(data.books)) StorageService.saveBooks(data.books);
-          if (Array.isArray(data.media)) StorageService.saveMedia(data.media);
-          if (Array.isArray(data.news)) StorageService.saveNews(data.news);
-          if (Array.isArray(data.donations)) StorageService.saveDonations(data.donations);
-          if (data.settings && typeof data.settings === 'object') StorageService.saveSiteSettings(data.settings);
+          if (Array.isArray(data.fatwas)) await StorageService.saveFatwas(data.fatwas);
+          if (Array.isArray(data.questions)) await StorageService.saveQuestions(data.questions);
+          if (Array.isArray(data.classBookings)) await StorageService.saveClassBookings(data.classBookings);
+          if (Array.isArray(data.examResults)) await StorageService.saveExamResults(data.examResults);
+          if (Array.isArray(data.departments)) await StorageService.saveDepartments(data.departments);
+          if (Array.isArray(data.faculty)) await StorageService.saveFaculty(data.faculty);
+          if (Array.isArray(data.books)) await StorageService.saveBooks(data.books);
+          if (Array.isArray(data.media)) await StorageService.saveMedia(data.media);
+          if (Array.isArray(data.news)) await StorageService.saveNews(data.news);
+          if (Array.isArray(data.donations)) await StorageService.saveDonations(data.donations);
+          if (data.settings && typeof data.settings === 'object') await StorageService.saveSiteSettings(data.settings);
 
           refreshData();
           alert('بیک اپ کامیابی کے ساتھ بحال (Restore) ہو گیا!');
@@ -631,10 +673,14 @@ export const AdminDashboard: React.FC = () => {
     e.target.value = '';
   };
 
-  const handleResetData = () => {
+  const handleResetData = async () => {
     if (confirm('کیا آپ تمام ڈیٹا کو ابتدائی حالت میں ری سیٹ کرنا چاہتے ہیں؟')) {
-      StorageService.resetAll();
-      refreshData();
+      try {
+        await StorageService.resetAll();
+        refreshData();
+      } catch (err: any) {
+        alert('ڈیٹا ری سیٹ کرنے میں خرابی پیش آئی: ' + (err?.message || 'نامعلوم خرابی'));
+      }
     }
   };
 
@@ -1768,10 +1814,14 @@ export const AdminDashboard: React.FC = () => {
                   </button>
 
                   <button 
-                    onClick={() => {
+                    onClick={async () => {
                       if (window.confirm(`کیا آپ واقعی فتویٰ نمبر ${f.fatwaNumber} کو حذف کرنا چاہتے ہیں؟`)) {
-                        StorageService.deleteFatwa(f.id);
-                        refreshData();
+                        try {
+                          await StorageService.deleteFatwa(f.id);
+                          refreshData();
+                        } catch (err: any) {
+                          alert('فتویٰ حذف کرنے میں سرور پر خرابی پیش آئی: ' + (err?.message || 'نامعلوم خرابی'));
+                        }
                       }
                     }}
                     className="px-3 py-1.5 text-red-600 hover:bg-red-50 dark:hover:bg-red-950/60 font-bold rounded-lg flex items-center gap-1.5 transition-colors"
@@ -2807,10 +2857,14 @@ export const AdminDashboard: React.FC = () => {
                 </button>
                 {visitors.length > 0 && (
                   <button
-                    onClick={() => {
+                    onClick={async () => {
                       if (window.confirm('کیا آپ تمام ناظرین کا لاگ صاف کرنا چاہتے ہیں؟')) {
-                        StorageService.clearVisitors();
-                        refreshData();
+                        try {
+                          await StorageService.clearVisitors();
+                          refreshData();
+                        } catch (err: any) {
+                          alert('لاگ صاف کرنے میں سرور پر خرابی پیش آئی: ' + (err?.message || 'نامعلوم خرابی'));
+                        }
                       }
                     }}
                     className="px-3 py-2 bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-300 hover:bg-red-100 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-colors"

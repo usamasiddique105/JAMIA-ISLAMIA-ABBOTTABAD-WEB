@@ -346,7 +346,10 @@ export const onRequest: PagesFunction<Env> = async (context) => {
   }
 
   if (!d1) {
-    return json({ success: true, message: 'D1 standalone mode' });
+    return json({ 
+      success: false, 
+      error: 'Cloudflare D1 ڈیٹا بیس بائنڈنگ (env.DB یا env.JAMIA_DB) منسلک نہیں ہے۔ برائے مہربانی Cloudflare Pages سیٹنگز میں D1 Database Binding فعال کریں۔' 
+    }, 503);
   }
 
   // Helper to check admin session
@@ -589,6 +592,33 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     }
 
     if (method === 'POST') {
+      if (path === '/api/questions/batch') {
+        if (!isAdmin) return json({ success: false, error: 'Unauthorized' }, 401);
+        const { questions: list } = await request.json() as { questions: any[] };
+        if (Array.isArray(list)) {
+          const stmts = list.map(q => d1.prepare(`
+            INSERT OR REPLACE INTO online_questions (id, trackingNumber, name, email, phone, city, questionText, category, status, answerText, submittedAt, answeredAt, muftiName)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          `).bind(
+            q.id || crypto.randomUUID(),
+            q.trackingNumber || `JIA-Q-${Date.now().toString().slice(-6)}`,
+            (q.name || q.questionerName || 'سائل').slice(0, 100),
+            (q.email || q.questionerEmail || '').slice(0, 100),
+            (q.phone || '').slice(0, 50),
+            (q.city || q.country || '').slice(0, 50),
+            (q.questionText || q.question || '').slice(0, 5000),
+            (q.category || 'عام').slice(0, 100),
+            q.status || (q.isAnswered ? 'Answered' : 'Pending'),
+            q.answerText || q.reply || null,
+            q.submittedAt || q.submissionDate || new Date().toISOString(),
+            q.answeredAt || null,
+            q.muftiName || null
+          ));
+          await d1.batch(stmts);
+          return json({ success: true, count: list.length });
+        }
+      }
+
       const q = await request.json() as any;
       const clientIp = request.headers.get('CF-Connecting-IP') || request.headers.get('x-forwarded-for') || '127.0.0.1';
 
@@ -702,6 +732,38 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     }
 
     if (method === 'POST') {
+      if (path === '/api/bookings/batch') {
+        if (!isAdmin) return json({ success: false, error: 'Unauthorized' }, 401);
+        const { bookings: list } = await request.json() as { bookings: any[] };
+        if (Array.isArray(list)) {
+          const stmts = list.map(b => d1.prepare(`
+            INSERT OR REPLACE INTO class_bookings (id, trackingNumber, studentName, fatherName, age, gender, contactNumber, email, whatsappNumber, city, country, selectedCourse, preferredTime, preferredTeacherGender, priorEducation, notes, status, submittedAt)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          `).bind(
+            b.id || crypto.randomUUID(),
+            b.trackingNumber || `JIA-ADM-${Date.now().toString().slice(-6)}`,
+            (b.studentName || '').slice(0, 100),
+            (b.fatherName || b.guardianName || '').slice(0, 100),
+            b.age || 18,
+            b.gender || 'male',
+            (b.contactNumber || b.phone || '').slice(0, 50),
+            (b.email || '').slice(0, 100),
+            (b.whatsappNumber || b.whatsapp || '').slice(0, 50),
+            (b.city || '').slice(0, 50),
+            (b.country || 'Pakistan').slice(0, 50),
+            (b.selectedCourse || b.course || '').slice(0, 100),
+            (b.preferredTime || 'صبح').slice(0, 50),
+            (b.preferredTeacherGender || 'male').slice(0, 20),
+            b.priorEducation ? String(b.priorEducation).slice(0, 500) : null,
+            b.notes ? String(b.notes).slice(0, 1000) : (b.adminNotes ? String(b.adminNotes).slice(0, 1000) : null),
+            b.status || 'Pending',
+            b.submittedAt || b.date || new Date().toISOString()
+          ));
+          await d1.batch(stmts);
+          return json({ success: true, count: list.length });
+        }
+      }
+
       const b = await request.json() as any;
       const clientIp = request.headers.get('CF-Connecting-IP') || request.headers.get('x-forwarded-for') || '127.0.0.1';
 
@@ -785,6 +847,33 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     }
 
     if (method === 'POST') {
+      if (path === '/api/donations/batch') {
+        if (!isAdmin) return json({ success: false, error: 'Unauthorized' }, 401);
+        const { donations: list } = await request.json() as { donations: any[] };
+        if (Array.isArray(list)) {
+          const stmts = list.map(dn => d1.prepare(`
+            INSERT OR REPLACE INTO donations (id, transactionId, donorName, donorEmail, donorPhone, amount, currency, fundType, paymentMethod, status, receiptNumber, date, notes)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          `).bind(
+            dn.id || crypto.randomUUID(),
+            dn.transactionId || dn.transactionRef || `TXN-${Date.now()}`,
+            (dn.donorName || 'مخلص عطیہ دہندہ').slice(0, 100),
+            dn.donorEmail ? String(dn.donorEmail).slice(0, 100) : null,
+            (dn.donorPhone || '').slice(0, 50),
+            Number(dn.amount) || 0,
+            (dn.currency || 'PKR').slice(0, 10),
+            (dn.fundType || dn.category || 'عام فنڈ').slice(0, 100),
+            (dn.paymentMethod || 'Bank').slice(0, 50),
+            dn.status || 'Verified',
+            dn.receiptNumber || `RCP-${Date.now().toString().slice(-6)}`,
+            dn.date || new Date().toISOString(),
+            dn.notes ? String(dn.notes).slice(0, 1000) : null
+          ));
+          await d1.batch(stmts);
+          return json({ success: true, count: list.length });
+        }
+      }
+
       const dn = await request.json() as any;
       const clientIp = request.headers.get('CF-Connecting-IP') || request.headers.get('x-forwarded-for') || '127.0.0.1';
 
@@ -873,6 +962,33 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     if (!isAdmin) return json({ success: false, error: 'Unauthorized' }, 401);
 
     if (method === 'POST') {
+      if (path === '/api/results/batch') {
+        const { results: list } = await request.json() as { results: any[] };
+        if (Array.isArray(list)) {
+          const stmts = list.map(r => d1.prepare(`
+            INSERT OR REPLACE INTO exam_results (id, rollNumber, studentName, fatherName, department, className, examSession, totalMarks, obtainedMarks, percentage, grade, status, position, declaredDate)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          `).bind(
+            r.id || crypto.randomUUID(),
+            r.rollNumber || '',
+            r.studentName || '',
+            r.fatherName || '',
+            r.department || '',
+            r.className || r.examType || '',
+            r.examSession || r.academicYear || '',
+            r.totalMarks || 100,
+            r.obtainedMarks || 0,
+            r.percentage || 0,
+            r.grade || '',
+            r.status || 'Pass',
+            r.position || null,
+            r.declaredDate || new Date().toISOString()
+          ));
+          await d1.batch(stmts);
+          return json({ success: true, count: list.length });
+        }
+      }
+
       const r = await request.json() as any;
       await d1.prepare(`
         INSERT OR REPLACE INTO exam_results (id, rollNumber, studentName, fatherName, department, className, examSession, totalMarks, obtainedMarks, percentage, grade, status, position, declaredDate)
@@ -979,6 +1095,31 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     if (!isAdmin) return json({ success: false, error: 'Unauthorized' }, 401);
 
     if (method === 'POST') {
+      if (path === '/api/faculty/batch') {
+        const { faculty: list } = await request.json() as { faculty: any[] };
+        if (Array.isArray(list)) {
+          const stmts = list.map((f, idx) => d1.prepare(`
+            INSERT OR REPLACE INTO faculty (id, name_ur, name_ar, name_en, designation_ur, designation_ar, designation_en, department, qualification, photoUrl, contactEmail, orderIndex)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          `).bind(
+            f.id || crypto.randomUUID(),
+            f.name?.ur || '',
+            f.name?.ar || '',
+            f.name?.en || '',
+            f.designation?.ur || '',
+            f.designation?.ar || '',
+            f.designation?.en || '',
+            f.department || '',
+            f.qualification || null,
+            f.photoUrl || null,
+            f.contactEmail || null,
+            f.orderIndex !== undefined ? f.orderIndex : idx
+          ));
+          await d1.batch(stmts);
+          return json({ success: true, count: list.length });
+        }
+      }
+
       const f = await request.json() as any;
       await d1.prepare(`
         INSERT OR REPLACE INTO faculty (id, name_ur, name_ar, name_en, designation_ur, designation_ar, designation_en, department, qualification, photoUrl, contactEmail, orderIndex)
@@ -1021,6 +1162,35 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     if (!isAdmin) return json({ success: false, error: 'Unauthorized' }, 401);
 
     if (method === 'POST') {
+      if (path === '/api/books/batch') {
+        const { books: list } = await request.json() as { books: any[] };
+        if (Array.isArray(list)) {
+          const stmts = list.map(b => d1.prepare(`
+            INSERT OR REPLACE INTO books (id, title_ur, title_ar, title_en, author_ur, author_ar, author_en, category, publicationYear, pages, pdfUrl, coverImageUrl, downloadCount, description_ur, description_ar, description_en)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          `).bind(
+            b.id || crypto.randomUUID(),
+            b.title?.ur || '',
+            b.title?.ar || '',
+            b.title?.en || '',
+            typeof b.author === 'object' ? (b.author?.ur || '') : (b.author || ''),
+            typeof b.author === 'object' ? (b.author?.ar || '') : (b.author || ''),
+            typeof b.author === 'object' ? (b.author?.en || '') : (b.author || ''),
+            b.category || 'عام',
+            Number(b.publicationYear) || Number(b.publishYear) || 2026,
+            Number(b.pages) || 100,
+            b.pdfUrl || b.fileUrl || '',
+            b.coverImageUrl || b.coverImage || null,
+            b.downloadCount || b.downloadsCount || 0,
+            typeof b.description === 'object' ? (b.description?.ur || null) : (b.description || null),
+            typeof b.description === 'object' ? (b.description?.ar || null) : (b.description || null),
+            typeof b.description === 'object' ? (b.description?.en || null) : (b.description || null)
+          ));
+          await d1.batch(stmts);
+          return json({ success: true, count: list.length });
+        }
+      }
+
       const b = await request.json() as any;
       await d1.prepare(`
         INSERT OR REPLACE INTO books (id, title_ur, title_ar, title_en, author_ur, author_ar, author_en, category, publicationYear, pages, pdfUrl, coverImageUrl, downloadCount, description_ur, description_ar, description_en)
@@ -1063,6 +1233,33 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     if (!isAdmin) return json({ success: false, error: 'Unauthorized' }, 401);
 
     if (method === 'POST') {
+      if (path === '/api/media/batch') {
+        const { media: list } = await request.json() as { media: any[] };
+        if (Array.isArray(list)) {
+          const stmts = list.map(m => d1.prepare(`
+            INSERT OR REPLACE INTO media (id, title_ur, title_ar, title_en, type, category, url, thumbnailUrl, speaker, duration, eventDate, description_ur, description_ar, description_en)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          `).bind(
+            m.id || crypto.randomUUID(),
+            m.title?.ur || '',
+            m.title?.ar || '',
+            m.title?.en || '',
+            m.type || 'video',
+            m.category || 'بیانات',
+            m.url || '',
+            m.thumbnailUrl || null,
+            m.speaker || null,
+            m.duration || null,
+            m.eventDate || null,
+            typeof m.description === 'object' ? (m.description?.ur || null) : (m.description || null),
+            typeof m.description === 'object' ? (m.description?.ar || null) : (m.description || null),
+            typeof m.description === 'object' ? (m.description?.en || null) : (m.description || null)
+          ));
+          await d1.batch(stmts);
+          return json({ success: true, count: list.length });
+        }
+      }
+
       const m = await request.json() as any;
       await d1.prepare(`
         INSERT OR REPLACE INTO media (id, title_ur, title_ar, title_en, type, category, url, thumbnailUrl, speaker, duration, eventDate, description_ur, description_ar, description_en)
@@ -1114,6 +1311,31 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     if (!isAdmin) return json({ success: false, error: 'Unauthorized' }, 401);
 
     if (method === 'POST') {
+      if (path === '/api/news/batch') {
+        const { news: list } = await request.json() as { news: any[] };
+        if (Array.isArray(list)) {
+          const stmts = list.map(n => d1.prepare(`
+            INSERT OR REPLACE INTO news (id, title_ur, title_ar, title_en, content_ur, content_ar, content_en, date, category, imageUrl, isUrgent, isPublished)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          `).bind(
+            n.id || crypto.randomUUID(),
+            n.title?.ur || '',
+            n.title?.ar || '',
+            n.title?.en || '',
+            n.content?.ur || '',
+            n.content?.ar || '',
+            n.content?.en || '',
+            n.date || new Date().toISOString().split('T')[0],
+            n.category || 'جامعہ خبریں',
+            n.imageUrl || null,
+            n.isUrgent || n.isPinned ? 1 : 0,
+            n.isPublished !== false ? 1 : 0
+          ));
+          await d1.batch(stmts);
+          return json({ success: true, count: list.length });
+        }
+      }
+
       const n = await request.json() as any;
       await d1.prepare(`
         INSERT OR REPLACE INTO news (id, title_ur, title_ar, title_en, content_ur, content_ar, content_en, date, category, imageUrl, isUrgent, isPublished)

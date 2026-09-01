@@ -89,7 +89,7 @@ export const BooksManagement: React.FC<BooksManagementProps> = ({
     setIsModalOpen(true);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!titleUr.trim()) {
       alert('براہ کرم کتاب کا نام درج فرمائیں۔');
@@ -113,10 +113,15 @@ export const BooksManagement: React.FC<BooksManagementProps> = ({
       downloadsCount: editingBook ? editingBook.downloadsCount : 0
     };
 
-    if (editingBook) {
-      StorageService.updateBook(bookData);
-    } else {
-      StorageService.addBook(bookData);
+    try {
+      if (editingBook) {
+        await StorageService.updateBook(bookData);
+      } else {
+        await StorageService.addBook(bookData);
+      }
+    } catch (err: any) {
+      alert('کتاب/مقالہ سرور پر محفوظ کرنے میں خرابی پیش آئی: ' + (err?.message || 'نامعلوم خرابی') + '\nڈیٹا کلاؤڈ ڈیٹا بیس میں محفوظ نہیں ہو سکا، براہ کرم دوبارہ کوشش کریں۔');
+      return;
     }
 
     setIsModalOpen(false);
@@ -124,9 +129,14 @@ export const BooksManagement: React.FC<BooksManagementProps> = ({
     if (onUpdate) onUpdate();
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (window.confirm('کیا آپ واقعی اس کتاب یا مقالے کو حذف کرنا چاہتے ہیں؟')) {
-      StorageService.deleteBook(id);
+      try {
+        await StorageService.deleteBook(id);
+      } catch (err: any) {
+        alert('کتاب حذف کرنے میں سرور پر خرابی پیش آئی: ' + (err?.message || 'نامعلوم خرابی'));
+        return;
+      }
       loadData();
       if (onUpdate) onUpdate();
     }

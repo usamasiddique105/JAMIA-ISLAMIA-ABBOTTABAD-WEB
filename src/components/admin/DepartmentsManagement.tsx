@@ -90,7 +90,7 @@ export const DepartmentsManagement: React.FC<DepartmentsManagementProps> = ({
     setIsModalOpen(true);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!nameUr.trim()) {
       alert('براہ کرم شعبہ کا نام درج فرمائیں۔');
@@ -117,10 +117,15 @@ export const DepartmentsManagement: React.FC<DepartmentsManagementProps> = ({
       eligibility: eligibility.trim() || 'اہلیت کے مطابق'
     };
 
-    if (editingDept) {
-      StorageService.updateDepartment(deptData);
-    } else {
-      StorageService.addDepartment(deptData);
+    try {
+      if (editingDept) {
+        await StorageService.updateDepartment(deptData);
+      } else {
+        await StorageService.addDepartment(deptData);
+      }
+    } catch (err: any) {
+      alert('تعلیمی شعبہ سرور پر محفوظ کرنے میں خرابی پیش آئی: ' + (err?.message || 'نامعلوم خرابی') + '\nڈیٹا کلاؤڈ ڈیٹا بیس میں محفوظ نہیں ہو سکا، براہ کرم دوبارہ کوشش کریں۔');
+      return;
     }
 
     setIsModalOpen(false);
@@ -128,9 +133,14 @@ export const DepartmentsManagement: React.FC<DepartmentsManagementProps> = ({
     if (onUpdate) onUpdate();
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (window.confirm('کیا آپ واقعی اس تعلیمی شعبے کو حذف کرنا چاہتے ہیں؟')) {
-      StorageService.deleteDepartment(id);
+      try {
+        await StorageService.deleteDepartment(id);
+      } catch (err: any) {
+        alert('شعبہ حذف کرنے میں سرور پر خرابی پیش آئی: ' + (err?.message || 'نامعلوم خرابی'));
+        return;
+      }
       loadData();
       if (onUpdate) onUpdate();
     }

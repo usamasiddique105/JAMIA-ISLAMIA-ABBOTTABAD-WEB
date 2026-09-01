@@ -27,83 +27,83 @@ export const StorageService = {
 
   // Fatwas
   getFatwas: (): Fatwa[] => currentAdapter.getFatwas() as Fatwa[],
-  saveFatwas: (data: Fatwa[]): void => { currentAdapter.saveFatwas(data); },
-  addFatwa: (fatwa: Fatwa): void => { currentAdapter.addFatwa(fatwa); },
-  updateFatwa: (fatwa: Fatwa): void => { currentAdapter.updateFatwa(fatwa); },
-  deleteFatwa: (id: string): void => { currentAdapter.deleteFatwa(id); },
+  saveFatwas: (data: Fatwa[]): Promise<void> => Promise.resolve(currentAdapter.saveFatwas(data)),
+  addFatwa: (fatwa: Fatwa): Promise<void> => Promise.resolve(currentAdapter.addFatwa(fatwa)),
+  updateFatwa: (fatwa: Fatwa): Promise<void> => Promise.resolve(currentAdapter.updateFatwa(fatwa)),
+  deleteFatwa: (id: string): Promise<void> => Promise.resolve(currentAdapter.deleteFatwa(id)),
 
   // Online Questions
   getQuestions: (): OnlineQuestion[] => currentAdapter.getQuestions() as OnlineQuestion[],
-  saveQuestions: (data: OnlineQuestion[]): void => { currentAdapter.saveQuestions(data); },
-  addQuestion: (question: OnlineQuestion, captchaToken?: string): void => { currentAdapter.addQuestion(question, captchaToken); },
-  updateQuestion: (question: OnlineQuestion): void => { currentAdapter.updateQuestion(question); },
+  saveQuestions: (data: OnlineQuestion[]): Promise<void> => Promise.resolve(currentAdapter.saveQuestions(data)),
+  addQuestion: (question: OnlineQuestion, captchaToken?: string): Promise<string | void> => Promise.resolve(currentAdapter.addQuestion(question, captchaToken)),
+  updateQuestion: (question: OnlineQuestion): Promise<void> => Promise.resolve(currentAdapter.updateQuestion(question)),
 
   // Online Class Bookings & Admissions
   getClassBookings: (): ClassBooking[] => currentAdapter.getClassBookings() as ClassBooking[],
-  saveClassBookings: (data: ClassBooking[]): void => { currentAdapter.saveClassBookings(data); },
-  addClassBooking: (booking: ClassBooking, captchaToken?: string): void => { currentAdapter.addClassBooking(booking, captchaToken); },
-  updateClassBooking: (booking: ClassBooking): void => { currentAdapter.updateClassBooking(booking); },
-  deleteClassBooking: (id: string): void => { currentAdapter.deleteClassBooking(id); },
+  saveClassBookings: (data: ClassBooking[]): Promise<void> => Promise.resolve(currentAdapter.saveClassBookings(data)),
+  addClassBooking: (booking: ClassBooking, captchaToken?: string): Promise<string | void> => Promise.resolve(currentAdapter.addClassBooking(booking, captchaToken)),
+  updateClassBooking: (booking: ClassBooking): Promise<void> => Promise.resolve(currentAdapter.updateClassBooking(booking)),
+  deleteClassBooking: (id: string): Promise<void> => Promise.resolve(currentAdapter.deleteClassBooking(id)),
 
   // Exam Results
   getExamResults: (): ExamResult[] => currentAdapter.getExamResults() as ExamResult[],
-  saveExamResults: (data: ExamResult[]): void => { currentAdapter.saveExamResults(data); },
-  addExamResult: (result: ExamResult): void => { currentAdapter.addExamResult(result); },
-  updateExamResult: (result: ExamResult): void => { currentAdapter.updateExamResult(result); },
-  deleteExamResult: (id: string): void => { currentAdapter.deleteExamResult(id); },
+  saveExamResults: (data: ExamResult[]): Promise<void> => Promise.resolve(currentAdapter.saveExamResults(data)),
+  addExamResult: (result: ExamResult): Promise<void> => Promise.resolve(currentAdapter.addExamResult(result)),
+  updateExamResult: (result: ExamResult): Promise<void> => Promise.resolve(currentAdapter.updateExamResult(result)),
+  deleteExamResult: (id: string): Promise<void> => Promise.resolve(currentAdapter.deleteExamResult(id)),
 
   // Departments
   getDepartments: (): Department[] => currentAdapter.getDepartments() as Department[],
-  saveDepartments: (data: Department[]): void => { currentAdapter.saveDepartments(data); },
-  addDepartment: (dept: Department): void => { currentAdapter.addDepartment(dept); },
-  updateDepartment: (dept: Department): void => { currentAdapter.updateDepartment(dept); },
-  deleteDepartment: (id: string): void => { currentAdapter.deleteDepartment(id); },
+  saveDepartments: (data: Department[]): Promise<void> => Promise.resolve(currentAdapter.saveDepartments(data)),
+  addDepartment: (dept: Department): Promise<void> => Promise.resolve(currentAdapter.addDepartment(dept)),
+  updateDepartment: (dept: Department): Promise<void> => Promise.resolve(currentAdapter.updateDepartment(dept)),
+  deleteDepartment: (id: string): Promise<void> => Promise.resolve(currentAdapter.deleteDepartment(id)),
 
   // Faculty
   getFaculty: (): FacultyMember[] => currentAdapter.getFaculty() as FacultyMember[],
-  saveFaculty: (data: FacultyMember[]): void => { currentAdapter.saveFaculty(data); },
-  addFaculty: (faculty: FacultyMember): void => { currentAdapter.addFaculty(faculty); },
-  updateFaculty: (faculty: FacultyMember): void => { currentAdapter.updateFaculty(faculty); },
-  deleteFaculty: (id: string): void => { currentAdapter.deleteFaculty(id); },
+  saveFaculty: (data: FacultyMember[]): Promise<void> => Promise.resolve(currentAdapter.saveFaculty(data)),
+  addFaculty: (faculty: FacultyMember): Promise<void> => Promise.resolve(currentAdapter.addFaculty(faculty)),
+  updateFaculty: (faculty: FacultyMember): Promise<void> => Promise.resolve(currentAdapter.updateFaculty(faculty)),
+  deleteFaculty: (id: string): Promise<void> => Promise.resolve(currentAdapter.deleteFaculty(id)),
 
   // Books / Publications
   getBooks: (): PublicationBook[] => currentAdapter.getBooks() as PublicationBook[],
-  saveBooks: (data: PublicationBook[]): void => { currentAdapter.saveBooks(data); },
-  addBook: (book: PublicationBook): void => { currentAdapter.addBook(book); },
-  updateBook: (book: PublicationBook): void => { currentAdapter.updateBook(book); },
-  deleteBook: (id: string): void => { currentAdapter.deleteBook(id); },
+  saveBooks: (data: PublicationBook[]): Promise<void> => Promise.resolve(currentAdapter.saveBooks(data)),
+  addBook: (book: PublicationBook): Promise<void> => Promise.resolve(currentAdapter.addBook(book)),
+  updateBook: (book: PublicationBook): Promise<void> => Promise.resolve(currentAdapter.updateBook(book)),
+  deleteBook: (id: string): Promise<void> => Promise.resolve(currentAdapter.deleteBook(id)),
 
   // Media (Audio, Video, Photo)
   getMedia: (): MediaItem[] => currentAdapter.getMedia() as MediaItem[],
-  saveMedia: (data: MediaItem[]): void => { currentAdapter.saveMedia(data); },
-  addMedia: (media: MediaItem): void => { currentAdapter.addMedia(media); },
-  updateMedia: (media: MediaItem): void => { currentAdapter.updateMedia(media); },
-  deleteMedia: (id: string): void => { currentAdapter.deleteMedia(id); },
+  saveMedia: (data: MediaItem[]): Promise<void> => Promise.resolve(currentAdapter.saveMedia(data)),
+  addMedia: (media: MediaItem): Promise<void> => Promise.resolve(currentAdapter.addMedia(media)),
+  updateMedia: (media: MediaItem): Promise<void> => Promise.resolve(currentAdapter.updateMedia(media)),
+  deleteMedia: (id: string): Promise<void> => Promise.resolve(currentAdapter.deleteMedia(id)),
 
   // News & Announcements
   getNews: (): NewsItem[] => currentAdapter.getNews() as NewsItem[],
-  saveNews: (data: NewsItem[]): void => { currentAdapter.saveNews(data); },
-  addNews: (news: NewsItem): void => { currentAdapter.addNews(news); },
-  updateNews: (news: NewsItem): void => { currentAdapter.updateNews(news); },
-  deleteNews: (id: string): void => { currentAdapter.deleteNews(id); },
+  saveNews: (data: NewsItem[]): Promise<void> => Promise.resolve(currentAdapter.saveNews(data)),
+  addNews: (news: NewsItem): Promise<void> => Promise.resolve(currentAdapter.addNews(news)),
+  updateNews: (news: NewsItem): Promise<void> => Promise.resolve(currentAdapter.updateNews(news)),
+  deleteNews: (id: string): Promise<void> => Promise.resolve(currentAdapter.deleteNews(id)),
 
   // Donations
   getDonations: (): DonationRecord[] => currentAdapter.getDonations() as DonationRecord[],
-  saveDonations: (data: DonationRecord[]): void => { currentAdapter.saveDonations(data); },
-  addDonation: (don: DonationRecord, captchaToken?: string): void => { currentAdapter.addDonation(don, captchaToken); },
+  saveDonations: (data: DonationRecord[]): Promise<void> => Promise.resolve(currentAdapter.saveDonations(data)),
+  addDonation: (don: DonationRecord, captchaToken?: string): Promise<void> => Promise.resolve(currentAdapter.addDonation(don, captchaToken)),
 
   // Site Settings
   getSiteSettings: (): SiteSettings => currentAdapter.getSiteSettings() as SiteSettings,
-  saveSiteSettings: (data: SiteSettings): void => { currentAdapter.saveSiteSettings(data); },
+  saveSiteSettings: (data: SiteSettings): Promise<void> => Promise.resolve(currentAdapter.saveSiteSettings(data)),
 
   // Real Site Visitors Logs & Analytics
   getVisitors: (): SiteVisitorLog[] => (currentAdapter.getVisitors?.() as SiteVisitorLog[]) || [],
-  addVisitor: (log: SiteVisitorLog): void => { currentAdapter.addVisitor?.(log); },
-  clearVisitors: (): void => { currentAdapter.clearVisitors?.(); },
+  addVisitor: (log: SiteVisitorLog): Promise<void> => Promise.resolve(currentAdapter.addVisitor?.(log)),
+  clearVisitors: (): Promise<void> => Promise.resolve(currentAdapter.clearVisitors?.()),
 
   // Cloudflare D1 Sync
   syncFromCloud: (): Promise<void> => cloudAdapter.syncFromCloud(),
 
   // Reset to Defaults
-  resetAll: (): void => { currentAdapter.resetAll(); }
+  resetAll: (): Promise<void> => Promise.resolve(currentAdapter.resetAll())
 };

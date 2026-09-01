@@ -85,7 +85,7 @@ export const NewsManagement: React.FC<NewsManagementProps> = ({
     setIsModalOpen(true);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!titleUr.trim() || !contentUr.trim()) {
       alert('براہ کرم خبر کا عنوان اور متن درج فرمائیں۔');
@@ -109,10 +109,15 @@ export const NewsManagement: React.FC<NewsManagementProps> = ({
       isPinned
     };
 
-    if (editingNews) {
-      StorageService.updateNews(newsData);
-    } else {
-      StorageService.addNews(newsData);
+    try {
+      if (editingNews) {
+        await StorageService.updateNews(newsData);
+      } else {
+        await StorageService.addNews(newsData);
+      }
+    } catch (err: any) {
+      alert('خبر/اعلان سرور پر محفوظ کرنے میں خرابی پیش آئی: ' + (err?.message || 'نامعلوم خرابی') + '\nڈیٹا کلاؤڈ ڈیٹا بیس میں محفوظ نہیں ہو سکا، براہ کرم دوبارہ کوشش کریں۔');
+      return;
     }
 
     setIsModalOpen(false);
@@ -120,19 +125,29 @@ export const NewsManagement: React.FC<NewsManagementProps> = ({
     if (onUpdate) onUpdate();
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (window.confirm('کیا آپ واقعی اس خبر/اعلان کو حذف کرنا چاہتے ہیں؟')) {
-      StorageService.deleteNews(id);
+      try {
+        await StorageService.deleteNews(id);
+      } catch (err: any) {
+        alert('خبر حذف کرنے میں سرور پر خرابی پیش آئی: ' + (err?.message || 'نامعلوم خرابی'));
+        return;
+      }
       loadData();
       if (onUpdate) onUpdate();
     }
   };
 
-  const handleTogglePin = (item: NewsItem) => {
-    StorageService.updateNews({
-      ...item,
-      isPinned: !item.isPinned
-    });
+  const handleTogglePin = async (item: NewsItem) => {
+    try {
+      await StorageService.updateNews({
+        ...item,
+        isPinned: !item.isPinned
+      });
+    } catch (err: any) {
+      alert('خبر کی حالت تبدیل کرنے میں سرور پر خرابی پیش آئی: ' + (err?.message || 'نامعلوم خرابی'));
+      return;
+    }
     loadData();
     if (onUpdate) onUpdate();
   };
