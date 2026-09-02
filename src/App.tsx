@@ -21,6 +21,7 @@ import { OnlineServicesView } from './components/OnlineServicesView';
 import { AskScholarView } from './components/AskScholarView';
 import { GlobalSearchModal } from './components/GlobalSearchModal';
 import { AdminDashboard } from './components/admin/AdminDashboard';
+import { CmsPageView } from './components/CmsPageView';
 import { trackSiteVisit } from './services/visitorTracker';
 
 import { 
@@ -219,6 +220,17 @@ function MainApp() {
 
         {/* TAB 12: COMPLETE CMS ADMIN DASHBOARD */}
         {currentTab === 'admin' && <AdminDashboard />}
+
+        {/* DYNAMIC CMS PAGES (e.g. #page-admissions, #page-rules, or published custom pages) */}
+        {(!['home', 'departments', 'faculty', 'results', 'library', 'media', 'news', 'donations', 'online-taawun', 'taawun', 'contact', 'faq', 'ask-scholar', 'admin'].includes(currentTab) &&
+          !currentTab.startsWith('about') &&
+          !currentTab.startsWith('fatwa') &&
+          !currentTab.startsWith('online-')) && (
+          <CmsPageView 
+            slug={currentTab.startsWith('page-') || currentTab.startsWith('page/') ? currentTab.replace(/^page[-/]/, '') : currentTab} 
+            onNavigate={handleTabChange} 
+          />
+        )}
       </main>
 
       {/* Floating WhatsApp Action Button with Direct Online Admission / Trial Inquiry */}

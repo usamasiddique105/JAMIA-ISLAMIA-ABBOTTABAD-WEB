@@ -15,6 +15,15 @@ import {
   INITIAL_DONATIONS, 
   INITIAL_SITE_SETTINGS 
 } from '../src/data/initialData';
+import {
+  INITIAL_CMS_PAGES,
+  INITIAL_CMS_MENUS,
+  INITIAL_CMS_SECTIONS,
+  INITIAL_CMS_THEME_SETTINGS,
+  INITIAL_CMS_SEO_SETTINGS,
+  INITIAL_CMS_MEDIA,
+  INITIAL_CMS_USERS
+} from '../src/data/initialCmsData';
 
 let dbInstance: Database.Database | null = null;
 
@@ -244,7 +253,142 @@ function initDatabaseSchema(db: Database.Database) {
       ip TEXT,
       user_agent TEXT
     );
+
+    CREATE TABLE IF NOT EXISTS cms_pages (
+      id TEXT PRIMARY KEY,
+      slug TEXT NOT NULL UNIQUE,
+      title_ur TEXT NOT NULL,
+      title_en TEXT,
+      title_ar TEXT,
+      content_ur TEXT NOT NULL,
+      content_en TEXT,
+      content_ar TEXT,
+      excerpt_ur TEXT,
+      excerpt_en TEXT,
+      excerpt_ar TEXT,
+      featured_image TEXT,
+      status TEXT NOT NULL DEFAULT 'published',
+      visibility TEXT NOT NULL DEFAULT 'public',
+      password TEXT,
+      seo_title_ur TEXT,
+      seo_title_en TEXT,
+      seo_title_ar TEXT,
+      seo_desc_ur TEXT,
+      seo_desc_en TEXT,
+      seo_desc_ar TEXT,
+      og_image TEXT,
+      author TEXT,
+      template TEXT NOT NULL DEFAULT 'default',
+      order_index INTEGER NOT NULL DEFAULT 0,
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS cms_menus (
+      id TEXT PRIMARY KEY,
+      location TEXT NOT NULL UNIQUE,
+      name TEXT NOT NULL,
+      items_json TEXT,
+      updated_at TEXT NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS cms_menu_items (
+      id TEXT PRIMARY KEY,
+      menu_id TEXT NOT NULL,
+      parent_id TEXT,
+      label_ur TEXT NOT NULL,
+      label_ar TEXT,
+      label_en TEXT,
+      target_type TEXT NOT NULL DEFAULT 'custom',
+      target_value TEXT,
+      url TEXT NOT NULL,
+      order_index INTEGER NOT NULL DEFAULT 0,
+      is_enabled INTEGER NOT NULL DEFAULT 1,
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS cms_media (
+      id TEXT PRIMARY KEY,
+      title TEXT NOT NULL,
+      filename TEXT NOT NULL,
+      file_type TEXT NOT NULL DEFAULT 'image',
+      mime_type TEXT,
+      file_size INTEGER NOT NULL DEFAULT 0,
+      url TEXT NOT NULL,
+      thumbnail_url TEXT,
+      alt_text TEXT,
+      caption TEXT,
+      uploaded_by TEXT,
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS cms_sections (
+      id TEXT PRIMARY KEY,
+      section_key TEXT NOT NULL UNIQUE,
+      name_ur TEXT NOT NULL,
+      name_en TEXT,
+      name_ar TEXT,
+      is_enabled INTEGER NOT NULL DEFAULT 1,
+      order_index INTEGER NOT NULL DEFAULT 0,
+      title_ur TEXT NOT NULL,
+      title_en TEXT,
+      title_ar TEXT,
+      subtitle_ur TEXT,
+      subtitle_en TEXT,
+      subtitle_ar TEXT,
+      content_ur TEXT,
+      content_en TEXT,
+      content_ar TEXT,
+      image_url TEXT,
+      bg_color TEXT,
+      bg_image_url TEXT,
+      button_text_ur TEXT,
+      button_text_en TEXT,
+      button_text_ar TEXT,
+      button_url TEXT,
+      config_json TEXT,
+      updated_at TEXT NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS cms_theme_settings (
+      id TEXT PRIMARY KEY,
+      data_json TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS cms_seo_settings (
+      id TEXT PRIMARY KEY,
+      data_json TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS cms_revisions (
+      id TEXT PRIMARY KEY,
+      entity_type TEXT NOT NULL,
+      entity_id TEXT NOT NULL,
+      data_json TEXT NOT NULL,
+      author TEXT NOT NULL,
+      revision_note TEXT,
+      created_at TEXT NOT NULL
+    );
+
+    -- Safe non-destructive indexes
+    CREATE INDEX IF NOT EXISTS idx_cms_pages_slug ON cms_pages(slug);
+    CREATE INDEX IF NOT EXISTS idx_cms_pages_status ON cms_pages(status);
+    CREATE INDEX IF NOT EXISTS idx_cms_menus_loc ON cms_menus(location);
+    CREATE INDEX IF NOT EXISTS idx_cms_menu_items_menu ON cms_menu_items(menu_id);
+    CREATE INDEX IF NOT EXISTS idx_cms_menu_items_parent ON cms_menu_items(parent_id);
+    CREATE INDEX IF NOT EXISTS idx_cms_sections_key ON cms_sections(section_key);
+    CREATE INDEX IF NOT EXISTS idx_cms_revisions_entity ON cms_revisions(entity_type, entity_id);
   `);
+
+  // Safe schema column migrations
+  try { db.exec("ALTER TABLE admin_users ADD COLUMN username TEXT;"); } catch {}
+  try { db.exec("ALTER TABLE admin_users ADD COLUMN full_name TEXT;"); } catch {}
+  try { db.exec("ALTER TABLE admin_users ADD COLUMN is_active INTEGER NOT NULL DEFAULT 1;"); } catch {}
+  try { db.exec("ALTER TABLE admin_users ADD COLUMN phone TEXT;"); } catch {}
 
   // Safe schema column migrations
   try { db.exec("ALTER TABLE fatwas ADD COLUMN isTranslationApproved INTEGER NOT NULL DEFAULT 0;"); } catch {}
@@ -278,6 +422,32 @@ function initDatabaseSchema(db: Database.Database) {
     db.prepare(`
       UPDATE admin_users SET password_hash = ?, password_salt = ? WHERE email = ?
     `).run(hash, salt, 'jamiaislamia');
+  }
+
+  // Also seed/sync username 'admin'
+  const adminShortRow = db.prepare('SELECT id FROM admin_users WHERE email = ?').get('admin');
+  if (!adminShortRow) {
+    db.prepare(`
+      INSERT INTO admin_users (id, email, password_hash, password_salt, role, created_at)
+      VALUES (?, ?, ?, ?, 'superadmin', ?)
+    `).run('admin-short-default', 'admin', hash, salt, new Date().toISOString());
+  } else {
+    db.prepare(`
+      UPDATE admin_users SET password_hash = ?, password_salt = ? WHERE email = ?
+    `).run(hash, salt, 'admin');
+  }
+
+  // Also seed/sync username 'jamiaislamia2003'
+  const adminYearRow = db.prepare('SELECT id FROM admin_users WHERE email = ?').get('jamiaislamia2003');
+  if (!adminYearRow) {
+    db.prepare(`
+      INSERT INTO admin_users (id, email, password_hash, password_salt, role, created_at)
+      VALUES (?, ?, ?, ?, 'superadmin', ?)
+    `).run('admin-year-default', 'jamiaislamia2003', hash, salt, new Date().toISOString());
+  } else {
+    db.prepare(`
+      UPDATE admin_users SET password_hash = ?, password_salt = ? WHERE email = ?
+    `).run(hash, salt, 'jamiaislamia2003');
   }
 
   // Seed Fatwas if empty
@@ -579,5 +749,172 @@ function initDatabaseSchema(db: Database.Database) {
       INSERT INTO site_settings (id, data_json, updated_at)
       VALUES ('main', ?, ?)
     `).run(JSON.stringify(INITIAL_SITE_SETTINGS), new Date().toISOString());
+  }
+
+  // Seed CMS Pages if empty
+  const pageCount = db.prepare('SELECT COUNT(*) as count FROM cms_pages').get() as { count: number };
+  if (pageCount.count === 0) {
+    const insertPage = db.prepare(`
+      INSERT INTO cms_pages (
+        id, slug, title_ur, title_en, title_ar,
+        content_ur, content_en, content_ar,
+        excerpt_ur, excerpt_en, excerpt_ar,
+        featured_image, status, visibility, password,
+        seo_title_ur, seo_title_en, seo_title_ar,
+        seo_desc_ur, seo_desc_en, seo_desc_ar,
+        og_image, author, template, order_index,
+        created_at, updated_at
+      ) VALUES (
+        ?, ?, ?, ?, ?,
+        ?, ?, ?,
+        ?, ?, ?,
+        ?, ?, ?, ?,
+        ?, ?, ?,
+        ?, ?, ?,
+        ?, ?, ?, ?,
+        ?, ?
+      )
+    `);
+
+    for (const p of INITIAL_CMS_PAGES) {
+      insertPage.run(
+        p.id, p.slug, p.title.ur, p.title.en, p.title.ar,
+        p.content.ur, p.content.en, p.content.ar,
+        p.excerpt?.ur || null, p.excerpt?.en || null, p.excerpt?.ar || null,
+        p.featuredImage || null, p.status || 'published', p.visibility || 'public', p.password || null,
+        p.seoTitle?.ur || null, p.seoTitle?.en || null, p.seoTitle?.ar || null,
+        p.seoDescription?.ur || null, p.seoDescription?.en || null, p.seoDescription?.ar || null,
+        p.ogImage || null, p.author || 'جامعہ انتظامیہ', p.template || 'default', p.orderIndex || 0,
+        p.createdAt || new Date().toISOString(), p.updatedAt || new Date().toISOString()
+      );
+    }
+  }
+
+  // Seed CMS Menus if empty
+  const menuCount = db.prepare('SELECT COUNT(*) as count FROM cms_menus').get() as { count: number };
+  if (menuCount.count === 0) {
+    const insertMenu = db.prepare(`
+      INSERT INTO cms_menus (id, location, name, items_json, updated_at)
+      VALUES (?, ?, ?, ?, ?)
+    `);
+    for (const m of INITIAL_CMS_MENUS) {
+      insertMenu.run(m.id, m.location, m.name, JSON.stringify(m.items), m.updatedAt || new Date().toISOString());
+    }
+  }
+
+  // Seed normalized menu items if empty
+  const menuItemCount = db.prepare('SELECT COUNT(*) as count FROM cms_menu_items').get() as { count: number };
+  if (menuItemCount.count === 0) {
+    const insertItem = db.prepare(`
+      INSERT INTO cms_menu_items (
+        id, menu_id, parent_id, label_ur, label_ar, label_en, target_type, target_value, url, order_index, is_enabled, created_at, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `);
+    for (const m of INITIAL_CMS_MENUS) {
+      if (Array.isArray(m.items)) {
+        for (const it of m.items) {
+          insertItem.run(
+            it.id, m.id, it.parentId || null,
+            it.title.ur, it.title.ar || '', it.title.en || '',
+            it.tabId ? 'tab' : it.pageId ? 'page' : 'custom',
+            it.tabId || it.pageId || null,
+            it.url || '',
+            it.orderIndex || 0,
+            it.isEnabled ? 1 : 0,
+            new Date().toISOString(),
+            new Date().toISOString()
+          );
+          if (Array.isArray(it.children)) {
+            for (const child of it.children) {
+              insertItem.run(
+                child.id, m.id, it.id,
+                child.title.ur, child.title.ar || '', child.title.en || '',
+                child.tabId ? 'tab' : child.pageId ? 'page' : 'custom',
+                child.tabId || child.pageId || null,
+                child.url || '',
+                child.orderIndex || 0,
+                child.isEnabled ? 1 : 0,
+                new Date().toISOString(),
+                new Date().toISOString()
+              );
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // Seed CMS Sections if empty
+  const secCount = db.prepare('SELECT COUNT(*) as count FROM cms_sections').get() as { count: number };
+  if (secCount.count === 0) {
+    const insertSec = db.prepare(`
+      INSERT INTO cms_sections (
+        id, section_key, name_ur, name_en, name_ar,
+        is_enabled, order_index,
+        title_ur, title_en, title_ar,
+        subtitle_ur, subtitle_en, subtitle_ar,
+        content_ur, content_en, content_ar,
+        image_url, bg_color, bg_image_url,
+        button_text_ur, button_text_en, button_text_ar,
+        button_url, config_json, updated_at
+      ) VALUES (
+        ?, ?, ?, ?, ?,
+        ?, ?,
+        ?, ?, ?,
+        ?, ?, ?,
+        ?, ?, ?,
+        ?, ?, ?,
+        ?, ?, ?,
+        ?, ?, ?
+      )
+    `);
+
+    for (const s of INITIAL_CMS_SECTIONS) {
+      insertSec.run(
+        s.id, s.sectionKey, s.name.ur, s.name.en, s.name.ar,
+        s.isEnabled ? 1 : 0, s.orderIndex || 0,
+        s.title.ur, s.title.en, s.title.ar,
+        s.subtitle?.ur || null, s.subtitle?.en || null, s.subtitle?.ar || null,
+        s.content?.ur || null, s.content?.en || null, s.content?.ar || null,
+        s.imageUrl || null, s.bgColor || null, s.bgImageUrl || null,
+        s.buttonText?.ur || null, s.buttonText?.en || null, s.buttonText?.ar || null,
+        s.buttonUrl || null, JSON.stringify(s.config || {}), s.updatedAt || new Date().toISOString()
+      );
+    }
+  }
+
+  // Seed CMS Theme Settings if empty
+  const themeCount = db.prepare('SELECT COUNT(*) as count FROM cms_theme_settings').get() as { count: number };
+  if (themeCount.count === 0) {
+    db.prepare(`
+      INSERT INTO cms_theme_settings (id, data_json, updated_at)
+      VALUES ('main', ?, ?)
+    `).run(JSON.stringify(INITIAL_CMS_THEME_SETTINGS), new Date().toISOString());
+  }
+
+  // Seed CMS SEO Settings if empty
+  const seoCount = db.prepare('SELECT COUNT(*) as count FROM cms_seo_settings').get() as { count: number };
+  if (seoCount.count === 0) {
+    db.prepare(`
+      INSERT INTO cms_seo_settings (id, data_json, updated_at)
+      VALUES ('main', ?, ?)
+    `).run(JSON.stringify(INITIAL_CMS_SEO_SETTINGS), new Date().toISOString());
+  }
+
+  // Seed CMS Media if empty
+  const mediaCount = db.prepare('SELECT COUNT(*) as count FROM cms_media').get() as { count: number };
+  if (mediaCount.count === 0) {
+    const insertMedia = db.prepare(`
+      INSERT INTO cms_media (
+        id, title, filename, file_type, mime_type, file_size, url, thumbnail_url, alt_text, caption, uploaded_by, created_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `);
+    for (const med of INITIAL_CMS_MEDIA) {
+      insertMedia.run(
+        med.id, med.title, med.filename, med.fileType, med.mimeType, med.fileSize,
+        med.url, med.thumbnailUrl || med.url, med.altText || null, med.caption || null,
+        med.uploadedBy || 'Admin', med.createdAt || new Date().toISOString()
+      );
+    }
   }
 }

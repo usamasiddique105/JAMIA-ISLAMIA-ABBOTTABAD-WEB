@@ -10,13 +10,29 @@ import {
   DonationRecord, 
   SiteSettings, 
   ClassBooking, 
-  SiteVisitorLog 
+  SiteVisitorLog,
+  CmsPage,
+  CmsMenu,
+  CmsMedia,
+  CmsSection,
+  CmsThemeSettings,
+  CmsSeoSettings,
+  CmsAdminUser
 } from '../types';
 import { 
   INITIAL_DEPARTMENTS, 
   INITIAL_FACULTY, 
   INITIAL_SITE_SETTINGS 
 } from '../data/initialData';
+import {
+  INITIAL_CMS_PAGES,
+  INITIAL_CMS_MENUS,
+  INITIAL_CMS_SECTIONS,
+  INITIAL_CMS_THEME_SETTINGS,
+  INITIAL_CMS_SEO_SETTINGS,
+  INITIAL_CMS_MEDIA,
+  INITIAL_CMS_USERS
+} from '../data/initialCmsData';
 import { IDatabaseService } from './dbInterface';
 
 export const D1_STORAGE_KEYS = {
@@ -32,6 +48,13 @@ export const D1_STORAGE_KEYS = {
   DONATIONS: 'jia_d1_donations_v1',
   SETTINGS: 'jia_d1_settings_v1',
   VISITORS: 'jia_d1_visitors_v1',
+  CMS_PAGES: 'jia_d1_cms_pages_v1',
+  CMS_MENUS: 'jia_d1_cms_menus_v1',
+  CMS_MEDIA: 'jia_d1_cms_media_v1',
+  CMS_SECTIONS: 'jia_d1_cms_sections_v1',
+  CMS_THEME: 'jia_d1_cms_theme_v1',
+  CMS_SEO: 'jia_d1_cms_seo_v1',
+  CMS_USERS: 'jia_d1_cms_users_v1',
   ADMIN_TOKEN: 'jia_d1_admin_token',
   ADMIN_EMAIL: 'jia_d1_admin_email',
 };
@@ -211,7 +234,13 @@ export class CloudApiAdapter implements IDatabaseService {
         facultyRes, 
         deptRes, 
         mediaRes,
-        settingsRes
+        settingsRes,
+        cmsPagesRes,
+        cmsMenusRes,
+        cmsSectionsRes,
+        cmsThemeRes,
+        cmsSeoRes,
+        cmsMediaRes
       ] = await Promise.allSettled([
         apiFetch('/api/fatwas'),
         apiFetch('/api/questions'),
@@ -223,6 +252,12 @@ export class CloudApiAdapter implements IDatabaseService {
         apiFetch('/api/departments'),
         apiFetch('/api/media'),
         apiFetch('/api/settings'),
+        apiFetch('/api/cms/pages'),
+        apiFetch('/api/cms/menus'),
+        apiFetch('/api/cms/sections'),
+        apiFetch('/api/cms/theme'),
+        apiFetch('/api/cms/seo'),
+        apiFetch('/api/cms/media'),
       ]);
 
       let changed = false;
@@ -253,6 +288,42 @@ export class CloudApiAdapter implements IDatabaseService {
       }
       if (facultyRes.status === 'fulfilled' && facultyRes.value.success && Array.isArray(facultyRes.value.data) && facultyRes.value.data.length > 0) {
         setLocal(D1_STORAGE_KEYS.FACULTY, facultyRes.value.data);
+        changed = true;
+      }
+      if (deptRes.status === 'fulfilled' && deptRes.value.success && Array.isArray(deptRes.value.data) && deptRes.value.data.length > 0) {
+        setLocal(D1_STORAGE_KEYS.DEPARTMENTS, deptRes.value.data);
+        changed = true;
+      }
+      if (mediaRes.status === 'fulfilled' && mediaRes.value.success && Array.isArray(mediaRes.value.data)) {
+        setLocal(D1_STORAGE_KEYS.MEDIA, mediaRes.value.data);
+        changed = true;
+      }
+      if (settingsRes.status === 'fulfilled' && settingsRes.value.success && settingsRes.value.data && typeof settingsRes.value.data === 'object') {
+        setLocal(D1_STORAGE_KEYS.SETTINGS, settingsRes.value.data);
+        changed = true;
+      }
+      if (cmsPagesRes.status === 'fulfilled' && cmsPagesRes.value.success && Array.isArray(cmsPagesRes.value.data) && cmsPagesRes.value.data.length > 0) {
+        setLocal(D1_STORAGE_KEYS.CMS_PAGES, cmsPagesRes.value.data);
+        changed = true;
+      }
+      if (cmsMenusRes.status === 'fulfilled' && cmsMenusRes.value.success && Array.isArray(cmsMenusRes.value.data) && cmsMenusRes.value.data.length > 0) {
+        setLocal(D1_STORAGE_KEYS.CMS_MENUS, cmsMenusRes.value.data);
+        changed = true;
+      }
+      if (cmsSectionsRes.status === 'fulfilled' && cmsSectionsRes.value.success && Array.isArray(cmsSectionsRes.value.data) && cmsSectionsRes.value.data.length > 0) {
+        setLocal(D1_STORAGE_KEYS.CMS_SECTIONS, cmsSectionsRes.value.data);
+        changed = true;
+      }
+      if (cmsThemeRes.status === 'fulfilled' && cmsThemeRes.value.success && cmsThemeRes.value.data) {
+        setLocal(D1_STORAGE_KEYS.CMS_THEME, cmsThemeRes.value.data);
+        changed = true;
+      }
+      if (cmsSeoRes.status === 'fulfilled' && cmsSeoRes.value.success && cmsSeoRes.value.data) {
+        setLocal(D1_STORAGE_KEYS.CMS_SEO, cmsSeoRes.value.data);
+        changed = true;
+      }
+      if (cmsMediaRes.status === 'fulfilled' && cmsMediaRes.value.success && Array.isArray(cmsMediaRes.value.data) && cmsMediaRes.value.data.length > 0) {
+        setLocal(D1_STORAGE_KEYS.CMS_MEDIA, cmsMediaRes.value.data);
         changed = true;
       }
       if (deptRes.status === 'fulfilled' && deptRes.value.success && Array.isArray(deptRes.value.data) && deptRes.value.data.length > 0) {

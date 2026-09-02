@@ -54,7 +54,7 @@ export const ReCaptcha: React.FC<ReCaptchaProps> = ({
   className = '',
   theme = 'light',
 }) => {
-  const { language, isDarkMode } = useThemeLanguage();
+  const { language, darkMode } = useThemeLanguage();
   const containerRef = useRef<HTMLDivElement | null>(null);
   const widgetIdRef = useRef<number | string | null>(null);
 
@@ -68,7 +68,7 @@ export const ReCaptcha: React.FC<ReCaptchaProps> = ({
   const isTurnstile = Boolean(turnstileSiteKey);
   const activeSiteKey = isTurnstile ? turnstileSiteKey : recaptchaSiteKey;
 
-  const currentTheme: 'light' | 'dark' = isDarkMode ? 'dark' : (theme === 'dark' ? 'dark' : 'light');
+  const currentTheme: 'light' | 'dark' = darkMode ? 'dark' : (theme === 'dark' ? 'dark' : 'light');
 
   useEffect(() => {
     let isMounted = true;

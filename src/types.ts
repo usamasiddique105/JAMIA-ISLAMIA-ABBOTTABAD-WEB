@@ -230,7 +230,6 @@ export interface SiteVisitorLog {
 }
 
 export interface SiteSettings {
-
   jamiaNameUrdu: string;
   jamiaNameEnglish: string;
   jamiaNameArabic: string;
@@ -258,4 +257,233 @@ export interface SiteSettings {
     easyPaisa: { title: string; number: string };
     jazzCash: { title: string; number: string };
   };
+  socialLinks?: {
+    facebook?: string;
+    youtube?: string;
+    whatsapp?: string;
+    telegram?: string;
+    twitter?: string;
+    instagram?: string;
+  };
+  headerSettings?: {
+    showTopBar?: boolean;
+    topBarAnnouncement?: LocalizedString;
+    stickyHeader?: boolean;
+    showLanguageSwitcher?: boolean;
+    showSearchModal?: boolean;
+    showDarkModeToggle?: boolean;
+    showFatwaButton?: boolean;
+  };
+  footerSettings?: {
+    showAboutColumn?: boolean;
+    showQuickLinks?: boolean;
+    showAcademicLinks?: boolean;
+    showContactColumn?: boolean;
+    showPrayerTimes?: boolean;
+    customCopyrightUrdu?: string;
+    customCopyrightEnglish?: string;
+    customCopyrightArabic?: string;
+  };
 }
+
+// ==========================================
+// CMS NATIVE TYPES (WordPress Style Website Management)
+// ==========================================
+
+export type CmsPageStatus = 'published' | 'draft' | 'archived';
+export type CmsPageVisibility = 'public' | 'private' | 'password_protected';
+
+export interface CmsPage {
+  id: string;
+  slug: string;
+  title: LocalizedString;
+  content: LocalizedString;
+  excerpt?: LocalizedString;
+  featuredImage?: string;
+  status: CmsPageStatus;
+  visibility: CmsPageVisibility;
+  password?: string;
+  seoTitle?: LocalizedString;
+  seoDescription?: LocalizedString;
+  ogImage?: string;
+  author?: string;
+  template?: 'default' | 'full_width' | 'contact' | 'landing';
+  orderIndex?: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CmsMenuItem {
+  id: string;
+  title: LocalizedString;
+  url: string;
+  tabId?: string;
+  pageId?: string;
+  target?: '_self' | '_blank';
+  icon?: string;
+  description?: LocalizedString;
+  isEnabled: boolean;
+  orderIndex: number;
+  parentId?: string | null;
+  children?: CmsMenuItem[];
+}
+
+export interface CmsMenu {
+  id: string;
+  location: 'header_main' | 'top_bar' | 'footer_quick' | 'footer_academics' | 'footer_sharia';
+  name: string;
+  items: CmsMenuItem[];
+  updatedAt: string;
+}
+
+export interface CmsMedia {
+  id: string;
+  title: string;
+  filename: string;
+  fileType: 'image' | 'document' | 'audio' | 'video';
+  mimeType: string;
+  fileSize: number; // in bytes
+  url: string;
+  thumbnailUrl?: string;
+  altText?: string;
+  caption?: string;
+  uploadedBy?: string;
+  uploadedAt?: string;
+  createdAt: string;
+}
+
+export interface CmsSection {
+  id: string;
+  sectionKey: string;
+  name: LocalizedString;
+  isEnabled: boolean;
+  orderIndex: number;
+  title: LocalizedString;
+  subtitle?: LocalizedString;
+  content?: LocalizedString;
+  imageUrl?: string;
+  bgColor?: string;
+  backgroundColor?: string;
+  bgImageUrl?: string;
+  backgroundImage?: string;
+  buttonText?: LocalizedString;
+  buttonUrl?: string;
+  customCss?: string;
+  config?: Record<string, any>;
+  settings?: Record<string, any>;
+  updatedAt: string;
+}
+
+export interface CmsThemeSettings {
+  id: string;
+  logoUrl?: string;
+  darkLogoUrl?: string;
+  faviconUrl?: string;
+  primaryColor?: string;
+  secondaryColor?: string;
+  accentColor?: string;
+  backgroundColor?: string;
+  colors?: {
+    primary?: string;
+    secondary?: string;
+    accent?: string;
+    background?: string;
+    surface?: string;
+    text?: string;
+    textMuted?: string;
+    border?: string;
+  };
+  fontUrdu?: string;
+  fontArabic?: string;
+  fontEnglish?: string;
+  borderRadius?: 'none' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | 'full';
+  headerStyle?: 'standard' | 'compact' | 'centered';
+  footerStyle?: 'four_columns' | 'three_columns' | 'minimal';
+  customCss?: string;
+  headerScripts?: string;
+  header?: {
+    logoUrl?: string;
+    siteTitle?: LocalizedString;
+    tagline?: LocalizedString;
+    showTopBar?: boolean;
+    showSearch?: boolean;
+    style?: 'standard' | 'compact' | 'centered';
+  };
+  footer?: {
+    aboutText?: LocalizedString;
+    address?: LocalizedString;
+    copyright?: LocalizedString;
+    layoutStyle?: '4col' | '3col' | 'minimal' | 'four_columns' | 'three_columns';
+  };
+  socialLinks?: {
+    facebook?: string;
+    youtube?: string;
+    whatsapp?: string;
+    twitter?: string;
+    instagram?: string;
+    telegram?: string;
+  };
+  updatedAt: string;
+}
+
+export interface CmsSeoSettings {
+  id: string;
+  siteTitle?: LocalizedString;
+  metaDescription?: LocalizedString;
+  defaultMetaTitle?: LocalizedString;
+  defaultMetaDescription?: LocalizedString;
+  keywords?: string;
+  ogTitle?: LocalizedString;
+  ogDescription?: LocalizedString;
+  ogImage?: string;
+  googleVerification?: string;
+  googleSiteVerification?: string;
+  bingVerification?: string;
+  bingSiteVerification?: string;
+  canonicalBase?: string;
+  canonicalBaseUrl?: string;
+  robotsTxt?: string;
+  sitemapEnabled?: boolean;
+  updatedAt: string;
+}
+
+export type CmsUserRole = 'superadmin' | 'admin' | 'editor' | 'content_manager';
+
+export interface CmsAdminUser {
+  id: string;
+  email: string;
+  username: string;
+  fullName: string;
+  role: CmsUserRole;
+  isActive: boolean;
+  avatarUrl?: string;
+  phone?: string;
+  createdAt: string;
+  lastLogin?: string;
+}
+
+export interface CmsRevision {
+  id: string;
+  entityType: 'page' | 'section' | 'menu' | 'theme' | 'seo';
+  entityId: string;
+  dataJson: string;
+  author: string;
+  revisionNote?: string;
+  createdAt: string;
+}
+
+export interface CmsMenuItemRow {
+  id: string;
+  menuId: string;
+  parentId?: string | null;
+  label: LocalizedString;
+  targetType: 'page' | 'url' | 'tab' | 'custom';
+  targetValue?: string;
+  url: string;
+  orderIndex: number;
+  isEnabled: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+

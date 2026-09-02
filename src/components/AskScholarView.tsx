@@ -29,7 +29,7 @@ interface AskScholarViewProps {
 }
 
 export const AskScholarView: React.FC<AskScholarViewProps> = ({ onBackToServices }) => {
-  const { isDarkMode, language } = useThemeLanguage();
+  const { darkMode, language } = useThemeLanguage();
 
   // Active form vs tracker toggle
   const [activeTab, setActiveTab] = useState<'ask' | 'track'>('ask');
@@ -565,7 +565,7 @@ export const AskScholarView: React.FC<AskScholarViewProps> = ({ onBackToServices
                 </label>
                 <ReCaptcha 
                   onChange={(token) => setCaptchaToken(token)} 
-                  theme={isDarkMode ? 'dark' : 'light'} 
+                  theme={darkMode ? 'dark' : 'light'} 
                 />
               </div>
 

@@ -1,5 +1,7 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useThemeLanguage } from '../context/ThemeLanguageContext';
+import { cmsApiService } from '../services/cmsApiService';
+import { CmsSeoSettings, CmsPage } from '../types';
 
 interface SEOHeadProps {
   currentTab: string;
@@ -246,50 +248,172 @@ export const SEOHead: React.FC<SEOHeadProps> = ({ currentTab }) => {
   const { language } = useThemeLanguage();
 
   useEffect(() => {
-    // Determine active key (support subtabs like 'online-quran' -> 'online-services')
+    let isMounted = true;
     let key = currentTab;
-    if (!TAB_SEO_MAP[key]) {
-      if (key.startsWith('fatwa-')) key = key;
-      else if (key.startsWith('fatwa')) key = 'fatwas';
-      else if (key.startsWith('online-') && TAB_SEO_MAP[key]) key = key;
-      else if (key.startsWith('online')) key = 'online-services';
-      else if (key.startsWith('about')) key = 'about';
-      else if (key === 'faq') key = 'contact';
-      else if (key === 'taawun' || key === 'online-taawun') key = 'donations';
-      else key = 'home';
-    }
+    const isStandardTab = Boolean(TAB_SEO_MAP[key]);
 
-    const data = TAB_SEO_MAP[key] || TAB_SEO_MAP.home;
+    const loadSeo = async () => {
+      let activeTitle = '';
+      let activeDesc = '';
+      let activeKeywords = '';
+      let activeOgImage = '';
+      let customBreadcrumbs: { name: string; item: string }[] | null = null;
 
-    // Pick language specific title and description
-    let activeTitle = data.titleUr;
-    let activeDesc = data.descUr;
+      // 1. Dynamic CMS page handling
+      if (!isStandardTab && (key.startsWith('page-') || key.startsWith('page/') || !TAB_SEO_MAP[key])) {
+        const slug = key.startsWith('page-') || key.startsWith('page/') ? key.replace(/^page[-/]/, '') : key;
+        try {
+          const pageData = await cmsApiService.getPage(slug);
+          if (pageData && isMounted) {
+            activeTitle = pageData.seoTitle?.[language] || pageData.title?.[language] || pageData.title?.ur || '';
+            activeDesc = pageData.seoDescription?.[language] || pageData.excerpt?.[language] || pageData.excerpt?.ur || '';
+            activeOgImage = pageData.ogImage || pageData.featuredImage || '';
+            customBreadcrumbs = [
+              { name: 'صفحہ اول (Home)', item: 'https://jamia-islamia-abbottabad.pages.dev/' },
+              { name: pageData.title?.[language] || pageData.title?.ur || slug, item: `https://jamia-islamia-abbottabad.pages.dev/#page-${slug}` }
+            ];
+          }
+        } catch {
+          // Fallback safely
+        }
+      }
 
-    if (language === 'en') {
-      activeTitle = data.titleEn;
-      activeDesc = data.descEn;
-    } else if (language === 'ar') {
-      activeTitle = data.titleAr;
-      activeDesc = data.descAr;
-    }
+      // Determine active key (support subtabs like 'online-quran' -> 'online-services')
+      if (!isStandardTab && !activeTitle) {
+        if (key.startsWith('fatwa-')) key = key;
+        else if (key.startsWith('fatwa')) key = 'fatwas';
+        else if (key.startsWith('online-') && TAB_SEO_MAP[key]) key = key;
+        else if (key.startsWith('online')) key = 'online-services';
+        else if (key.startsWith('about')) key = 'about';
+        else if (key === 'faq') key = 'contact';
+        else if (key === 'taawun' || key === 'online-taawun') key = 'donations';
+        else key = 'home';
+      }
 
-    const baseUrl = 'https://jamia-islamia-abbottabad.pages.dev';
+      const data = TAB_SEO_MAP[key] || TAB_SEO_MAP.home;
 
-    // Determine canonical and og:url based on active language and key
-    let canonicalUrl = '';
-    if (language === 'en') {
-      canonicalUrl = key === 'home' ? `${baseUrl}/en` : `${baseUrl}/en/${key}`;
-    } else if (language === 'ar') {
-      canonicalUrl = key === 'home' ? `${baseUrl}/ar` : `${baseUrl}/ar/${key}`;
-    } else {
-      // Default Urdu (original URL preserved exactly)
-      canonicalUrl = key === 'home' || currentTab === 'home'
-        ? `${baseUrl}/`
-        : `${baseUrl}/?tab=${currentTab}`;
-    }
+      // Pick language specific title and description
+      if (!activeTitle) {
+        if (language === 'en') {
+          activeTitle = data.titleEn;
+          activeDesc = data.descEn;
+        } else if (language === 'ar') {
+          activeTitle = data.titleAr;
+          activeDesc = data.descAr;
+        } else {
+          activeTitle = data.titleUr;
+          activeDesc = data.descUr;
+        }
+      }
 
-    // Update document title and lang/dir on html tag
-    document.title = activeTitle;
+      activeKeywords = data.keywords;
+      const breadcrumbs = customBreadcrumbs || data.breadcrumbs;
+
+      // Check Global CMS SEO Settings for verification tags or site title
+      try {
+        const globalSeo = await cmsApiService.getSeo();
+        if (globalSeo && isMounted) {
+          if (key === 'home' && globalSeo.siteTitle?.[language]) {
+            activeTitle = globalSeo.siteTitle[language]!;
+          }
+          if (key === 'home' && globalSeo.metaDescription?.[language]) {
+            activeDesc = globalSeo.metaDescription[language]!;
+          }
+          if (globalSeo.googleVerification) {
+            updateMeta('meta[name="google-site-verification"]', 'name', 'google-site-verification', globalSeo.googleVerification);
+          }
+          if (globalSeo.bingVerification) {
+            updateMeta('meta[name="msvalidate.01"]', 'name', 'msvalidate.01', globalSeo.bingVerification);
+          }
+        }
+      } catch {
+        // Fallback safely
+      }
+
+      if (!isMounted) return;
+
+      const baseUrl = 'https://jamia-islamia-abbottabad.pages.dev';
+
+      // Determine canonical and og:url based on active language and key
+      let canonicalUrl = '';
+      if (language === 'en') {
+        canonicalUrl = key === 'home' ? `${baseUrl}/en` : `${baseUrl}/en/${key}`;
+      } else if (language === 'ar') {
+        canonicalUrl = key === 'home' ? `${baseUrl}/ar` : `${baseUrl}/ar/${key}`;
+      } else {
+        // Default Urdu (original URL preserved exactly)
+        canonicalUrl = key === 'home' || currentTab === 'home'
+          ? `${baseUrl}/`
+          : `${baseUrl}/?tab=${currentTab}`;
+      }
+
+      // Update document title and lang/dir on html tag
+      document.title = activeTitle;
+
+      updateMeta('meta[name="description"]', 'name', 'description', activeDesc);
+      updateMeta('meta[name="keywords"]', 'name', 'keywords', activeKeywords);
+      updateMeta('meta[property="og:title"]', 'property', 'og:title', activeTitle);
+      updateMeta('meta[property="og:description"]', 'property', 'og:description', activeDesc);
+      updateMeta('meta[property="og:url"]', 'property', 'og:url', canonicalUrl);
+      updateMeta('meta[property="og:locale"]', 'property', 'og:locale', language === 'en' ? 'en_US' : language === 'ar' ? 'ar_SA' : 'ur_PK');
+      if (activeOgImage) {
+        updateMeta('meta[property="og:image"]', 'property', 'og:image', activeOgImage);
+      }
+      updateMeta('meta[name="twitter:title"]', 'name', 'twitter:title', activeTitle);
+      updateMeta('meta[name="twitter:description"]', 'name', 'twitter:description', activeDesc);
+
+      // Canonical link update
+      let canonical = document.querySelector('link[rel="canonical"]') as HTMLLinkElement | null;
+      if (!canonical) {
+        canonical = document.createElement('link');
+        canonical.setAttribute('rel', 'canonical');
+        document.head.appendChild(canonical);
+      }
+      canonical.setAttribute('href', canonicalUrl);
+
+      // Dynamic hreflang Alternate Tags for International SEO across all languages
+      const updateHreflang = (lang: string, href: string) => {
+        let link = document.querySelector(`link[rel="alternate"][hreflang="${lang}"]`) as HTMLLinkElement | null;
+        if (!link) {
+          link = document.createElement('link');
+          link.setAttribute('rel', 'alternate');
+          link.setAttribute('hreflang', lang);
+          document.head.appendChild(link);
+        }
+        link.setAttribute('href', href);
+      };
+
+      const urUrl = key === 'home' ? `${baseUrl}/` : `${baseUrl}/?tab=${key}`;
+      const enUrl = key === 'home' ? `${baseUrl}/en` : `${baseUrl}/en/${key}`;
+      const arUrl = key === 'home' ? `${baseUrl}/ar` : `${baseUrl}/ar/${key}`;
+
+      updateHreflang('ur', urUrl);
+      updateHreflang('en', enUrl);
+      updateHreflang('ar', arUrl);
+      updateHreflang('x-default', urUrl);
+
+      // Update JSON-LD Breadcrumb Schema dynamically
+      let breadcrumbScript = document.getElementById('json-ld-breadcrumb') as HTMLScriptElement | null;
+      if (!breadcrumbScript) {
+        breadcrumbScript = document.createElement('script');
+        breadcrumbScript.id = 'json-ld-breadcrumb';
+        breadcrumbScript.type = 'application/ld+json';
+        document.head.appendChild(breadcrumbScript);
+      }
+
+      const breadcrumbSchema = {
+        '@context': 'https://schema.org',
+        '@type': 'BreadcrumbList',
+        'itemListElement': breadcrumbs.map((bc, index) => ({
+          '@type': 'ListItem',
+          'position': index + 1,
+          'name': bc.name,
+          'item': bc.item
+        }))
+      };
+
+      breadcrumbScript.textContent = JSON.stringify(breadcrumbSchema);
+    };
 
     // Helper to update or create meta tags
     const updateMeta = (selector: string, attrName: string, attrVal: string, content: string) => {
@@ -302,66 +426,11 @@ export const SEOHead: React.FC<SEOHeadProps> = ({ currentTab }) => {
       element.setAttribute('content', content);
     };
 
-    updateMeta('meta[name="description"]', 'name', 'description', activeDesc);
-    updateMeta('meta[name="keywords"]', 'name', 'keywords', data.keywords);
-    updateMeta('meta[property="og:title"]', 'property', 'og:title', activeTitle);
-    updateMeta('meta[property="og:description"]', 'property', 'og:description', activeDesc);
-    updateMeta('meta[property="og:url"]', 'property', 'og:url', canonicalUrl);
-    updateMeta('meta[property="og:locale"]', 'property', 'og:locale', language === 'en' ? 'en_US' : language === 'ar' ? 'ar_SA' : 'ur_PK');
-    updateMeta('meta[name="twitter:title"]', 'name', 'twitter:title', activeTitle);
-    updateMeta('meta[name="twitter:description"]', 'name', 'twitter:description', activeDesc);
+    loadSeo();
 
-    // Canonical link update
-    let canonical = document.querySelector('link[rel="canonical"]') as HTMLLinkElement | null;
-    if (!canonical) {
-      canonical = document.createElement('link');
-      canonical.setAttribute('rel', 'canonical');
-      document.head.appendChild(canonical);
-    }
-    canonical.setAttribute('href', canonicalUrl);
-
-    // Dynamic hreflang Alternate Tags for International SEO across all languages
-    const updateHreflang = (lang: string, href: string) => {
-      let link = document.querySelector(`link[rel="alternate"][hreflang="${lang}"]`) as HTMLLinkElement | null;
-      if (!link) {
-        link = document.createElement('link');
-        link.setAttribute('rel', 'alternate');
-        link.setAttribute('hreflang', lang);
-        document.head.appendChild(link);
-      }
-      link.setAttribute('href', href);
+    return () => {
+      isMounted = false;
     };
-
-    const urUrl = key === 'home' ? `${baseUrl}/` : `${baseUrl}/?tab=${key}`;
-    const enUrl = key === 'home' ? `${baseUrl}/en` : `${baseUrl}/en/${key}`;
-    const arUrl = key === 'home' ? `${baseUrl}/ar` : `${baseUrl}/ar/${key}`;
-
-    updateHreflang('ur', urUrl);
-    updateHreflang('en', enUrl);
-    updateHreflang('ar', arUrl);
-    updateHreflang('x-default', urUrl);
-
-    // Update JSON-LD Breadcrumb Schema dynamically
-    let breadcrumbScript = document.getElementById('json-ld-breadcrumb') as HTMLScriptElement | null;
-    if (!breadcrumbScript) {
-      breadcrumbScript = document.createElement('script');
-      breadcrumbScript.id = 'json-ld-breadcrumb';
-      breadcrumbScript.type = 'application/ld+json';
-      document.head.appendChild(breadcrumbScript);
-    }
-
-    const breadcrumbSchema = {
-      '@context': 'https://schema.org',
-      '@type': 'BreadcrumbList',
-      'itemListElement': data.breadcrumbs.map((bc, index) => ({
-        '@type': 'ListItem',
-        'position': index + 1,
-        'name': bc.name,
-        'item': bc.item
-      }))
-    };
-
-    breadcrumbScript.textContent = JSON.stringify(breadcrumbSchema);
 
     // Inject FAQPage schema when on contact/faq, fatwa, or ask-scholar tab
     if (key === 'contact' || key === 'faq' || key === 'fatwas' || key === 'ask-scholar') {
