@@ -107,7 +107,16 @@ Return ONLY a valid JSON object without markdown fences:
     ];
 
     let lastErr = '';
-    let parsed: { titleEn?: string; questionEn?: string; answerEn?: string } | null = null;
+    let parsed: { 
+      titleEn?: string; 
+      questionEn?: string; 
+      answerEn?: string;
+      contentEn?: string;
+      titleAr?: string;
+      questionAr?: string;
+      answerAr?: string;
+      contentAr?: string;
+    } | null = null;
 
     for (const model of models) {
       try {
