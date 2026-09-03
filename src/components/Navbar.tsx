@@ -20,6 +20,7 @@ import {
   Sun, 
   Globe, 
   Clock, 
+  Lock,
   ShieldAlert,
   Heart,
   Calendar,
@@ -303,68 +304,64 @@ export const Navbar: React.FC<NavbarProps> = ({
   ];
 
   // Dynamic CMS Menu integration with robust fallback to defaultNavItems
+  // The original 4 items define the exact layout, styling, spacing, and dropdown arrangement.
   const navItems = useMemo(() => {
     const headerMenu = cmsMenus?.find(m => m.location === 'header_main' || m.location === 'header' || m.location === 'main');
     if (!headerMenu || !headerMenu.items || headerMenu.items.length === 0) {
       return defaultNavItems;
     }
 
-    const enabledItems = headerMenu.items.filter(item => item.isEnabled !== false);
-    if (enabledItems.length === 0) {
+    const enabledCmsItems = headerMenu.items.filter(item => item.isEnabled !== false);
+    if (enabledCmsItems.length === 0) {
       return defaultNavItems;
     }
 
-    return enabledItems.map(cItem => {
-      const title = cItem.title?.[language] || cItem.title?.ur || cItem.title?.en || '';
-      const matchedDefault = defaultNavItems.find(d => 
-        d.id === cItem.id || 
-        d.id === cItem.tabId || 
-        (cItem.url && cItem.url.replace(/^[#/]+/, '') === d.id)
+    // Map over the original 4 defaultNavItems so the exact visual layout, order, icons, and hierarchy are strictly preserved.
+    return defaultNavItems.map(dItem => {
+      // Match CMS item by id, tabId, or slug
+      const matchedCms = enabledCmsItems.find(ci => 
+        ci.id === dItem.id || 
+        ci.id === `menu-${dItem.id}` || 
+        ci.tabId === dItem.id ||
+        (ci.url && ci.url.replace(/^[#/]+/, '') === dItem.id)
       );
 
-      if (matchedDefault) {
-        let mappedChildren = matchedDefault.children;
-        if (cItem.children && cItem.children.length > 0) {
-          mappedChildren = cItem.children.filter(ch => ch.isEnabled !== false).map(ch => {
-            const chTitle = ch.title?.[language] || ch.title?.ur || ch.title?.en || '';
-            const chDesc = ch.description?.[language] || ch.description?.ur || ch.description?.en || '';
-            const chMatched = matchedDefault.children?.find(dChild => 
-              dChild.id === ch.id || 
-              dChild.tab === ch.tabId || 
-              (ch.url && ch.url.replace(/^[#/]+/, '') === dChild.tab)
-            );
-            return {
-              id: ch.id || ch.tabId || ch.url,
-              label: chTitle || chMatched?.label || '',
-              desc: chDesc || chMatched?.desc || '',
-              icon: chMatched?.icon || Bookmark,
-              tab: ch.tabId || (ch.url ? ch.url.replace(/^[#/]+/, '') : (chMatched?.tab || 'home')),
-              isModal: (ch as any).isModal || (chMatched as any)?.isModal || false,
-              subChildren: (chMatched as any)?.subChildren
-            };
-          });
-        }
-        return {
-          ...matchedDefault,
-          label: title || matchedDefault.label,
-          children: mappedChildren
-        };
+      if (!matchedCms) {
+        return dItem;
       }
 
-      // Custom CMS-defined menu item
-      const tabTarget = cItem.tabId || (cItem.url ? cItem.url.replace(/^[#/]+/, '') : cItem.id);
+      const customTitle = matchedCms.title?.[language] || (language === 'ur' ? matchedCms.title?.ur : language === 'ar' ? matchedCms.title?.ar : matchedCms.title?.en);
+
+      // If CMS has children, customize child labels/descriptions/urls while preserving icons and structure
+      let updatedChildren = dItem.children;
+      if (dItem.children && matchedCms.children && matchedCms.children.length > 0) {
+        updatedChildren = dItem.children.map(dChild => {
+          const matchedChildCms = matchedCms.children?.find(ch => 
+            ch.id === dChild.id || 
+            ch.id === `menu-${dChild.id}` || 
+            ch.tabId === dChild.tab || 
+            ch.tabId === dChild.id ||
+            (ch.url && ch.url.replace(/^[#/]+/, '') === dChild.tab)
+          );
+
+          if (!matchedChildCms) return dChild;
+
+          const chTitle = matchedChildCms.title?.[language] || (language === 'ur' ? matchedChildCms.title?.ur : language === 'ar' ? matchedChildCms.title?.ar : matchedChildCms.title?.en);
+          const chDesc = matchedChildCms.description?.[language] || (language === 'ur' ? matchedChildCms.description?.ur : language === 'ar' ? matchedChildCms.description?.ar : matchedChildCms.description?.en);
+
+          return {
+            ...dChild,
+            label: chTitle || dChild.label,
+            desc: chDesc || dChild.desc,
+            tab: matchedChildCms.tabId || (matchedChildCms.url ? matchedChildCms.url.replace(/^[#/]+/, '') : dChild.tab),
+          };
+        });
+      }
+
       return {
-        id: cItem.id || tabTarget,
-        label: title || tabTarget,
-        tab: tabTarget,
-        url: cItem.url,
-        children: cItem.children && cItem.children.length > 0 ? cItem.children.filter(ch => ch.isEnabled !== false).map(ch => ({
-          id: ch.id || ch.tabId || ch.url,
-          label: ch.title?.[language] || ch.title?.ur || ch.title?.en || '',
-          desc: ch.description?.[language] || ch.description?.ur || ch.description?.en || '',
-          icon: Bookmark,
-          tab: ch.tabId || (ch.url ? ch.url.replace(/^[#/]+/, '') : 'home')
-        })) : undefined
+        ...dItem,
+        label: customTitle || dItem.label,
+        children: updatedChildren
       };
     });
   }, [cmsMenus, language, defaultNavItems]);
@@ -483,12 +480,13 @@ export const Navbar: React.FC<NavbarProps> = ({
               )}
             </div>
 
-            {/* Login Button (Hidden on Mobile) */}
+            {/* Login Button */}
             <button 
-              onClick={() => setCurrentTab('results')} 
-              className="hidden sm:flex h-6 sm:h-7 items-center gap-1 text-white hover:text-amber-200 px-2 sm:px-2.5 rounded border border-[#85674B]/70 sm:border-transparent text-[11px] xs:text-xs sm:text-sm font-bold transition-all cursor-pointer bg-[#6B5138]/60 hover:bg-[#6B5138] sm:bg-transparent active:scale-95"
-              title={language === 'ar' ? 'تسجيل الدخول ونتائج الامتحانات' : language === 'en' ? 'Portal Login & Results' : 'آن لائن رزلٹ و پورٹل لاگ ان'}
+              onClick={() => setCurrentTab('admin')} 
+              className="flex h-6 sm:h-7 items-center gap-1 text-white hover:text-amber-200 px-2 sm:px-2.5 rounded border border-[#85674B]/70 sm:border-transparent text-[11px] xs:text-xs sm:text-sm font-bold transition-all cursor-pointer bg-[#6B5138]/60 hover:bg-[#6B5138] sm:bg-transparent active:scale-95"
+              title={language === 'ar' ? 'تسجيل دخول لوحة الإدارة' : language === 'en' ? 'Admin Portal Login' : 'ایڈمن پورٹل لاگ ان'}
             >
+              <Lock className="w-3 h-3 text-amber-200 shrink-0" />
               <span className="text-white hover:text-amber-200">
                 {language === 'ar' ? 'تسجيل الدخول' : language === 'en' ? 'Login' : 'لاگ ان'}
               </span>
@@ -870,6 +868,28 @@ export const Navbar: React.FC<NavbarProps> = ({
                       </button>
                     );
                   })}
+
+                  {/* Admin Portal Mobile Access */}
+                  <div className="pt-2 border-t border-stone-200 dark:border-slate-800">
+                    <button
+                      onClick={() => {
+                        setCurrentTab('admin');
+                        setMobileMenuOpen(false);
+                        setActiveMobileCategory(null);
+                      }}
+                      className="w-full text-right px-4 py-2.5 rounded-xl font-bold text-sm bg-amber-50 dark:bg-amber-950/40 text-[#5C4632] dark:text-amber-300 border border-[#B88A3B]/40 flex items-center justify-between cursor-pointer shadow-xs active:bg-[#3C2E21] active:text-white"
+                    >
+                      <div className="flex items-center gap-2">
+                        <Lock className="w-4 h-4 text-[#B88A3B]" />
+                        <span>{language === 'ar' ? 'تسجيل دخول لوحة الإدارة' : language === 'en' ? 'Admin Portal Login' : 'ایڈمن پورٹل لاگ ان'}</span>
+                      </div>
+                      {language === 'en' ? (
+                        <ChevronRight className="w-4 h-4 text-[#B88A3B]" />
+                      ) : (
+                        <ChevronLeft className="w-4 h-4 text-[#B88A3B]" />
+                      )}
+                    </button>
+                  </div>
                 </motion.div>
               ) : (
                 /* LEVEL 2: FOCUSED SUB-MENU VIEW FOR SELECTED CATEGORY */

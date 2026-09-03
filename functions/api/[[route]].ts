@@ -227,11 +227,11 @@ export const onRequest: PagesFunction<Env> = async (context) => {
         return json({ authenticated: false }, 401);
       }
       const sEmail = session.email.toLowerCase();
-      const isAuth = sEmail === 'jamiaislamia' || sEmail === 'jamiaislamia2003' || sEmail === 'admin' || sEmail === 'superadmin' || sEmail === AUTHORIZED_ADMIN_EMAIL.toLowerCase();
+      const isAuth = sEmail === 'jamiaislamia';
       if (!isAuth) {
         return json({ authenticated: false }, 401);
       }
-      return json({ authenticated: true, user: { email: session.email, role: 'superadmin' } });
+      return json({ authenticated: true, user: { email: 'jamiaislamia', role: 'superadmin' } });
     } else {
       // In standalone/fallback mode, validate token existence
       return json({ authenticated: true, user: { email: 'jamiaislamia', role: 'superadmin' } });
@@ -251,14 +251,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
       const userInput = (body.username || body.email || '').trim().toLowerCase();
       const password = (body.password || '').trim();
 
-      const isKnownUser = 
-        userInput === 'jamiaislamia' || 
-        userInput === 'jamiaislamia2003' || 
-        userInput === 'admin' || 
-        userInput === 'superadmin' || 
-        userInput === AUTHORIZED_ADMIN_EMAIL.toLowerCase() ||
-        userInput === 'admin@jamiaislamia.edu.pk' ||
-        userInput === 'admin@jamiaislamia.pk';
+      const isKnownUser = userInput === 'jamiaislamia';
 
       if (!isKnownUser) {
         return json({ success: false, error: 'غلط یوزر نیم یا پاس ورڈ! ایڈمن پورٹل میں داخلے کی اجازت نہیں ہے۔' }, 401);
@@ -272,7 +265,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
       const enc = new TextEncoder();
       const pwHashBuf = await crypto.subtle.digest('SHA-256', enc.encode(password));
       const pwHex = Array.from(new Uint8Array(pwHashBuf)).map(b => b.toString(16).padStart(2, '0')).join('');
-      if (pwHex === '01fd1b9b6fd04deb66883dfb6d2982d6e5ca0e3dd41f48722c5d3b9dbea02b09' || pwHex === '87f4672e3a5eb4dcfe5cfb8bae57ce4510b622aa9c6c520f9ecaf394d57b1bbb') {
+      if (pwHex === '222a73e385e69c330c454a7323240ccacbd0dbf51c26d387becfd3cc3e381036') {
         isValid = true;
       }
 

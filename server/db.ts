@@ -403,61 +403,35 @@ function initDatabaseSchema(db: Database.Database) {
   const DEFAULT_ADMIN_HASH = process.env.ADMIN_DEFAULT_HASH || (
     process.env.ADMIN_DEFAULT_PASSWORD 
       ? hashPassword(process.env.ADMIN_DEFAULT_PASSWORD, DEFAULT_ADMIN_SALT).hash
-      : '72ccbeba79ee53933f1df64e0bca80d39a37cef2b3c877891099a88a03d565e51951d3277a43fb5c4fe377d92762eae32560e752f367f311039a18f1a3099bf9'
+      : '9e5c75f174cdfee48ab62f455f62400a35b5d4ed7b3aefba470b6ebe6a8c6aab097d554b498b7a22e5767805e3f8709909d8390b133c25c7bf8a52c305948d16'
   );
   const hash = DEFAULT_ADMIN_HASH;
   const salt = DEFAULT_ADMIN_SALT;
-  const adminRow = db.prepare('SELECT id FROM admin_users WHERE email = ?').get(AUTHORIZED_ADMIN_EMAIL);
-  if (!adminRow) {
+
+  // Clean up legacy accounts so ONLY 'jamiaislamia' is the recognized administrator
+  try {
+    db.prepare("DELETE FROM admin_users WHERE email NOT IN ('jamiaislamia', ?)").run(AUTHORIZED_ADMIN_EMAIL);
+  } catch {}
+
+  // Seed/sync username 'jamiaislamia'
+  const usernameRow = db.prepare('SELECT id FROM admin_users WHERE email = ? OR username = ?').get('jamiaislamia', 'jamiaislamia');
+  if (!usernameRow) {
     db.prepare(`
-      INSERT INTO admin_users (id, email, password_hash, password_salt, role, created_at)
-      VALUES (?, ?, ?, ?, 'superadmin', ?)
-    `).run('admin-default', AUTHORIZED_ADMIN_EMAIL, hash, salt, new Date().toISOString());
+      INSERT INTO admin_users (id, email, username, full_name, password_hash, password_salt, role, created_at)
+      VALUES (?, ?, ?, ?, ?, ?, 'superadmin', ?)
+    `).run('admin-user-default', 'jamiaislamia', 'jamiaislamia', 'ایڈمنسٹریٹر جامعہ اسلامیہ', hash, salt, new Date().toISOString());
   } else {
-    // Ensure active password hash matches 'jamiaislamia2003'
+    db.prepare(`
+      UPDATE admin_users SET password_hash = ?, password_salt = ?, username = 'jamiaislamia' WHERE email = 'jamiaislamia' OR username = 'jamiaislamia'
+    `).run(hash, salt);
+  }
+
+  // Also keep AUTHORIZED_ADMIN_EMAIL synced if present
+  try {
     db.prepare(`
       UPDATE admin_users SET password_hash = ?, password_salt = ? WHERE email = ?
     `).run(hash, salt, AUTHORIZED_ADMIN_EMAIL);
-  }
-
-  // Also seed/sync username 'jamiaislamia'
-  const usernameRow = db.prepare('SELECT id FROM admin_users WHERE email = ?').get('jamiaislamia');
-  if (!usernameRow) {
-    db.prepare(`
-      INSERT INTO admin_users (id, email, password_hash, password_salt, role, created_at)
-      VALUES (?, ?, ?, ?, 'superadmin', ?)
-    `).run('admin-user-default', 'jamiaislamia', hash, salt, new Date().toISOString());
-  } else {
-    db.prepare(`
-      UPDATE admin_users SET password_hash = ?, password_salt = ? WHERE email = ?
-    `).run(hash, salt, 'jamiaislamia');
-  }
-
-  // Also seed/sync username 'admin'
-  const adminShortRow = db.prepare('SELECT id FROM admin_users WHERE email = ?').get('admin');
-  if (!adminShortRow) {
-    db.prepare(`
-      INSERT INTO admin_users (id, email, password_hash, password_salt, role, created_at)
-      VALUES (?, ?, ?, ?, 'superadmin', ?)
-    `).run('admin-short-default', 'admin', hash, salt, new Date().toISOString());
-  } else {
-    db.prepare(`
-      UPDATE admin_users SET password_hash = ?, password_salt = ? WHERE email = ?
-    `).run(hash, salt, 'admin');
-  }
-
-  // Also seed/sync username 'jamiaislamia2003'
-  const adminYearRow = db.prepare('SELECT id FROM admin_users WHERE email = ?').get('jamiaislamia2003');
-  if (!adminYearRow) {
-    db.prepare(`
-      INSERT INTO admin_users (id, email, password_hash, password_salt, role, created_at)
-      VALUES (?, ?, ?, ?, 'superadmin', ?)
-    `).run('admin-year-default', 'jamiaislamia2003', hash, salt, new Date().toISOString());
-  } else {
-    db.prepare(`
-      UPDATE admin_users SET password_hash = ?, password_salt = ? WHERE email = ?
-    `).run(hash, salt, 'jamiaislamia2003');
-  }
+  } catch {}
 
   // Seed Fatwas if empty
   const fatwaCount = db.prepare('SELECT COUNT(*) as count FROM fatwas').get() as { count: number };

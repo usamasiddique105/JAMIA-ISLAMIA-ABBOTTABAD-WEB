@@ -884,14 +884,13 @@ export const AdminDashboard: React.FC = () => {
     }
 
     const cleanUser = inputUser.toLowerCase();
-    const isKnownAdmin = 
-      cleanUser === 'jamiaislamia' || 
-      cleanUser === 'jamiaislamia2003' || 
-      cleanUser === 'admin' || 
-      cleanUser === 'superadmin' || 
-      cleanUser === AUTHORIZED_ADMIN_EMAIL.toLowerCase() ||
-      cleanUser === 'admin@jamiaislamia.edu.pk' ||
-      cleanUser === 'admin@jamiaislamia.pk';
+    const isKnownAdmin = cleanUser === 'jamiaislamia';
+
+    if (!isKnownAdmin) {
+      setLoginError('غلط یوزر نیم یا پاس ورڈ! ایڈمن پورٹل میں داخلے کی اجازت نہیں ہے۔');
+      setIsAuthLoading(false);
+      return;
+    }
 
     try {
       let loginSuccess = false;
@@ -913,24 +912,27 @@ export const AdminDashboard: React.FC = () => {
           loginSuccess = true;
           authenticatedUser = res.user;
           tokenToSave = res.token;
-        } else if (res && res.error && !isKnownAdmin) {
+        } else if (res && res.error) {
           throw new Error(res.error);
         }
-      } catch (networkErr) {
-        // Backend offline or static Pages deployment
+      } catch (networkErr: any) {
+        if (networkErr?.message && !networkErr?.message?.includes('fetch')) {
+          // Explicit rejection from API
+          throw networkErr;
+        }
       }
 
-      // If backend was not reached or returned non-success, fallback to cryptographic hash verification (zero plain password in frontend)
+      // If backend was offline or static Pages deployment, verify cryptographic SHA-256 hash (zero plain password in frontend)
       if (!loginSuccess && isKnownAdmin) {
         try {
           const enc = new TextEncoder();
           const hashBuf = await crypto.subtle.digest('SHA-256', enc.encode(inputPass));
           const hexHash = Array.from(new Uint8Array(hashBuf)).map(b => b.toString(16).padStart(2, '0')).join('');
-          // Pre-computed cryptographic SHA-256 hash comparison (zero plain password in code)
-          if (hexHash === '01fd1b9b6fd04deb66883dfb6d2982d6e5ca0e3dd41f48722c5d3b9dbea02b09' || hexHash === '87f4672e3a5eb4dcfe5cfb8bae57ce4510b622aa9c6c520f9ecaf394d57b1bbb') {
+          // Pre-computed cryptographic SHA-256 hash comparison for 'islamia2003' (zero plain password in code)
+          if (hexHash === '222a73e385e69c330c454a7323240ccacbd0dbf51c26d387becfd3cc3e381036') {
             loginSuccess = true;
             tokenToSave = `admin_auth_${Date.now()}_${Math.random().toString(36).substring(2, 10)}`;
-            authenticatedUser = { email: inputUser, role: 'superadmin' };
+            authenticatedUser = { email: 'jamiaislamia', role: 'superadmin' };
           }
         } catch {
           // Web crypto unavailable
@@ -977,14 +979,7 @@ export const AdminDashboard: React.FC = () => {
     }
 
     const cleanUser = inputIdentifier.toLowerCase();
-    const isKnownAdmin = 
-      cleanUser === 'jamiaislamia' || 
-      cleanUser === 'jamiaislamia2003' || 
-      cleanUser === 'admin' || 
-      cleanUser === 'superadmin' || 
-      cleanUser === AUTHORIZED_ADMIN_EMAIL.toLowerCase() ||
-      cleanUser === 'admin@jamiaislamia.edu.pk' ||
-      cleanUser === 'admin@jamiaislamia.pk';
+    const isKnownAdmin = cleanUser === 'jamiaislamia';
 
     if (!isKnownAdmin) {
       setForgotError('صرف مجاز ایڈمن اکاؤنٹ کے لیے پاس ورڈ بحالی کی درخواست ممکن ہے۔');

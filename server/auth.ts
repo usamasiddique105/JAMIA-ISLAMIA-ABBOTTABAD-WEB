@@ -5,15 +5,7 @@ export const AUTHORIZED_ADMIN_USERNAME = 'jamiaislamia';
 
 export function isAuthorizedAdminUser(identifier: string): boolean {
   const clean = (identifier || '').trim().toLowerCase();
-  return (
-    clean === 'jamiaislamia' ||
-    clean === 'jamiaislamia2003' ||
-    clean === 'admin' ||
-    clean === 'superadmin' ||
-    clean === AUTHORIZED_ADMIN_EMAIL.toLowerCase() ||
-    clean === 'admin@jamiaislamia.edu.pk' ||
-    clean === 'admin@jamiaislamia.pk'
-  );
+  return clean === 'jamiaislamia';
 }
 const ITERATIONS = 100000;
 const KEY_LEN = 64;

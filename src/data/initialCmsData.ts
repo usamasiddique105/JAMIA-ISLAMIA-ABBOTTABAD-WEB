@@ -267,36 +267,28 @@ export const INITIAL_CMS_MENUS: CmsMenu[] = [
     updatedAt: '2026-08-30T10:00:00.000Z',
     items: [
       {
-        id: 'menu-home',
-        title: { ur: 'صفحہ اول', en: 'Home', ar: 'الرئيسية' },
-        url: '#home',
-        tabId: 'home',
-        isEnabled: true,
-        orderIndex: 1
-      },
-      {
         id: 'menu-about',
         title: { ur: 'تعارفِ جامعہ', en: 'About Jamia', ar: 'عن الجامعة' },
         url: '#about',
         tabId: 'about',
         isEnabled: true,
-        orderIndex: 2,
+        orderIndex: 1,
         children: [
           {
             id: 'menu-about-overview',
             title: { ur: 'تعارفِ جامعہ', en: 'About Jamia', ar: 'نبذة عن الجامعة' },
             url: '#about-overview',
             tabId: 'about-overview',
-            description: { ur: 'جامعہ کی تاریخ اور خدمات کا اجمالی جائزہ', en: 'History and mission of Jamia Islamia', ar: 'تاريخ الجامعة ورسالتها' },
+            description: { ur: 'جامعہ کی تاریخ، امتیازات اور خدمات کا اجمالی جائزہ', en: 'History and mission of Jamia Islamia', ar: 'تاريخ الجامعة وميزاتها ورسالتها' },
             isEnabled: true,
             orderIndex: 1
           },
           {
             id: 'menu-about-founder',
-            title: { ur: 'بانیِ جامعہ و اکابرین', en: 'Founder & Luminaries', ar: 'مؤسس الجامعة' },
+            title: { ur: 'بانیِ جامعہ و اکابرین', en: 'Founder & Luminaries', ar: 'مؤسس الجامعة وكبار العلماء' },
             url: '#about-founder',
             tabId: 'about-founder',
-            description: { ur: 'حضرت مولانا فضل مولیٰؒ و اکابرینِ جامعہ', en: 'Hazrat Maulana Fazl-e-Maula (RA)', ar: 'سماحة الشيخ فضل مولى رحمه الله' },
+            description: { ur: 'حضرت شیخ الحدیث مولانا فضل مولیٰؒ و اکابرینِ جامعہ', en: 'Hazrat Maulana Fazl-e-Maula (RA)', ar: 'سماحة الشيخ فضل مولى رحمه الله والعلماء الأجلاء' },
             isEnabled: true,
             orderIndex: 2
           },
@@ -305,27 +297,47 @@ export const INITIAL_CMS_MENUS: CmsMenu[] = [
             title: { ur: 'اغراض و مقاصد', en: 'Objectives', ar: 'الأهداف والغايات' },
             url: '#about-objectives',
             tabId: 'about-objectives',
-            description: { ur: 'علومِ شرعیہ کی اشاعت و اصلاحِ معاشرہ', en: 'Islamic teachings and societal reform', ar: 'نشر العلوم الشرعية والإصلاح' },
+            description: { ur: 'علومِ شرعیہ کی اشاعت، افتاء اور اصلاحِ معاشرہ', en: 'Islamic teachings and societal reform', ar: 'نشر العلوم الشرعية، الإفتاء وإصلاح المجتمع' },
             isEnabled: true,
             orderIndex: 3
+          },
+          {
+            id: 'menu-about-administration',
+            title: { ur: 'نظم و نسق و شوریٰ', en: 'Administration', ar: 'مجلس الإدارة والشورى' },
+            url: '#about-administration',
+            tabId: 'about-administration',
+            description: { ur: 'مجلسِ شوریٰ اور تعلیمی انتظامی ڈھانچہ', en: 'Governing body and educational leadership', ar: 'مجلس الشورى والهيكل الإداري والتعليمي' },
+            isEnabled: true,
+            orderIndex: 4
+          },
+          {
+            id: 'menu-about-rules',
+            title: { ur: 'ضروری ہدایات و قواعد', en: 'Rules & Guidelines', ar: 'القواعد والتعليمات' },
+            url: '#about-rules',
+            tabId: 'about-rules',
+            description: { ur: 'طلبہ کرام کے لیے تعلیمی و تربیتی ضوابط', en: 'Academic and behavioral guidelines', ar: 'الضوابط والتعليمات العامة للطلاب' },
+            isEnabled: true,
+            orderIndex: 5
+          },
+          {
+            id: 'menu-about-expenses',
+            title: { ur: 'مصارف و فنڈز', en: 'Expenses & Boarding', ar: 'المصارف والأوقاف' },
+            url: '#about-expenses',
+            tabId: 'about-expenses',
+            description: { ur: 'طلبا کی مفت تعلیم، طعام، قیام اور شعبہ جات فنڈز', en: 'Free education, food, and boarding funds', ar: 'التعليم المجاني، الإطعام، السكن وصناديق الأقسام' },
+            isEnabled: true,
+            orderIndex: 6
+          },
+          {
+            id: 'menu-departments',
+            title: { ur: 'نظامِ تعلیم و شعبہ جات', en: 'Academic System', ar: 'النظام الأكاديمي والأقسام' },
+            url: '#departments',
+            tabId: 'departments',
+            description: { ur: 'درسِ نظامی، تخصص فی الافتاء، تجوید و تحفیظ', en: 'Dars-e-Nizami, Fatwa, Hifz', ar: 'درس نظامي، التخصص في الإفتاء، التجويد والتحفيظ' },
+            isEnabled: true,
+            orderIndex: 7
           }
         ]
-      },
-      {
-        id: 'menu-departments',
-        title: { ur: 'شعبہ جات', en: 'Departments', ar: 'الأقسام التعليمية' },
-        url: '#departments',
-        tabId: 'departments',
-        isEnabled: true,
-        orderIndex: 3
-      },
-      {
-        id: 'menu-faculty',
-        title: { ur: 'اساتذہ کرام', en: 'Faculty', ar: 'الهيئة التدريسية' },
-        url: '#faculty',
-        tabId: 'faculty',
-        isEnabled: true,
-        orderIndex: 4
       },
       {
         id: 'menu-fatwas',
@@ -333,81 +345,110 @@ export const INITIAL_CMS_MENUS: CmsMenu[] = [
         url: '#fatwas',
         tabId: 'fatwas',
         isEnabled: true,
-        orderIndex: 5,
+        orderIndex: 2,
         children: [
           {
-            id: 'menu-fatwas-archive',
-            title: { ur: 'فتاویٰ آرکائیو (45,000+)', en: 'Fatwa Archive', ar: 'أرشيف الفتاوى' },
-            url: '#fatwas',
-            tabId: 'fatwas',
+            id: 'menu-fatwa-new',
+            title: { ur: 'آن لائن فتویٰ پوچھیں', en: 'Ask Online Fatwa', ar: 'طلب فتوى شرعية' },
+            url: '#fatwa-new',
+            tabId: 'fatwa-new',
+            description: { ur: 'دار الافتاء سے اپنے سوالات کا شرعی جواب حاصل کریں', en: 'Submit questions to Muftis for authentic rulings', ar: 'الحصول على الإجابة والفتوى المعتمدة من المفتين' },
             isEnabled: true,
             orderIndex: 1
           },
           {
-            id: 'menu-fatwas-ask',
-            title: { ur: 'آن لائن فتویٰ پوچھیں', en: 'Ask Online Fatwa', ar: 'طلب فتوى شرعية' },
-            url: '#ask-scholar',
-            tabId: 'ask-scholar',
+            id: 'menu-fatwa-archive',
+            title: { ur: 'نئے سوالات', en: 'New Questions', ar: 'الأسئلة الجديدة' },
+            url: '#fatwas',
+            tabId: 'fatwas',
+            description: { ur: 'عبادات، معاملات اور عقائد کے مستند شرعی جوابات', en: 'Search rulings on Islamic law and daily issues', ar: 'إجابات وفتاوى معتمدة في العبادات والمعاملات والعقائد' },
             isEnabled: true,
             orderIndex: 2
           },
           {
-            id: 'menu-fatwas-duas',
-            title: { ur: 'مسنون دعائیں و اذکار', en: 'Masnoon Duas', ar: 'الأدعية المأثورة' },
-            url: '#fatwa-duas',
-            tabId: 'fatwa-duas',
+            id: 'menu-fatwa-names',
+            title: { ur: 'اسلامی نام ڈائریکٹری', en: 'Islamic Names Directory', ar: 'دليل الأسماء الإسلامية' },
+            url: '#fatwa-names',
+            tabId: 'fatwa-names',
+            description: { ur: 'بچوں کے خوبصورت اور بابرکت اسلامی نام اور معانی', en: 'Authentic Islamic baby names and meanings', ar: 'أسماء إسلامية مباركة ومعانيها الطيبة للأبناء والبنات' },
             isEnabled: true,
             orderIndex: 3
           },
           {
-            id: 'menu-fatwas-names',
-            title: { ur: 'اسلامی نام ڈائریکٹری', en: 'Islamic Names', ar: 'دليل الأسماء الإسلامية' },
-            url: '#fatwa-names',
-            tabId: 'fatwa-names',
+            id: 'menu-fatwa-duas',
+            title: { ur: 'مسنون و معروف دعائیں', en: 'Masnoon Duas & Azkar', ar: 'الأدعية المأثورة والأذكار' },
+            url: '#fatwa-duas',
+            tabId: 'fatwa-duas',
+            description: { ur: 'روزمرہ مسنون دعائیں، اذکار اور اورادِ مبارکہ', en: 'Daily prophetic supplications and morning/evening azkar', ar: 'الأدعية النبوية اليومية وأذكار الصباح والمساء والأوراد' },
             isEnabled: true,
             orderIndex: 4
           }
         ]
       },
       {
-        id: 'menu-results',
-        title: { ur: 'نتائج امتحانات', en: 'Exam Results', ar: 'النتائج الامتحانية' },
-        url: '#results',
-        tabId: 'results',
-        isEnabled: true,
-        orderIndex: 6
-      },
-      {
         id: 'menu-library',
-        title: { ur: 'کتب خانہ', en: 'Library', ar: 'المكتبة الرقمية' },
+        title: { ur: 'نشر و اشاعت', en: 'Publications', ar: 'النشر والمطبوعات' },
         url: '#library',
         tabId: 'library',
         isEnabled: true,
-        orderIndex: 7
+        orderIndex: 3,
+        children: [
+          {
+            id: 'menu-sub-journal',
+            title: { ur: 'ماہنامہ "الجامعہ" ایبٹ آباد', en: 'Monthly Journal Al-Jamia', ar: 'مجلة "الجامعة" الشهرية بأبت آباد' },
+            url: '#library',
+            tabId: 'library',
+            description: { ur: 'جامعہ کا سرکاری دینی و علمی مجلہ پی ڈی ایف', en: 'Official monthly research magazine in PDF', ar: 'المجلة العلمية والدينية الرسمية للجامعة بصيغة PDF' },
+            isEnabled: true,
+            orderIndex: 1
+          },
+          {
+            id: 'menu-sub-books',
+            title: { ur: 'کتب و رسائل لائبریری', en: 'Books & Research Library', ar: 'مكتبة الكتب والرسائل العلمية' },
+            url: '#library',
+            tabId: 'library',
+            description: { ur: 'علماءِ جامعہ کی تصانیف اور درسی کتب پی ڈی ایف', en: 'PDF library of Islamic books and scholarly works', ar: 'مؤلفات علماء الجامعة والكتب الدراسية بصيغة PDF' },
+            isEnabled: true,
+            orderIndex: 2
+          }
+        ]
       },
       {
         id: 'menu-online-services',
-        title: { ur: 'آن لائن اکیڈمی', en: 'Online Academy', ar: 'التعليم الإلكتروني' },
+        title: { ur: 'آن لائن خدمات', en: 'Online Services', ar: 'الخدمات الإلكترونية' },
         url: '#online-services',
         tabId: 'online-services',
         isEnabled: true,
-        orderIndex: 8
-      },
-      {
-        id: 'menu-donations',
-        title: { ur: 'عطیات و زکوٰۃ', en: 'Donations & Zakat', ar: 'التبرعات والزكاة' },
-        url: '#donations',
-        tabId: 'donations',
-        isEnabled: true,
-        orderIndex: 9
-      },
-      {
-        id: 'menu-contact',
-        title: { ur: 'رابطہ', en: 'Contact Us', ar: 'اتصل بنا' },
-        url: '#contact',
-        tabId: 'contact',
-        isEnabled: true,
-        orderIndex: 10
+        orderIndex: 4,
+        children: [
+          {
+            id: 'menu-online-taawun',
+            title: { ur: 'طریقہ تعاون', en: 'Donation & Contribution', ar: 'طريقة التعاون' },
+            url: '#donations',
+            tabId: 'donations',
+            description: { ur: 'زکوٰۃ، صدقات اور عطیات کے لیے بنک اکاؤنٹس کی مکمل تفصیل', en: 'Official bank accounts and guidance for donations and Zakat', ar: 'الحسابات البنكية للتبرعات والزكاة والصدقات' },
+            isEnabled: true,
+            orderIndex: 1
+          },
+          {
+            id: 'menu-online-quran-dars',
+            title: { ur: 'آن لائن قرآن کریم و درسِ نظامی', en: 'Online Quran & Dars-e-Nizami', ar: 'أكاديمية القرآن الكريم والدرس النظامي' },
+            url: '#online-services',
+            tabId: 'online-services',
+            description: { ur: 'ناظرہ، تجوید، حفظ اور مکمل درسِ نظامی آن لائن', en: 'Online Quran recitation, Tajweed, Hifz & Dars-e-Nizami', ar: 'القرآن الكريم والعلوم الإسلامية والدرس النظامي عبر الإنترنت' },
+            isEnabled: true,
+            orderIndex: 2
+          },
+          {
+            id: 'menu-online-contact',
+            title: { ur: 'رابطہ و معلومات', en: 'Contact & Inquiries', ar: 'الاتصال والاستفسار' },
+            url: '#contact',
+            tabId: 'contact',
+            description: { ur: 'پتہ، فون نمبرز اور آن لائن میسج', en: 'Address, phones and online inquiry', ar: 'العنوان، أرقام الهواتف والتواصل المباشر' },
+            isEnabled: true,
+            orderIndex: 3
+          }
+        ]
       }
     ]
   },
