@@ -275,9 +275,16 @@ export const cmsApiService = {
   },
 
   // 7. Revisions API
-  async getRevisions(entityType: string, entityId: string): Promise<CmsRevision[]> {
+  async getRevisions(entityType?: string, entityId?: string): Promise<CmsRevision[]> {
     try {
-      const res = await apiFetch(`/api/cms/revisions?entity_type=${encodeURIComponent(entityType)}&entity_id=${encodeURIComponent(entityId)}`);
+      let url = '/api/cms/revisions';
+      const params = new URLSearchParams();
+      if (entityType) params.append('entity_type', entityType);
+      if (entityId) params.append('entity_id', entityId);
+      const q = params.toString();
+      if (q) url += `?${q}`;
+
+      const res = await apiFetch(url);
       if (res && res.success && Array.isArray(res.data)) {
         return res.data;
       }
@@ -288,7 +295,15 @@ export const cmsApiService = {
     }
   },
 
-  async createRevision(revision: { entityType: string; entityId: string; dataJson: string; revisionNote?: string; author?: string }): Promise<{ success: boolean; error?: string }> {
+  async createRevision(revision: { 
+    entityType: string; 
+    entityId: string; 
+    dataJson: string; 
+    revisionNote?: string; 
+    author?: string;
+    action?: string;
+    previousState?: string;
+  }): Promise<{ success: boolean; id?: string; error?: string }> {
     try {
       const res = await apiFetch('/api/cms/revisions', {
         method: 'POST',
@@ -297,6 +312,18 @@ export const cmsApiService = {
       return res;
     } catch (err: any) {
       return { success: false, error: err?.message || 'ریویژن محفوظ کرنے میں خرابی پیش آئی۔' };
+    }
+  },
+
+  async rollbackRevision(revisionId: string): Promise<{ success: boolean; message?: string; error?: string }> {
+    try {
+      const res = await apiFetch('/api/cms/revisions/rollback', {
+        method: 'POST',
+        body: JSON.stringify({ revisionId }),
+      });
+      return res;
+    } catch (err: any) {
+      return { success: false, error: err?.message || 'ریویژن بحال (Rollback) کرنے میں خرابی پیش آئی۔' };
     }
   }
 };

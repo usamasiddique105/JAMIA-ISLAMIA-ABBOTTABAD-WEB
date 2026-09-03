@@ -16,7 +16,9 @@ import {
   Sparkles,
   ShieldCheck,
   AlertCircle,
-  ExternalLink
+  ExternalLink,
+  Lock,
+  KeyRound
 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 
@@ -31,11 +33,17 @@ export const CmsPageView: React.FC<CmsPageViewProps> = ({ slug, onNavigate }) =>
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [passwordInput, setPasswordInput] = useState('');
+  const [isUnlocked, setIsUnlocked] = useState(false);
+  const [passwordError, setPasswordError] = useState('');
 
   useEffect(() => {
     let isMounted = true;
     setLoading(true);
     setError(null);
+    setIsUnlocked(false);
+    setPasswordInput('');
+    setPasswordError('');
 
     cmsApiService.getPage(slug)
       .then((data) => {
@@ -113,6 +121,65 @@ export const CmsPageView: React.FC<CmsPageViewProps> = ({ slug, onNavigate }) =>
             <span>{language === 'ar' ? 'العودة للرئيسية' : language === 'en' ? 'Back to Homepage' : 'صفحہ اول پر واپس جائیں'}</span>
           </button>
         </div>
+      </div>
+    );
+  }
+
+  // Password Protection Gate
+  if (page.visibility === 'password_protected' && !isUnlocked && page.password) {
+    const handleUnlock = (e: React.FormEvent) => {
+      e.preventDefault();
+      if (passwordInput === page.password) {
+        setIsUnlocked(true);
+        setPasswordError('');
+      } else {
+        setPasswordError(language === 'ar' ? 'كلمة المرور غير صحيحة' : language === 'en' ? 'Incorrect password' : 'غلط پاس ورڈ۔ دوبارہ کوشش کریں۔');
+      }
+    };
+
+    return (
+      <div className="w-full max-w-md mx-auto my-12 p-8 bg-white dark:bg-slate-900 border-2 border-stone-200 dark:border-slate-800 rounded-3xl shadow-lg text-center space-y-5" dir={dir}>
+        <div className="w-16 h-16 mx-auto rounded-full bg-amber-100 dark:bg-amber-950/50 flex items-center justify-center text-[#B88A3B]">
+          <Lock className="w-8 h-8" />
+        </div>
+        <h2 className="text-xl font-bold font-urdu text-stone-900 dark:text-stone-100">
+          {language === 'ar' ? 'هذه الصفحة محمية بكلمة مرور' : language === 'en' ? 'This Page is Password Protected' : 'یہ صفحہ پاس ورڈ سے محفوظ ہے'}
+        </h2>
+        <p className="text-xs font-urdu text-stone-600 dark:text-stone-400">
+          {language === 'ar' ? 'يرجى إدخال كلمة المرور لعرض محتوى الصفحة.' : language === 'en' ? 'Please enter the access password to view this content.' : 'مطلوبہ مواد دیکھنے کے لیے پاس ورڈ درج کریں۔'}
+        </p>
+
+        <form onSubmit={handleUnlock} className="space-y-4 pt-2">
+          <div>
+            <input
+              type="password"
+              value={passwordInput}
+              onChange={(e) => setPasswordInput(e.target.value)}
+              placeholder={language === 'ar' ? 'كلمة المرور...' : language === 'en' ? 'Password...' : 'پاس ورڈ درج کریں...'}
+              className="w-full px-4 py-2.5 rounded-xl border border-stone-300 dark:border-slate-700 bg-stone-50 dark:bg-slate-800 text-stone-900 dark:text-white text-center text-sm font-urdu focus:outline-none focus:ring-2 focus:ring-[#B88A3B]"
+              autoFocus
+            />
+            {passwordError && (
+              <p className="text-xs text-rose-500 font-urdu mt-1.5">{passwordError}</p>
+            )}
+          </div>
+          <div className="flex items-center justify-center gap-2">
+            <button
+              type="submit"
+              className="px-6 py-2 bg-[#5C4632] hover:bg-[#4A3222] text-amber-300 font-bold text-xs rounded-xl shadow-md transition-all font-urdu cursor-pointer flex items-center gap-2"
+            >
+              <KeyRound className="w-3.5 h-3.5" />
+              <span>{language === 'ar' ? 'فتح المحتوى' : language === 'en' ? 'Unlock Page' : 'صفحہ کھولیں'}</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => onNavigate('home')}
+              className="px-4 py-2 bg-stone-100 dark:bg-slate-800 hover:bg-stone-200 text-stone-700 dark:text-stone-300 text-xs font-bold rounded-xl transition-all font-urdu cursor-pointer"
+            >
+              <span>{language === 'ar' ? 'إلغاء' : language === 'en' ? 'Cancel' : 'منسوخ'}</span>
+            </button>
+          </div>
+        </form>
       </div>
     );
   }

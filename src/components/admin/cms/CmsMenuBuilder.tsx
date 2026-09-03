@@ -232,6 +232,15 @@ export const CmsMenuBuilder: React.FC = () => {
         setSuccessMsg(`مینیو "${currentMenu.name}" کامیابی سے محفوظ ہو گیا!`);
         // Update local state
         setMenus(prev => prev.map(m => m.id === currentMenu.id ? { ...m, items: currentItems } : m));
+        // Log revision for menu
+        cmsApiService.createRevision({
+          entityType: 'menu',
+          entityId: currentMenu.id,
+          action: 'update',
+          dataJson: JSON.stringify(payload),
+          author: 'Admin',
+          revisionNote: `مینیو "${currentMenu.name}" محفوظ کیا گیا`
+        }).catch(() => {});
         setTimeout(() => setSuccessMsg(''), 4000);
       } else {
         setErrorMsg(res?.error || 'مینیو محفوظ کرنے میں مسئلہ پیش آیا۔');
@@ -266,6 +275,15 @@ export const CmsMenuBuilder: React.FC = () => {
         setCurrentItems([]);
         setIsNewMenuModalOpen(false);
         setNewMenuName('');
+        // Log revision
+        cmsApiService.createRevision({
+          entityType: 'menu',
+          entityId: newId,
+          action: 'create',
+          dataJson: JSON.stringify(newMenuObj),
+          author: 'Admin',
+          revisionNote: `نیا مینیو "${newMenuObj.name}" بنایا گیا`
+        }).catch(() => {});
         setSuccessMsg(`نیا مینیو "${newMenuObj.name}" کامیابی سے بن گیا۔`);
         setTimeout(() => setSuccessMsg(''), 4000);
       }

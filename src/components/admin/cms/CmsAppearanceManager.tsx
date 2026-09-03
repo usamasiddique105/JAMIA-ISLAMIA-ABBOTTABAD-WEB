@@ -89,6 +89,15 @@ export const CmsAppearanceManager: React.FC = () => {
       const res = await cmsApiService.saveTheme(payload);
       if (res && res.success) {
         setSuccessMsg('ظاہری شکل و صورت اور تھیم ترتیبات کامیابی سے محفوظ ہو گئیں!');
+        // Log revision for theme settings
+        cmsApiService.createRevision({
+          entityType: 'theme',
+          entityId: 'main',
+          action: 'update',
+          dataJson: JSON.stringify(payload),
+          author: 'Admin',
+          revisionNote: 'تھیم ترتیبات و رنگ محفوظ کیے گئے'
+        }).catch(() => {});
         setTimeout(() => setSuccessMsg(''), 4000);
       } else {
         setErrorMsg(res?.error || 'محفوظ کرنے میں خرابی پیش آئی۔');

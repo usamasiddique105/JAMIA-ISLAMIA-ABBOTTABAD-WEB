@@ -316,8 +316,11 @@ export interface CmsPage {
 export interface CmsMenuItem {
   id: string;
   title: LocalizedString;
+  label?: string;
   url: string;
   tabId?: string;
+  tab?: string;
+  isModal?: boolean;
   pageId?: string;
   target?: '_self' | '_blank';
   icon?: string;
@@ -330,7 +333,7 @@ export interface CmsMenuItem {
 
 export interface CmsMenu {
   id: string;
-  location: 'header_main' | 'top_bar' | 'footer_quick' | 'footer_academics' | 'footer_sharia';
+  location: 'header_main' | 'top_bar' | 'footer_quick' | 'footer_academics' | 'footer_sharia' | 'footer_main' | 'header' | 'main' | string;
   name: string;
   items: CmsMenuItem[];
   updatedAt: string;
@@ -377,8 +380,12 @@ export interface CmsSection {
 export interface CmsThemeSettings {
   id: string;
   logoUrl?: string;
+  headerLogoUrl?: string;
   darkLogoUrl?: string;
   faviconUrl?: string;
+  address?: string;
+  phone?: string;
+  website?: string;
   primaryColor?: string;
   secondaryColor?: string;
   accentColor?: string;
@@ -464,9 +471,11 @@ export interface CmsAdminUser {
 
 export interface CmsRevision {
   id: string;
-  entityType: 'page' | 'section' | 'menu' | 'theme' | 'seo';
+  entityType: 'page' | 'section' | 'menu' | 'theme' | 'seo' | string;
   entityId: string;
+  action?: 'create' | 'update' | 'delete' | 'rollback' | string;
   dataJson: string;
+  previousState?: string;
   author: string;
   revisionNote?: string;
   createdAt: string;

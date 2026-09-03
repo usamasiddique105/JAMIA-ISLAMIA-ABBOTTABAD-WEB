@@ -31,13 +31,22 @@ export const onRequestGet = async (context: PagesContext<Env>): Promise<Response
 
   const robotsTxt = `User-agent: *
 Allow: /
+Disallow: /admin
+Disallow: /admin-login
+Disallow: /?tab=admin
+Disallow: /api/admin/
+Disallow: /api/manage/
+Disallow: /api/auth/
 
 Sitemap: https://jamia-islamia-abbottabad.pages.dev/sitemap.xml
+Sitemap: https://jamia-islamia-abbottabad.pages.dev/sitemap-en.xml
+Sitemap: https://jamia-islamia-abbottabad.pages.dev/sitemap-ar.xml
 Sitemap: https://jamia-islamia-abbottabad.pages.dev/sitemap-darulifta.xml
 Sitemap: https://jamia-islamia-abbottabad.pages.dev/sitemap-quran.xml
 Sitemap: https://jamia-islamia-abbottabad.pages.dev/sitemap-dars-nizami.xml
 Sitemap: https://jamia-islamia-abbottabad.pages.dev/sitemap-results.xml
 Sitemap: https://jamia-islamia-abbottabad.pages.dev/sitemap-donations.xml
+Sitemap: https://jamia-islamia-abbottabad.pages.dev/sitemap-pages.xml
 `;
 
   return new Response(robotsTxt.trim(), {

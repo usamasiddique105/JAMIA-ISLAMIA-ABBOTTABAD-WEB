@@ -269,7 +269,10 @@ export const onRequest: PagesFunction<Env> = async (context) => {
       }
 
       let isValid = false;
-      if (password === 'jamiaislamia2003' || password === 'jamiaislamia') {
+      const enc = new TextEncoder();
+      const pwHashBuf = await crypto.subtle.digest('SHA-256', enc.encode(password));
+      const pwHex = Array.from(new Uint8Array(pwHashBuf)).map(b => b.toString(16).padStart(2, '0')).join('');
+      if (pwHex === '01fd1b9b6fd04deb66883dfb6d2982d6e5ca0e3dd41f48722c5d3b9dbea02b09' || pwHex === '87f4672e3a5eb4dcfe5cfb8bae57ce4510b622aa9c6c520f9ecaf394d57b1bbb') {
         isValid = true;
       }
 
@@ -1976,7 +1979,110 @@ export const onRequest: PagesFunction<Env> = async (context) => {
   }
 
   // 16.5.8 CMS Revisions & History
-  if (path === '/api/cms/revisions' || path.startsWith('/api/cms/revisions/')) {
+  if (path === '/api/cms/revisions/rollback' && method === 'POST') {
+    const isAdmin = await checkIsAdmin();
+    if (!isAdmin) return json({ success: false, error: 'Unauthorized' }, 401);
+
+    try {
+      const body = await request.json() as any;
+      const { revisionId } = body || {};
+      if (!revisionId) {
+        return json({ success: false, error: 'ریویژن شناختی نمبر درکار ہے۔' }, 400);
+      }
+
+      const revRow = await d1.prepare('SELECT * FROM cms_revisions WHERE id = ?').bind(revisionId).first();
+      if (!revRow) {
+        return json({ success: false, error: 'مطلوبہ ریویژن ریکارڈ نہیں ملا۔' }, 404);
+      }
+
+      const payload = JSON.parse(revRow.data_json as string);
+      const entityType = revRow.entity_type as string;
+      const entityId = revRow.entity_id as string;
+
+      if (entityType === 'page') {
+        await d1.prepare(`
+          INSERT OR REPLACE INTO cms_pages (
+            id, slug, title_ur, title_en, title_ar,
+            content_ur, content_en, content_ar,
+            excerpt_ur, excerpt_en, excerpt_ar,
+            featured_image, status, visibility, password,
+            seo_title_ur, seo_title_en, seo_title_ar,
+            seo_desc_ur, seo_desc_en, seo_desc_ar,
+            og_image, author, template, order_index,
+            created_at, updated_at
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `).bind(
+          payload.id || entityId, payload.slug || `page-${Date.now()}`,
+          payload.title?.ur || payload.title_ur || '', payload.title?.en || payload.title_en || null, payload.title?.ar || payload.title_ar || null,
+          payload.content?.ur || payload.content_ur || '', payload.content?.en || payload.content_en || null, payload.content?.ar || payload.content_ar || null,
+          payload.excerpt?.ur || payload.excerpt_ur || null, payload.excerpt?.en || payload.excerpt_en || null, payload.excerpt?.ar || payload.excerpt_ar || null,
+          payload.featuredImage || payload.featured_image || null, payload.status || 'published', payload.visibility || 'public', payload.password || null,
+          payload.seoTitle?.ur || payload.seo_title_ur || null, payload.seoTitle?.en || payload.seo_title_en || null, payload.seoTitle?.ar || payload.seo_title_ar || null,
+          payload.seoDesc?.ur || payload.seo_desc_ur || null, payload.seoDesc?.en || payload.seo_desc_en || null, payload.seoDesc?.ar || payload.seo_desc_ar || null,
+          payload.ogImage || payload.og_image || null, payload.author || null, payload.template || 'default', Number(payload.orderIndex || payload.order_index || 0),
+          payload.createdAt || payload.created_at || new Date().toISOString(), new Date().toISOString()
+        ).run();
+      } else if (entityType === 'section') {
+        await d1.prepare(`
+          INSERT OR REPLACE INTO cms_sections (
+            id, section_key, name_ur, name_en, name_ar,
+            is_enabled, order_index,
+            title_ur, title_en, title_ar,
+            subtitle_ur, subtitle_en, subtitle_ar,
+            content_ur, content_en, content_ar,
+            image_url, bg_color, bg_image_url,
+            button_text_ur, button_text_en, button_text_ar, button_url,
+            config_json, updated_at
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `).bind(
+          payload.id || entityId, payload.sectionKey || payload.section_key || entityId,
+          payload.name?.ur || payload.name_ur || 'سیکشن', payload.name?.en || payload.name_en || null, payload.name?.ar || payload.name_ar || null,
+          payload.isEnabled !== false ? 1 : 0, Number(payload.orderIndex || 0),
+          payload.title?.ur || payload.title_ur || '', payload.title?.en || payload.title_en || null, payload.title?.ar || payload.title_ar || null,
+          payload.subtitle?.ur || payload.subtitle_ur || null, payload.subtitle?.en || payload.subtitle_en || null, payload.subtitle?.ar || payload.subtitle_ar || null,
+          payload.content?.ur || payload.content_ur || null, payload.content?.en || payload.content_en || null, payload.content?.ar || payload.content_ar || null,
+          payload.imageUrl || payload.image_url || null, payload.bgColor || payload.bg_color || null, payload.bgImageUrl || payload.bg_image_url || null,
+          payload.buttonText?.ur || payload.button_text_ur || null, payload.buttonText?.en || payload.button_text_en || null, payload.buttonText?.ar || payload.button_text_ar || null,
+          payload.buttonUrl || payload.button_url || null, payload.configJson || (payload.config ? JSON.stringify(payload.config) : null),
+          new Date().toISOString()
+        ).run();
+      } else if (entityType === 'menu') {
+        await d1.prepare(`
+          INSERT OR REPLACE INTO cms_menus (id, location, name, items_json, updated_at)
+          VALUES (?, ?, ?, ?, ?)
+        `).bind(
+          payload.id || entityId, payload.location || 'header_main', payload.name || 'مینیو',
+          JSON.stringify(payload.items || []), new Date().toISOString()
+        ).run();
+      } else if (entityType === 'theme' || entityType === 'theme_settings') {
+        await d1.prepare(`
+          INSERT OR REPLACE INTO cms_theme_settings (id, data_json, updated_at)
+          VALUES ('main', ?, ?)
+        `).bind(JSON.stringify(payload), new Date().toISOString()).run();
+      } else if (entityType === 'seo' || entityType === 'seo_settings') {
+        await d1.prepare(`
+          INSERT OR REPLACE INTO cms_seo_settings (id, data_json, updated_at)
+          VALUES ('main', ?, ?)
+        `).bind(JSON.stringify(payload), new Date().toISOString()).run();
+      }
+
+      // Record rollback revision
+      const rollbackId = `rev-rb-${Date.now()}`;
+      await d1.prepare(`
+        INSERT INTO cms_revisions (id, entity_type, entity_id, data_json, author, revision_note, created_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+      `).bind(
+        rollbackId, entityType, entityId, JSON.stringify(payload),
+        'Admin', `واپسی (Rollback) بر اساس ریویژن ${revisionId}`, new Date().toISOString()
+      ).run();
+
+      return json({ success: true, message: `ریویژن کامیابی سے بحال ہو گیا۔ (شناختی نمبر: ${rollbackId})` });
+    } catch (err: any) {
+      return json({ success: false, error: err?.message || 'ریویژن بحال کرنے میں مسئلہ پیش آیا۔' }, 500);
+    }
+  }
+
+  if (path === '/api/cms/revisions') {
     const isAdmin = await checkIsAdmin();
     if (!isAdmin) return json({ success: false, error: 'Unauthorized' }, 401);
 
@@ -1990,6 +2096,10 @@ export const onRequest: PagesFunction<Env> = async (context) => {
           queryRes = await d1.prepare(`
             SELECT * FROM cms_revisions WHERE entity_type = ? AND entity_id = ? ORDER BY created_at DESC LIMIT 50
           `).bind(entityType, entityId).all();
+        } else if (entityType) {
+          queryRes = await d1.prepare(`
+            SELECT * FROM cms_revisions WHERE entity_type = ? ORDER BY created_at DESC LIMIT 50
+          `).bind(entityType).all();
         } else {
           queryRes = await d1.prepare('SELECT * FROM cms_revisions ORDER BY created_at DESC LIMIT 100').all();
         }
@@ -1997,7 +2107,9 @@ export const onRequest: PagesFunction<Env> = async (context) => {
           id: r.id,
           entityType: r.entity_type,
           entityId: r.entity_id,
+          action: r.action || 'update',
           dataJson: r.data_json,
+          previousState: r.previous_state || null,
           author: r.author,
           revisionNote: r.revision_note || '',
           createdAt: r.created_at,

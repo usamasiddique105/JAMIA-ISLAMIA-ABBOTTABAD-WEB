@@ -139,6 +139,15 @@ export const CmsHeaderFooterManager: React.FC = () => {
       const res = await cmsApiService.saveTheme(updatedTheme);
       if (res && res.success) {
         setSuccessMsg('ہیڈر، فوٹر اور سوشل روابط کی ترتیبات کامیابی سے محفوظ ہو گئیں!');
+        // Log revision for header/footer settings
+        cmsApiService.createRevision({
+          entityType: 'theme',
+          entityId: 'header_footer',
+          action: 'update',
+          dataJson: JSON.stringify(updatedTheme),
+          author: 'Admin',
+          revisionNote: 'ہیڈر، فوٹر اور سوشل لنکس کی ترتیبات محفوظ کی گئیں'
+        }).catch(() => {});
         setTimeout(() => setSuccessMsg(''), 4000);
       } else {
         setErrorMsg(res?.error || 'محفوظ کرنے میں مسئلہ پیش آیا۔');

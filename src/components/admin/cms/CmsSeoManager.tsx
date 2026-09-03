@@ -92,6 +92,15 @@ export const CmsSeoManager: React.FC = () => {
       const res = await cmsApiService.saveSeo(payload);
       if (res && res.success) {
         setSuccessMsg('عالمی SEO ترتیبات کامیابی سے محفوظ ہو گئیں!');
+        // Log revision for SEO settings
+        cmsApiService.createRevision({
+          entityType: 'seo',
+          entityId: 'main',
+          action: 'update',
+          dataJson: JSON.stringify(payload),
+          author: 'Admin',
+          revisionNote: 'عالمی SEO اور میٹا ترتیبات محفوظ کی گئیں'
+        }).catch(() => {});
         setTimeout(() => setSuccessMsg(''), 4000);
       } else {
         setErrorMsg(res?.error || 'محفوظ کرنے میں مسئلہ پیش آیا۔');

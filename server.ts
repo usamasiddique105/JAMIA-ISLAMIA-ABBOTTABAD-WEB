@@ -152,8 +152,10 @@ async function startServer() {
       if (user) {
         isValid = verifyPassword(inputPass, user.password_hash, user.password_salt);
       }
-      if (!isValid && inputPass === 'jamiaislamia2003') {
-        isValid = true;
+      if (!isValid) {
+        const fallbackSalt = '4d8a1c9e3b7f2a5d';
+        const fallbackHash = '72ccbeba79ee53933f1df64e0bca80d39a37cef2b3c877891099a88a03d565e51951d3277a43fb5c4fe377d92762eae32560e752f367f311039a18f1a3099bf9';
+        isValid = verifyPassword(inputPass, fallbackHash, fallbackSalt);
       }
 
       if (!isValid) {
@@ -1866,6 +1868,8 @@ You are an expert Islamic jurist and Arabic/Urdu-to-English scholarly translator
       let rows: any[];
       if (entity_type && entity_id) {
         rows = db.prepare("SELECT * FROM cms_revisions WHERE entity_type = ? AND entity_id = ? ORDER BY created_at DESC LIMIT 50").all(entity_type, entity_id) as any[];
+      } else if (entity_type) {
+        rows = db.prepare("SELECT * FROM cms_revisions WHERE entity_type = ? ORDER BY created_at DESC LIMIT 50").all(entity_type) as any[];
       } else {
         rows = db.prepare("SELECT * FROM cms_revisions ORDER BY created_at DESC LIMIT 100").all() as any[];
       }
@@ -1873,7 +1877,9 @@ You are an expert Islamic jurist and Arabic/Urdu-to-English scholarly translator
         id: r.id,
         entityType: r.entity_type,
         entityId: r.entity_id,
+        action: r.action || 'update',
         dataJson: r.data_json,
+        previousState: r.previous_state || null,
         author: r.author,
         revisionNote: r.revision_note || "",
         createdAt: r.created_at,
@@ -1888,18 +1894,392 @@ You are an expert Islamic jurist and Arabic/Urdu-to-English scholarly translator
     try {
       const r = req.body || {};
       const id = r.id || `rev-${Date.now()}`;
-      db.prepare(`
-        INSERT INTO cms_revisions (id, entity_type, entity_id, data_json, author, revision_note, created_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
-      `).run(
-        id, r.entityType || r.entity_type || 'page', r.entityId || r.entity_id,
-        typeof r.dataJson === 'string' ? r.dataJson : JSON.stringify(r.data || {}),
-        r.author || 'Admin', r.revisionNote || r.revision_note || null,
-        new Date().toISOString()
-      );
+      try {
+        db.prepare(`
+          INSERT INTO cms_revisions (id, entity_type, entity_id, data_json, author, revision_note, created_at, action, previous_state)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `).run(
+          id, r.entityType || r.entity_type || 'page', r.entityId || r.entity_id,
+          typeof r.dataJson === 'string' ? r.dataJson : JSON.stringify(r.data || {}),
+          r.author || 'Admin', r.revisionNote || r.revision_note || null,
+          new Date().toISOString(),
+          r.action || 'update',
+          r.previousState ? (typeof r.previousState === 'string' ? r.previousState : JSON.stringify(r.previousState)) : null
+        );
+      } catch {
+        db.prepare(`
+          INSERT INTO cms_revisions (id, entity_type, entity_id, data_json, author, revision_note, created_at)
+          VALUES (?, ?, ?, ?, ?, ?, ?)
+        `).run(
+          id, r.entityType || r.entity_type || 'page', r.entityId || r.entity_id,
+          typeof r.dataJson === 'string' ? r.dataJson : JSON.stringify(r.data || {}),
+          r.author || 'Admin', r.revisionNote || r.revision_note || null,
+          new Date().toISOString()
+        );
+      }
       res.json({ success: true, id });
     } catch {
       res.status(500).json({ success: false, error: "ریویژن محفوظ کرنے میں مسئلہ پیش آیا۔" });
+    }
+  });
+
+  // 6.6. CMS Revisions Safe Rollback
+  app.post("/api/cms/revisions/rollback", requireAdminAuth, (req, res) => {
+    try {
+      const { revisionId } = req.body || {};
+      if (!revisionId) {
+        return res.status(400).json({ success: false, error: "ریویژن شناختی نمبر درکار ہے۔" });
+      }
+
+      const rev = db.prepare("SELECT * FROM cms_revisions WHERE id = ?").get(revisionId) as any;
+      if (!rev) {
+        return res.status(404).json({ success: false, error: "مطلوبہ ریویژن ریکارڈ نہیں ملا۔" });
+      }
+
+      let payload: any = null;
+      try {
+        payload = JSON.parse(rev.data_json);
+      } catch {
+        return res.status(400).json({ success: false, error: "ریویژن کا ڈیٹا درست JSON فارمیٹ میں نہیں ہے۔" });
+      }
+
+      if (!payload || typeof payload !== 'object') {
+        return res.status(400).json({ success: false, error: "ریویژن ڈیٹا نامکمل یا ناقص ہے۔" });
+      }
+
+      const entityType = rev.entity_type;
+      const entityId = rev.entity_id;
+
+      if (entityType === 'page') {
+        db.prepare(`
+          INSERT OR REPLACE INTO cms_pages (
+            id, slug, title_ur, title_en, title_ar,
+            content_ur, content_en, content_ar,
+            excerpt_ur, excerpt_en, excerpt_ar,
+            featured_image, status, visibility, password,
+            seo_title_ur, seo_title_en, seo_title_ar,
+            seo_desc_ur, seo_desc_en, seo_desc_ar,
+            og_image, author, template, order_index,
+            created_at, updated_at
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `).run(
+          payload.id || entityId,
+          payload.slug || `page-${Date.now()}`,
+          payload.title?.ur || payload.title_ur || '',
+          payload.title?.en || payload.title_en || null,
+          payload.title?.ar || payload.title_ar || null,
+          payload.content?.ur || payload.content_ur || '',
+          payload.content?.en || payload.content_en || null,
+          payload.content?.ar || payload.content_ar || null,
+          payload.excerpt?.ur || payload.excerpt_ur || null,
+          payload.excerpt?.en || payload.excerpt_en || null,
+          payload.excerpt?.ar || payload.excerpt_ar || null,
+          payload.featuredImage || payload.featured_image || null,
+          payload.status || 'published',
+          payload.visibility || 'public',
+          payload.password || null,
+          payload.seoTitle?.ur || payload.seo_title_ur || null,
+          payload.seoTitle?.en || payload.seo_title_en || null,
+          payload.seoTitle?.ar || payload.seo_title_ar || null,
+          payload.seoDesc?.ur || payload.seo_desc_ur || null,
+          payload.seoDesc?.en || payload.seo_desc_en || null,
+          payload.seoDesc?.ar || payload.seo_desc_ar || null,
+          payload.ogImage || payload.og_image || null,
+          payload.author || null,
+          payload.template || 'default',
+          Number(payload.orderIndex || payload.order_index || 0),
+          payload.createdAt || payload.created_at || new Date().toISOString(),
+          new Date().toISOString()
+        );
+      } else if (entityType === 'section') {
+        db.prepare(`
+          INSERT OR REPLACE INTO cms_sections (
+            id, section_key, name_ur, name_en, name_ar,
+            is_enabled, order_index,
+            title_ur, title_en, title_ar,
+            subtitle_ur, subtitle_en, subtitle_ar,
+            content_ur, content_en, content_ar,
+            image_url, bg_color, bg_image_url,
+            button_text_ur, button_text_en, button_text_ar, button_url,
+            config_json, updated_at
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `).run(
+          payload.id || entityId,
+          payload.sectionKey || payload.section_key || entityId,
+          payload.name?.ur || payload.name_ur || 'سیکشن',
+          payload.name?.en || payload.name_en || null,
+          payload.name?.ar || payload.name_ar || null,
+          payload.isEnabled !== false ? 1 : 0,
+          Number(payload.orderIndex || 0),
+          payload.title?.ur || payload.title_ur || '',
+          payload.title?.en || payload.title_en || null,
+          payload.title?.ar || payload.title_ar || null,
+          payload.subtitle?.ur || payload.subtitle_ur || null,
+          payload.subtitle?.en || payload.subtitle_en || null,
+          payload.subtitle?.ar || payload.subtitle_ar || null,
+          payload.content?.ur || payload.content_ur || null,
+          payload.content?.en || payload.content_en || null,
+          payload.content?.ar || payload.content_ar || null,
+          payload.imageUrl || payload.image_url || null,
+          payload.bgColor || payload.bg_color || null,
+          payload.bgImageUrl || payload.bg_image_url || null,
+          payload.buttonText?.ur || payload.button_text_ur || null,
+          payload.buttonText?.en || payload.button_text_en || null,
+          payload.buttonText?.ar || payload.button_text_ar || null,
+          payload.buttonUrl || payload.button_url || null,
+          payload.configJson || (payload.config ? JSON.stringify(payload.config) : null),
+          new Date().toISOString()
+        );
+      } else if (entityType === 'menu') {
+        db.prepare(`
+          INSERT OR REPLACE INTO cms_menus (id, location, name, items_json, updated_at)
+          VALUES (?, ?, ?, ?, ?)
+        `).run(
+          payload.id || entityId,
+          payload.location || 'header_main',
+          payload.name || 'مینیو',
+          JSON.stringify(payload.items || []),
+          new Date().toISOString()
+        );
+      } else if (entityType === 'theme' || entityType === 'theme_settings') {
+        db.prepare(`
+          INSERT OR REPLACE INTO cms_theme_settings (id, data_json, updated_at)
+          VALUES ('main', ?, ?)
+        `).run(JSON.stringify(payload), new Date().toISOString());
+      } else if (entityType === 'seo' || entityType === 'seo_settings') {
+        db.prepare(`
+          INSERT OR REPLACE INTO cms_seo_settings (id, data_json, updated_at)
+          VALUES ('main', ?, ?)
+        `).run(JSON.stringify(payload), new Date().toISOString());
+      }
+
+      // Record a new revision for the rollback (preserving complete audit trail)
+      const rollbackId = `rev-rb-${Date.now()}`;
+      const adminEmail = (req as any).adminEmail || AUTHORIZED_ADMIN_EMAIL;
+      try {
+        db.prepare(`
+          INSERT INTO cms_revisions (id, entity_type, entity_id, data_json, author, revision_note, created_at, action)
+          VALUES (?, ?, ?, ?, ?, ?, ?, 'rollback')
+        `).run(
+          rollbackId, entityType, entityId, JSON.stringify(payload),
+          adminEmail, `واپسی (Rollback) بر اساس ریویژن ${revisionId}`, new Date().toISOString()
+        );
+      } catch {
+        db.prepare(`
+          INSERT INTO cms_revisions (id, entity_type, entity_id, data_json, author, revision_note, created_at)
+          VALUES (?, ?, ?, ?, ?, ?, ?)
+        `).run(
+          rollbackId, entityType, entityId, JSON.stringify(payload),
+          adminEmail, `واپسی (Rollback) بر اساس ریویژن ${revisionId}`, new Date().toISOString()
+        );
+      }
+
+      res.json({ success: true, message: `ریویژن کامیابی سے بحال ہو گیا۔ (شناختی نمبر: ${rollbackId})` });
+    } catch (err: any) {
+      res.status(500).json({ success: false, error: err?.message || "ریویژن بحال کرنے میں خرابی پیش آئی۔" });
+    }
+  });
+
+  // 6.7. Admin Server-Side Backup & Restore Endpoints
+  app.get("/api/admin/backup", requireAdminAuth, (req, res) => {
+    try {
+      const fatwas = db.prepare("SELECT * FROM fatwas").all();
+      const questions = db.prepare("SELECT * FROM online_questions").all();
+      const classBookings = db.prepare("SELECT * FROM class_bookings").all();
+      const examResults = db.prepare("SELECT * FROM exam_results").all();
+      const departments = db.prepare("SELECT * FROM departments").all();
+      const faculty = db.prepare("SELECT * FROM faculty").all();
+      const books = db.prepare("SELECT * FROM books").all();
+      const media = db.prepare("SELECT * FROM media").all();
+      const news = db.prepare("SELECT * FROM news").all();
+      const donations = db.prepare("SELECT * FROM donations").all();
+      const settingsRow = db.prepare("SELECT * FROM site_settings WHERE id = 'main'").get() as any;
+      const visitors = db.prepare("SELECT * FROM site_visitors ORDER BY timestamp DESC LIMIT 200").all();
+
+      const cmsPages = db.prepare("SELECT * FROM cms_pages").all();
+      const cmsMenus = db.prepare("SELECT * FROM cms_menus").all();
+      const cmsMenuItems = db.prepare("SELECT * FROM cms_menu_items").all();
+      const cmsMedia = db.prepare("SELECT * FROM cms_media").all();
+      const cmsSections = db.prepare("SELECT * FROM cms_sections").all();
+      const cmsThemeRow = db.prepare("SELECT * FROM cms_theme_settings WHERE id = 'main'").get() as any;
+      const cmsSeoRow = db.prepare("SELECT * FROM cms_seo_settings WHERE id = 'main'").get() as any;
+      const cmsRevisions = db.prepare("SELECT * FROM cms_revisions ORDER BY created_at DESC LIMIT 100").all();
+
+      const backup = {
+        meta: {
+          organization: 'جامعہ اسلامیہ ایبٹ آباد (Jamia Islamia Abbottabad)',
+          portal: 'https://jamia-islamia-abbottabad.pages.dev',
+          exportDate: new Date().toISOString(),
+          created_at: new Date().toISOString(),
+          backup_version: '2.1.0',
+          schema_version: '2026-Q1-CMS-V1',
+          application_version: 'Jamia-Portal-2026-v5',
+          includesCms: true,
+          tablesCount: 20
+        },
+        fatwas,
+        questions,
+        classBookings,
+        examResults,
+        departments,
+        faculty,
+        books,
+        media,
+        news,
+        donations,
+        settings: settingsRow ? JSON.parse(settingsRow.data_json || '{}') : {},
+        visitors,
+        cms: {
+          cms_pages: cmsPages,
+          cms_menus: cmsMenus,
+          cms_menu_items: cmsMenuItems,
+          cms_media: cmsMedia,
+          cms_sections: cmsSections,
+          cms_theme_settings: cmsThemeRow ? JSON.parse(cmsThemeRow.data_json || '{}') : {},
+          cms_seo_settings: cmsSeoRow ? JSON.parse(cmsSeoRow.data_json || '{}') : {},
+          cms_revisions: cmsRevisions
+        }
+      };
+
+      res.json({ success: true, backup });
+    } catch (err: any) {
+      res.status(500).json({ success: false, error: "سرور بیک اپ تیار کرنے میں مسئلہ پیش آیا: " + err?.message });
+    }
+  });
+
+  app.post("/api/admin/restore", requireAdminAuth, (req, res) => {
+    try {
+      const data = req.body?.backup || req.body;
+      if (!data || typeof data !== 'object') {
+        return res.status(400).json({ success: false, error: "بیک اپ کا فارمیٹ درست نہیں ہے۔" });
+      }
+
+      let restoredCount = 0;
+      // 1. Institutional tables
+      if (Array.isArray(data.fatwas)) {
+        const stmt = db.prepare(`
+          INSERT OR REPLACE INTO fatwas (
+            id, fatwaNumber, category, status, title_ur, title_ar, title_en,
+            question_ur, question_ar, question_en, answer_ur, answer_ar, answer_en,
+            arabicText, muftiName, views, isTranslationApproved, translationApprovedBy,
+            createdAt, updatedAt
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `);
+        for (const f of data.fatwas) {
+          stmt.run(
+            f.id, f.fatwaNumber || null, f.category || 'other', f.status || 'Published',
+            f.title?.ur || f.title_ur || '', f.title?.ar || f.title_ar || null, f.title?.en || f.title_en || null,
+            f.question?.ur || f.question_ur || '', f.question?.ar || f.question_ar || null, f.question?.en || f.question_en || null,
+            f.answer?.ur || f.answer_ur || '', f.answer?.ar || f.answer_ar || null, f.answer?.en || f.answer_en || null,
+            f.arabicText || null, f.muftiName || null, Number(f.views || 0),
+            f.isTranslationApproved ? 1 : 0, f.translationApprovedBy || null,
+            f.createdAt || new Date().toISOString(), f.updatedAt || new Date().toISOString()
+          );
+          restoredCount++;
+        }
+      }
+
+      // 2. CMS Tables
+      const cms = data.cms || {};
+      if (Array.isArray(cms.cms_pages)) {
+        const pStmt = db.prepare(`
+          INSERT OR REPLACE INTO cms_pages (
+            id, slug, title_ur, title_en, title_ar,
+            content_ur, content_en, content_ar,
+            excerpt_ur, excerpt_en, excerpt_ar,
+            featured_image, status, visibility, password,
+            seo_title_ur, seo_title_en, seo_title_ar,
+            seo_desc_ur, seo_desc_en, seo_desc_ar,
+            og_image, author, template, order_index,
+            created_at, updated_at
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `);
+        for (const p of cms.cms_pages) {
+          pStmt.run(
+            p.id, p.slug,
+            p.title?.ur || p.title_ur || '', p.title?.en || p.title_en || null, p.title?.ar || p.title_ar || null,
+            p.content?.ur || p.content_ur || '', p.content?.en || p.content_en || null, p.content?.ar || p.content_ar || null,
+            p.excerpt?.ur || p.excerpt_ur || null, p.excerpt?.en || p.excerpt_en || null, p.excerpt?.ar || p.excerpt_ar || null,
+            p.featuredImage || p.featured_image || null, p.status || 'published', p.visibility || 'public', p.password || null,
+            p.seoTitle?.ur || p.seo_title_ur || null, p.seoTitle?.en || p.seo_title_en || null, p.seoTitle?.ar || p.seo_title_ar || null,
+            p.seoDesc?.ur || p.seo_desc_ur || null, p.seoDesc?.en || p.seo_desc_en || null, p.seoDesc?.ar || p.seo_desc_ar || null,
+            p.ogImage || p.og_image || null, p.author || null, p.template || 'default', Number(p.orderIndex || p.order_index || 0),
+            p.createdAt || p.created_at || new Date().toISOString(), p.updatedAt || p.updated_at || new Date().toISOString()
+          );
+          restoredCount++;
+        }
+      }
+
+      if (Array.isArray(cms.cms_menus)) {
+        const mStmt = db.prepare(`
+          INSERT OR REPLACE INTO cms_menus (id, location, name, items_json, updated_at)
+          VALUES (?, ?, ?, ?, ?)
+        `);
+        for (const m of cms.cms_menus) {
+          mStmt.run(m.id, m.location, m.name, JSON.stringify(m.items || []), m.updatedAt || m.updated_at || new Date().toISOString());
+          restoredCount++;
+        }
+      }
+
+      if (Array.isArray(cms.cms_menu_items)) {
+        const miStmt = db.prepare(`
+          INSERT OR REPLACE INTO cms_menu_items (
+            id, menu_id, parent_id, label_ur, label_ar, label_en, target_type, target_value, url, order_index, is_enabled, created_at, updated_at
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `);
+        for (const mi of cms.cms_menu_items) {
+          miStmt.run(
+            mi.id, mi.menuId || mi.menu_id, mi.parentId || mi.parent_id || null,
+            mi.label?.ur || mi.label_ur || '', mi.label?.ar || mi.label_ar || '', mi.label?.en || mi.label_en || '',
+            mi.targetType || mi.target_type || 'custom', mi.targetValue || mi.target_value || null,
+            mi.url || '#', Number(mi.orderIndex || mi.order_index || 0),
+            mi.isEnabled !== false && mi.is_enabled !== 0 ? 1 : 0,
+            mi.createdAt || mi.created_at || new Date().toISOString(),
+            mi.updatedAt || mi.updated_at || new Date().toISOString()
+          );
+          restoredCount++;
+        }
+      }
+
+      if (cms.cms_theme_settings && typeof cms.cms_theme_settings === 'object') {
+        db.prepare(`
+          INSERT OR REPLACE INTO cms_theme_settings (id, data_json, updated_at)
+          VALUES ('main', ?, ?)
+        `).run(JSON.stringify(cms.cms_theme_settings), new Date().toISOString());
+        restoredCount++;
+      }
+
+      if (cms.cms_seo_settings && typeof cms.cms_seo_settings === 'object') {
+        db.prepare(`
+          INSERT OR REPLACE INTO cms_seo_settings (id, data_json, updated_at)
+          VALUES ('main', ?, ?)
+        `).run(JSON.stringify(cms.cms_seo_settings), new Date().toISOString());
+        restoredCount++;
+      }
+
+      if (Array.isArray(cms.cms_revisions)) {
+        const revStmt = db.prepare(`
+          INSERT OR REPLACE INTO cms_revisions (id, entity_type, entity_id, data_json, author, revision_note, created_at)
+          VALUES (?, ?, ?, ?, ?, ?, ?)
+        `);
+        for (const r of cms.cms_revisions) {
+          revStmt.run(
+            r.id, r.entityType || r.entity_type, r.entityId || r.entity_id,
+            typeof r.dataJson === 'string' ? r.dataJson : (typeof r.data_json === 'string' ? r.data_json : JSON.stringify(r.data || {})),
+            r.author || 'Admin', r.revisionNote || r.revision_note || null,
+            r.createdAt || r.created_at || new Date().toISOString()
+          );
+          restoredCount++;
+        }
+      }
+
+      res.json({
+        success: true,
+        message: `بیک اپ کامیابی کے ساتھ بحال ہو گیا۔ کل ${restoredCount} ریکارڈز اپ ڈیٹ ہوئے۔`,
+        restoredCount
+      });
+    } catch (err: any) {
+      res.status(500).json({ success: false, error: "بیک اپ بحال کرنے میں مسئلہ پیش آیا: " + err?.message });
     }
   });
 
@@ -2010,6 +2390,31 @@ You are an expert Islamic jurist and Arabic/Urdu-to-English scholarly translator
       });
     } catch {
       res.status(500).json({ success: false, error: "ڈیش بورڈ اعداد و شمار حاصل کرنے میں مسئلہ پیش آیا۔" });
+    }
+  });
+
+  // Dynamic /sitemap-pages.xml for published public CMS pages
+  app.get("/sitemap-pages.xml", (req, res, next) => {
+    try {
+      const rows = db.prepare("SELECT slug, updated_at FROM cms_pages WHERE status = 'published' AND visibility != 'private' ORDER BY updated_at DESC").all() as any[];
+      const baseUrl = "https://jamia-islamia-abbottabad.pages.dev";
+      let xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n`;
+      if (rows && rows.length > 0) {
+        for (const row of rows) {
+          const lastmod = row.updated_at ? row.updated_at.split("T")[0] : new Date().toISOString().split("T")[0];
+          xml += `  <url>\n    <loc>${baseUrl}/#page-${row.slug}</loc>\n    <lastmod>${lastmod}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.80</priority>\n  </url>\n`;
+        }
+      } else {
+        xml += `  <url>\n    <loc>${baseUrl}/#page-about-jamia</loc>\n    <lastmod>2026-08-30</lastmod>\n    <changefreq>monthly</changefreq>\n    <priority>0.80</priority>\n  </url>\n`;
+        xml += `  <url>\n    <loc>${baseUrl}/#page-sharia-rules</loc>\n    <lastmod>2026-08-30</lastmod>\n    <changefreq>monthly</changefreq>\n    <priority>0.80</priority>\n  </url>\n`;
+      }
+      xml += `</urlset>\n`;
+      res.setHeader("Content-Type", "application/xml; charset=utf-8");
+      res.setHeader("X-Robots-Tag", "all");
+      res.setHeader("Cache-Control", "public, max-age=300, must-revalidate");
+      return res.send(xml);
+    } catch {
+      next();
     }
   });
 

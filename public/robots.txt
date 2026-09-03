@@ -15,3 +15,4 @@ Sitemap: https://jamia-islamia-abbottabad.pages.dev/sitemap-quran.xml
 Sitemap: https://jamia-islamia-abbottabad.pages.dev/sitemap-dars-nizami.xml
 Sitemap: https://jamia-islamia-abbottabad.pages.dev/sitemap-results.xml
 Sitemap: https://jamia-islamia-abbottabad.pages.dev/sitemap-donations.xml
+Sitemap: https://jamia-islamia-abbottabad.pages.dev/sitemap-pages.xml

@@ -1,7 +1,9 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { useThemeLanguage } from '../context/ThemeLanguageContext';
 import { getHijriAndGregorianDate } from '../utils/hijriDate';
+import { cmsApiService } from '../services/cmsApiService';
+import { CmsSection } from '../types';
 import { 
   BookOpen, 
   Bell, 
@@ -39,6 +41,34 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
   onOpenFatwaModal
 }) => {
   const { t, language } = useThemeLanguage();
+  const [cmsSections, setCmsSections] = useState<CmsSection[] | null>(null);
+
+  useEffect(() => {
+    let isMounted = true;
+    cmsApiService.getSections().then((secs) => {
+      if (!isMounted) return;
+      if (Array.isArray(secs) && secs.length > 0) {
+        setCmsSections(secs);
+      }
+    }).catch(() => {});
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const isSectionEnabled = (key: string): boolean => {
+    if (!cmsSections) return true; // Safe default: show all existing sections
+    const sec = cmsSections.find(s => s.sectionKey === key || s.id === `sec-${key}` || s.id === key);
+    return sec ? (sec.isEnabled !== false) : true;
+  };
+
+  const getSectionTitle = (key: string, defaultTitle: string): string => {
+    if (!cmsSections) return defaultTitle;
+    const sec = cmsSections.find(s => s.sectionKey === key || s.id === `sec-${key}` || s.id === key);
+    const custom = sec?.title?.[language] || sec?.title?.ur || sec?.title?.en || sec?.title?.ar;
+    return custom && custom.trim() ? custom : defaultTitle;
+  };
 
   // Dynamic Date Formatting (Auto-updated)
   const now = new Date();
@@ -314,93 +344,98 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
     <div className="space-y-16 sm:space-y-20 lg:space-y-24 font-urdu text-stone-900 dark:text-stone-100" dir="rtl">
       
       {/* 1. HERO BANNER: MOBILE (FULL-WIDTH CAMPUS PHOTO DIRECTLY AT TOP) & DESKTOP (PRESERVED WITH SEAL) */}
-      {/* Mobile Banner: Photo directly at top without circular seal */}
-      <motion.div 
-        initial={{ opacity: 0, scale: 0.96, y: -10 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        transition={{ duration: 0.75, ease: [0.25, 0.1, 0.25, 1] }}
-        className="sm:hidden -mt-4 -mx-4 border-b border-stone-300 dark:border-slate-800 shadow-sm overflow-hidden bg-[#F8F5EE] dark:bg-[#0F172A] select-none"
-      >
-        <div className="w-full relative h-[130px] xs:h-[155px] overflow-hidden bg-[#F8F5EE] dark:bg-[#0F172A]">
-          <img 
-            src={jamiaExactUserPhoto} 
-            alt="جامعہ اسلامیہ ایبٹ آباد کیمپس" 
-            loading="eager"
-            decoding="async"
-            fetchPriority="high"
-            className="w-full h-full object-cover object-center"
-            onError={(e) => {
-              const target = e.currentTarget;
-              if (!target.dataset.tried) {
-                target.dataset.tried = '1';
-                target.src = '/jamia_banner.jpg';
-              }
-            }}
-          />
-        </div>
-      </motion.div>
+      {isSectionEnabled('hero') && (
+        <>
+          {/* Mobile Banner: Photo directly at top without circular seal */}
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.96, y: -10 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            transition={{ duration: 0.75, ease: [0.25, 0.1, 0.25, 1] }}
+            className="sm:hidden -mt-4 -mx-4 border-b border-stone-300 dark:border-slate-800 shadow-sm overflow-hidden bg-[#F8F5EE] dark:bg-[#0F172A] select-none"
+          >
+            <div className="w-full relative h-[130px] xs:h-[155px] overflow-hidden bg-[#F8F5EE] dark:bg-[#0F172A]">
+              <img 
+                src={jamiaExactUserPhoto} 
+                alt="جامعہ اسلامیہ ایبٹ آباد کیمپس" 
+                loading="eager"
+                decoding="async"
+                fetchPriority="high"
+                className="w-full h-full object-cover object-center"
+                onError={(e) => {
+                  const target = e.currentTarget;
+                  if (!target.dataset.tried) {
+                    target.dataset.tried = '1';
+                    target.src = '/jamia_banner.jpg';
+                  }
+                }}
+              />
+            </div>
+          </motion.div>
 
-      {/* Desktop & Tablet Banner: Full Width Campus Photo without Circular Seal with refined subtle gold side accents */}
-      <motion.div 
-        initial={{ opacity: 0, y: -15 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
-        className="hidden sm:block -mt-6 lg:-mt-8 -mx-6 lg:-mx-8 relative sm:h-[150px] md:h-[165px] border-b border-stone-300/80 dark:border-slate-800 shadow-md overflow-hidden bg-[#F8F5EE] dark:bg-[#0F172A] select-none"
-      >
-        {/* Subtle geometric gold background accents for wide screens on left and right */}
-        <div className="absolute inset-y-0 right-0 w-32 md:w-48 bg-gradient-to-l from-[#B88A3B]/10 via-[#B88A3B]/5 to-transparent pointer-events-none flex items-center justify-end pr-4 opacity-75">
-          <svg className="w-20 h-20 text-[#B88A3B]/20" viewBox="0 0 100 100" fill="none">
-            <circle cx="50" cy="50" r="44" stroke="currentColor" strokeWidth="1.5" strokeDasharray="3 3" />
-            <rect x="25" y="25" width="50" height="50" rx="4" stroke="currentColor" strokeWidth="1.5" transform="rotate(45 50 50)" />
-            <rect x="25" y="25" width="50" height="50" rx="4" stroke="currentColor" strokeWidth="1.5" />
-          </svg>
-        </div>
-        <div className="absolute inset-y-0 left-0 w-32 md:w-48 bg-gradient-to-r from-[#B88A3B]/10 via-[#B88A3B]/5 to-transparent pointer-events-none flex items-center justify-start pl-4 opacity-75">
-          <svg className="w-20 h-20 text-[#B88A3B]/20" viewBox="0 0 100 100" fill="none">
-            <circle cx="50" cy="50" r="44" stroke="currentColor" strokeWidth="1.5" strokeDasharray="3 3" />
-            <rect x="25" y="25" width="50" height="50" rx="4" stroke="currentColor" strokeWidth="1.5" transform="rotate(45 50 50)" />
-            <rect x="25" y="25" width="50" height="50" rx="4" stroke="currentColor" strokeWidth="1.5" />
-          </svg>
-        </div>
+          {/* Desktop & Tablet Banner: Full Width Campus Photo without Circular Seal with refined subtle gold side accents */}
+          <motion.div 
+            initial={{ opacity: 0, y: -15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
+            className="hidden sm:block -mt-6 lg:-mt-8 -mx-6 lg:-mx-8 relative sm:h-[150px] md:h-[165px] border-b border-stone-300/80 dark:border-slate-800 shadow-md overflow-hidden bg-[#F8F5EE] dark:bg-[#0F172A] select-none"
+          >
+            {/* Subtle geometric gold background accents for wide screens on left and right */}
+            <div className="absolute inset-y-0 right-0 w-32 md:w-48 bg-gradient-to-l from-[#B88A3B]/10 via-[#B88A3B]/5 to-transparent pointer-events-none flex items-center justify-end pr-4 opacity-75">
+              <svg className="w-20 h-20 text-[#B88A3B]/20" viewBox="0 0 100 100" fill="none">
+                <circle cx="50" cy="50" r="44" stroke="currentColor" strokeWidth="1.5" strokeDasharray="3 3" />
+                <rect x="25" y="25" width="50" height="50" rx="4" stroke="currentColor" strokeWidth="1.5" transform="rotate(45 50 50)" />
+                <rect x="25" y="25" width="50" height="50" rx="4" stroke="currentColor" strokeWidth="1.5" />
+              </svg>
+            </div>
+            <div className="absolute inset-y-0 left-0 w-32 md:w-48 bg-gradient-to-r from-[#B88A3B]/10 via-[#B88A3B]/5 to-transparent pointer-events-none flex items-center justify-start pl-4 opacity-75">
+              <svg className="w-20 h-20 text-[#B88A3B]/20" viewBox="0 0 100 100" fill="none">
+                <circle cx="50" cy="50" r="44" stroke="currentColor" strokeWidth="1.5" strokeDasharray="3 3" />
+                <rect x="25" y="25" width="50" height="50" rx="4" stroke="currentColor" strokeWidth="1.5" transform="rotate(45 50 50)" />
+                <rect x="25" y="25" width="50" height="50" rx="4" stroke="currentColor" strokeWidth="1.5" />
+              </svg>
+            </div>
 
-        {/* Centered Exact Uploaded Photo across full header */}
-        <motion.img 
-          initial={{ opacity: 0, scale: 0.98 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.85, ease: [0.25, 0.1, 0.25, 1] }}
-          src={jamiaExactUserPhoto} 
-          alt="جامعہ اسلامیہ ایبٹ آباد" 
-          loading="eager"
-          decoding="async"
-          fetchPriority="high"
-          className="relative z-10 w-full h-full object-contain mx-auto"
-          onError={(e) => {
-            const target = e.currentTarget;
-            if (!target.dataset.tried) {
-              target.dataset.tried = '1';
-              target.src = '/jamia_banner.jpg';
-            }
-          }}
-        />
-      </motion.div>
+            {/* Centered Exact Uploaded Photo across full header */}
+            <motion.img 
+              initial={{ opacity: 0, scale: 0.98 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.85, ease: [0.25, 0.1, 0.25, 1] }}
+              src={jamiaExactUserPhoto} 
+              alt="جامعہ اسلامیہ ایبٹ آباد" 
+              loading="eager"
+              decoding="async"
+              fetchPriority="high"
+              className="relative z-10 w-full h-full object-contain mx-auto"
+              onError={(e) => {
+                const target = e.currentTarget;
+                if (!target.dataset.tried) {
+                  target.dataset.tried = '1';
+                  target.src = '/jamia_banner.jpg';
+                }
+              }}
+            />
+          </motion.div>
 
-      {/* Subtle decorative Islamic divider between Hero Banner and Service Cards on desktop */}
-      <div className="hidden sm:flex items-center justify-center gap-3 -my-8 sm:-my-10 md:-my-12 select-none opacity-85">
-        <div className="h-[1px] w-24 md:w-36 bg-gradient-to-r from-transparent via-[#B88A3B]/40 to-[#B88A3B]/70" />
-        <div className="flex items-center gap-1.5 text-[#B88A3B]">
-          <div className="w-1.5 h-1.5 rotate-45 bg-[#B88A3B]/60" />
-          <svg className="w-5 h-5 text-[#B88A3B]" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M12 2L14.5 8.5L21 9.5L16 14L17.5 20.5L12 17L6.5 20.5L8 14L3 9.5L9.5 8.5L12 2Z" opacity="0.8" />
-          </svg>
-          <div className="w-1.5 h-1.5 rotate-45 bg-[#B88A3B]/60" />
-        </div>
-        <div className="h-[1px] w-24 md:w-36 bg-gradient-to-l from-transparent via-[#B88A3B]/40 to-[#B88A3B]/70" />
-      </div>
+          {/* Subtle decorative Islamic divider between Hero Banner and Service Cards on desktop */}
+          <div className="hidden sm:flex items-center justify-center gap-3 -my-8 sm:-my-10 md:-my-12 select-none opacity-85">
+            <div className="h-[1px] w-24 md:w-36 bg-gradient-to-r from-transparent via-[#B88A3B]/40 to-[#B88A3B]/70" />
+            <div className="flex items-center gap-1.5 text-[#B88A3B]">
+              <div className="w-1.5 h-1.5 rotate-45 bg-[#B88A3B]/60" />
+              <svg className="w-5 h-5 text-[#B88A3B]" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2L14.5 8.5L21 9.5L16 14L17.5 20.5L12 17L6.5 20.5L8 14L3 9.5L9.5 8.5L12 2Z" opacity="0.8" />
+              </svg>
+              <div className="w-1.5 h-1.5 rotate-45 bg-[#B88A3B]/60" />
+            </div>
+            <div className="h-[1px] w-24 md:w-36 bg-gradient-to-l from-transparent via-[#B88A3B]/40 to-[#B88A3B]/70" />
+          </div>
+        </>
+      )}
 
       {/* 2. EXACT 6 PORTAL TILES: 2 per row on mobile screens (grid-cols-2), 3 per row on tablet/desktop (sm:grid-cols-3) */}
-      <div 
-        className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 xs:gap-3 sm:gap-3.5 md:gap-4 lg:gap-4.5"
-      >
+      {isSectionEnabled('portals') && (
+        <div 
+          className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 xs:gap-3 sm:gap-3.5 md:gap-4 lg:gap-4.5"
+        >
         {/* Tile 1: بانیِ جامعہ و اکابرین */}
         <motion.div 
           initial={{ opacity: 0, x: -40 }}
@@ -666,11 +701,13 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
           </div>
         </motion.div>
       </div>
+      )}
 
       {/* 3. SCROLL-TRIGGERED 3 LOWER SECTIONS: FADE-LEFT, FADE-UP, AND FADE-RIGHT */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 lg:gap-8 font-urdu" dir="rtl">
         
         {/* Column 1 (Left Card): آن لائن قرآن کریم و درس نظامی (comes from Left / Fade-Left) */}
+        {isSectionEnabled('online_academy') && (
         <motion.div 
           initial={{ opacity: 0, x: -60, y: 20 }}
           whileInView={{ opacity: 1, x: 0, y: 0 }}
@@ -681,7 +718,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
           {/* Dark Wood Header Bar */}
           <div className="bg-[#5C4632] dark:bg-[#382B1E] text-white px-4 sm:px-5 py-3.5 flex items-center justify-between border-b border-[#4A3727] dark:border-slate-800">
             <h3 className="text-lg sm:text-xl lg:text-[22px] font-bold font-urdu text-[#F8F4EC] whitespace-nowrap leading-normal">
-              {language === 'ar' ? 'القرآن الكريم والدرس النظامي أونلاين' : language === 'en' ? 'Online Quran & Dars-e-Nizami' : 'آن لائن قرآن کریم و درس نظامی'}
+              {getSectionTitle('online_academy', language === 'ar' ? 'القرآن الكريم والدرس النظامي أونلاين' : language === 'en' ? 'Online Quran & Dars-e-Nizami' : 'آن لائن قرآن کریم و درس نظامی')}
             </h3>
             <span className="text-xs font-semibold text-[#B88A3B] bg-[#453424] px-2.5 py-0.5 rounded border border-[#6B533E] shrink-0">
               {language === 'ar' ? 'التعليم عن بعد' : language === 'en' ? 'Online Academy' : 'آن لائن اکیڈمی'}
@@ -767,8 +804,10 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
             </button>
           </div>
         </motion.div>
+        )}
 
         {/* Column 2 (Center Card): نماز کے اوقات (comes from Bottom / Fade-Up) */}
+        {isSectionEnabled('prayer_timings') && (
         <motion.div 
           initial={{ opacity: 0, y: 60, scale: 0.96 }}
           whileInView={{ opacity: 1, y: 0, scale: 1 }}
@@ -781,7 +820,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
             <div className="flex items-center gap-2.5">
               <Clock className="w-5 h-5 text-[#B88A3B]" />
               <h3 className="text-xl sm:text-2xl font-bold font-urdu text-[#F8F4EC]">
-                {language === 'ar' ? 'مواقيت الصلاة' : language === 'en' ? 'Prayer Timings' : 'نماز کے اوقات'}
+                {getSectionTitle('prayer_timings', language === 'ar' ? 'مواقيت الصلاة' : language === 'en' ? 'Prayer Timings' : 'نماز کے اوقات')}
               </h3>
             </div>
             <span className="text-xs font-semibold text-[#B88A3B] bg-[#453424] px-2.5 py-0.5 rounded border border-[#6B533E]">
@@ -869,8 +908,10 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
             </div>
           </div>
         </motion.div>
+        )}
 
         {/* Column 3 (Right Card): مسنون دعائیں و اسلامی نام (comes from Right / Fade-Right) */}
+        {isSectionEnabled('fatwas') && (
         <motion.div 
           initial={{ opacity: 0, x: 60, y: 20 }}
           whileInView={{ opacity: 1, x: 0, y: 0 }}
@@ -883,7 +924,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
             <div className="flex items-center gap-2.5">
               <Compass className="w-5 h-5 text-[#B88A3B]" />
               <h3 className="text-xl sm:text-2xl font-bold font-urdu text-[#F8F4EC]">
-                {language === 'ar' ? 'الأدعية المأثورة والأسماء الإسلامية' : language === 'en' ? 'Prayers & Islamic Names' : 'مسنون دعائیں و اسلامی نام'}
+                {getSectionTitle('fatwas', language === 'ar' ? 'الأدعية المأثورة والأسماء الإسلامية' : language === 'en' ? 'Prayers & Islamic Names' : 'مسنون دعائیں و اسلامی نام')}
               </h3>
             </div>
             <span className="text-xs font-semibold text-[#B88A3B] bg-[#453424] px-2.5 py-0.5 rounded border border-[#6B533E]">
@@ -970,6 +1011,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
             </button>
           </div>
         </motion.div>
+        )}
 
       </div>
 

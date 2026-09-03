@@ -385,6 +385,8 @@ function initDatabaseSchema(db: Database.Database) {
   `);
 
   // Safe schema column migrations
+  try { db.exec("ALTER TABLE cms_revisions ADD COLUMN action TEXT;"); } catch {}
+  try { db.exec("ALTER TABLE cms_revisions ADD COLUMN previous_state TEXT;"); } catch {}
   try { db.exec("ALTER TABLE admin_users ADD COLUMN username TEXT;"); } catch {}
   try { db.exec("ALTER TABLE admin_users ADD COLUMN full_name TEXT;"); } catch {}
   try { db.exec("ALTER TABLE admin_users ADD COLUMN is_active INTEGER NOT NULL DEFAULT 1;"); } catch {}
@@ -396,9 +398,16 @@ function initDatabaseSchema(db: Database.Database) {
   try { db.exec("ALTER TABLE news ADD COLUMN isTranslationApproved INTEGER NOT NULL DEFAULT 0;"); } catch {}
   try { db.exec("ALTER TABLE news ADD COLUMN translationApprovedBy TEXT;"); } catch {}
 
-  // Seed/Sync default admin user strictly with authorized password 'jamiaislamia2003'
+  // Seed/Sync default admin user using precomputed cryptographic PBKDF2 hash
+  const DEFAULT_ADMIN_SALT = process.env.ADMIN_DEFAULT_SALT || '4d8a1c9e3b7f2a5d';
+  const DEFAULT_ADMIN_HASH = process.env.ADMIN_DEFAULT_HASH || (
+    process.env.ADMIN_DEFAULT_PASSWORD 
+      ? hashPassword(process.env.ADMIN_DEFAULT_PASSWORD, DEFAULT_ADMIN_SALT).hash
+      : '72ccbeba79ee53933f1df64e0bca80d39a37cef2b3c877891099a88a03d565e51951d3277a43fb5c4fe377d92762eae32560e752f367f311039a18f1a3099bf9'
+  );
+  const hash = DEFAULT_ADMIN_HASH;
+  const salt = DEFAULT_ADMIN_SALT;
   const adminRow = db.prepare('SELECT id FROM admin_users WHERE email = ?').get(AUTHORIZED_ADMIN_EMAIL);
-  const { hash, salt } = hashPassword('jamiaislamia2003');
   if (!adminRow) {
     db.prepare(`
       INSERT INTO admin_users (id, email, password_hash, password_salt, role, created_at)
@@ -906,14 +915,15 @@ function initDatabaseSchema(db: Database.Database) {
   if (mediaCount.count === 0) {
     const insertMedia = db.prepare(`
       INSERT INTO cms_media (
-        id, title, filename, file_type, mime_type, file_size, url, thumbnail_url, alt_text, caption, uploaded_by, created_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        id, title, filename, file_type, mime_type, file_size, url, thumbnail_url, alt_text, caption, uploaded_by, created_at, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
     for (const med of INITIAL_CMS_MEDIA) {
       insertMedia.run(
         med.id, med.title, med.filename, med.fileType, med.mimeType, med.fileSize,
         med.url, med.thumbnailUrl || med.url, med.altText || null, med.caption || null,
-        med.uploadedBy || 'Admin', med.createdAt || new Date().toISOString()
+        med.uploadedBy || 'Admin', med.createdAt || new Date().toISOString(),
+        (med as any).updatedAt || med.createdAt || new Date().toISOString()
       );
     }
   }

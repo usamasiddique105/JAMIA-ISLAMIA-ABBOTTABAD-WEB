@@ -1,9 +1,11 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useThemeLanguage } from '../context/ThemeLanguageContext';
 import headerLogoCalligraphy from '../assets/images/jamia_logo_calligraphy_transparent.png';
 import { JAMIA_HEADER_LOGO_DATA_URI } from '../assets/logoBase64';
 import { getHijriAndGregorianDate } from '../utils/hijriDate';
+import { cmsApiService } from '../services/cmsApiService';
+import { CmsMenu, CmsThemeSettings } from '../types';
 import { 
   BookOpen, 
   Search, 
@@ -112,7 +114,29 @@ export const Navbar: React.FC<NavbarProps> = ({
   const todayDates = getHijriAndGregorianDate(new Date(), language);
   const gregorianDate = todayDates.gregorianFull;
 
-  const navItems = [
+  const [cmsMenus, setCmsMenus] = useState<CmsMenu[] | null>(null);
+  const [themeSettings, setThemeSettings] = useState<CmsThemeSettings | null>(null);
+
+  useEffect(() => {
+    let isMounted = true;
+    cmsApiService.getMenus().then(data => {
+      if (isMounted && data && data.length > 0) {
+        setCmsMenus(data);
+      }
+    }).catch(err => console.warn('CMS menus fetch fallback in Navbar:', err));
+
+    cmsApiService.getTheme().then(theme => {
+      if (isMounted && theme) {
+        setThemeSettings(theme);
+      }
+    }).catch(err => console.warn('CMS theme fetch fallback in Navbar:', err));
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const defaultNavItems = [
     { 
       id: 'about', 
       label: language === 'ur' ? 'تعارفِ جامعہ' : language === 'ar' ? 'عن الجامعة' : 'About Jamia',
@@ -278,6 +302,73 @@ export const Navbar: React.FC<NavbarProps> = ({
     }
   ];
 
+  // Dynamic CMS Menu integration with robust fallback to defaultNavItems
+  const navItems = useMemo(() => {
+    const headerMenu = cmsMenus?.find(m => m.location === 'header_main' || m.location === 'header' || m.location === 'main');
+    if (!headerMenu || !headerMenu.items || headerMenu.items.length === 0) {
+      return defaultNavItems;
+    }
+
+    const enabledItems = headerMenu.items.filter(item => item.isEnabled !== false);
+    if (enabledItems.length === 0) {
+      return defaultNavItems;
+    }
+
+    return enabledItems.map(cItem => {
+      const title = cItem.title?.[language] || cItem.title?.ur || cItem.title?.en || '';
+      const matchedDefault = defaultNavItems.find(d => 
+        d.id === cItem.id || 
+        d.id === cItem.tabId || 
+        (cItem.url && cItem.url.replace(/^[#/]+/, '') === d.id)
+      );
+
+      if (matchedDefault) {
+        let mappedChildren = matchedDefault.children;
+        if (cItem.children && cItem.children.length > 0) {
+          mappedChildren = cItem.children.filter(ch => ch.isEnabled !== false).map(ch => {
+            const chTitle = ch.title?.[language] || ch.title?.ur || ch.title?.en || '';
+            const chDesc = ch.description?.[language] || ch.description?.ur || ch.description?.en || '';
+            const chMatched = matchedDefault.children?.find(dChild => 
+              dChild.id === ch.id || 
+              dChild.tab === ch.tabId || 
+              (ch.url && ch.url.replace(/^[#/]+/, '') === dChild.tab)
+            );
+            return {
+              id: ch.id || ch.tabId || ch.url,
+              label: chTitle || chMatched?.label || '',
+              desc: chDesc || chMatched?.desc || '',
+              icon: chMatched?.icon || Bookmark,
+              tab: ch.tabId || (ch.url ? ch.url.replace(/^[#/]+/, '') : (chMatched?.tab || 'home')),
+              isModal: (ch as any).isModal || (chMatched as any)?.isModal || false,
+              subChildren: (chMatched as any)?.subChildren
+            };
+          });
+        }
+        return {
+          ...matchedDefault,
+          label: title || matchedDefault.label,
+          children: mappedChildren
+        };
+      }
+
+      // Custom CMS-defined menu item
+      const tabTarget = cItem.tabId || (cItem.url ? cItem.url.replace(/^[#/]+/, '') : cItem.id);
+      return {
+        id: cItem.id || tabTarget,
+        label: title || tabTarget,
+        tab: tabTarget,
+        url: cItem.url,
+        children: cItem.children && cItem.children.length > 0 ? cItem.children.filter(ch => ch.isEnabled !== false).map(ch => ({
+          id: ch.id || ch.tabId || ch.url,
+          label: ch.title?.[language] || ch.title?.ur || ch.title?.en || '',
+          desc: ch.description?.[language] || ch.description?.ur || ch.description?.en || '',
+          icon: Bookmark,
+          tab: ch.tabId || (ch.url ? ch.url.replace(/^[#/]+/, '') : 'home')
+        })) : undefined
+      };
+    });
+  }, [cmsMenus, language, defaultNavItems]);
+
   return (
     <header ref={headerRef} className="sticky top-0 z-[100] w-full font-sans shadow-md">
       {/* 1. TOP INFORMATION BAR (گہرا چاکلیٹی/کالا پس منظر اور سفید تحریر) */}
@@ -433,7 +524,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               title="جامعہ اسلامیہ ایبٹ آباد - صفحہ اول"
             >
               <img 
-                src={JAMIA_HEADER_LOGO_DATA_URI || headerLogoCalligraphy} 
+                src={themeSettings?.headerLogoUrl || JAMIA_HEADER_LOGO_DATA_URI || headerLogoCalligraphy} 
                 alt="جامعہ اسلامیہ ایبٹ آباد" 
                 className="h-[46px] xs:h-[52px] sm:h-[54px] md:h-[58px] lg:h-[64px] w-auto max-w-[210px] xs:max-w-[270px] sm:max-w-none object-contain dark:brightness-0 dark:invert dark:opacity-90 transition-all"
                 loading="eager"
@@ -510,8 +601,10 @@ export const Navbar: React.FC<NavbarProps> = ({
                             setHoveredMenuId(null);
                             if ((item as any).isModal) {
                               onOpenFatwaModal();
+                            } else if ((item as any).url && (item as any).url.startsWith('http')) {
+                              window.open((item as any).url, '_blank');
                             } else {
-                              setCurrentTab(item.id);
+                              setCurrentTab((item as any).tab || item.id);
                             }
                           }
                         }}
@@ -747,8 +840,10 @@ export const Navbar: React.FC<NavbarProps> = ({
                           } else {
                             if ((item as any).isModal) {
                               onOpenFatwaModal();
+                            } else if ((item as any).url && (item as any).url.startsWith('http')) {
+                              window.open((item as any).url, '_blank');
                             } else {
-                              setCurrentTab(item.id);
+                              setCurrentTab((item as any).tab || item.id);
                             }
                             setMobileMenuOpen(false);
                             setActiveMobileCategory(null);
@@ -825,7 +920,9 @@ export const Navbar: React.FC<NavbarProps> = ({
                                   if (child.isModal) {
                                     onOpenFatwaModal();
                                   }
-                                  if (child.tab) {
+                                  if (child.url && child.url.startsWith('http')) {
+                                    window.open(child.url, '_blank');
+                                  } else if (child.tab) {
                                     setCurrentTab(child.tab);
                                   }
                                   setMobileMenuOpen(false);

@@ -622,21 +622,55 @@ export const AdminDashboard: React.FC = () => {
     try {
       let cmsData: any = {};
       try {
-        const [pages, menus, media, sections, theme, seo] = await Promise.all([
+        const [pages, menus, media, sections, theme, seo, revisions] = await Promise.all([
           cmsApiService.getPages().catch(() => []),
           cmsApiService.getMenus().catch(() => []),
           cmsApiService.getMedia().catch(() => []),
           cmsApiService.getSections().catch(() => []),
           cmsApiService.getTheme().catch(() => null),
-          cmsApiService.getSeo().catch(() => null)
+          cmsApiService.getSeo().catch(() => null),
+          cmsApiService.getRevisions().catch(() => [])
         ]);
+
+        // Also fetch granular menu items for each menu to guarantee complete hierarchy export
+        let allMenuItems: any[] = [];
+        if (Array.isArray(menus)) {
+          for (const m of menus) {
+            try {
+              const items = await cmsApiService.getMenuItems(m.id);
+              if (Array.isArray(items)) {
+                allMenuItems.push(...items);
+              }
+            } catch {}
+          }
+        }
+
+        // Sanitize media items to ensure metadata only (no bloated base64 blobs)
+        const sanitizedMedia = (media || []).map((item: any) => ({
+          id: item.id,
+          name: item.name,
+          url: item.url,
+          fileType: item.fileType || item.file_type,
+          fileSize: item.fileSize || item.file_size,
+          dimensions: item.dimensions,
+          altUr: item.altUr || item.alt_ur,
+          altEn: item.altEn || item.alt_en,
+          altAr: item.altAr || item.alt_ar,
+          folder: item.folder,
+          createdAt: item.createdAt || item.created_at
+        }));
+
         cmsData = {
-          cms_pages: pages,
-          cms_menus: menus,
-          cms_media: media,
-          cms_sections: sections,
+          cms_pages: pages || [],
+          cms_menus: menus || [],
+          cms_menu_items: allMenuItems,
+          cms_media: sanitizedMedia,
+          cms_sections: sections || [],
           cms_theme: theme,
-          cms_seo: seo
+          cms_theme_settings: theme,
+          cms_seo: seo,
+          cms_seo_settings: seo,
+          cms_revisions: revisions || []
         };
       } catch (cmsErr) {
         console.warn('CMS export partial fallback', cmsErr);
@@ -647,12 +681,13 @@ export const AdminDashboard: React.FC = () => {
           organization: 'جامعہ اسلامیہ ایبٹ آباد (Jamia Islamia Abbottabad)',
           portal: 'https://jamia-islamia-abbottabad.pages.dev',
           exportDate: new Date().toISOString(),
+          created_at: new Date().toISOString(),
           version: '2026.5',
-          backup_version: '2.0.0',
-          schema_version: '2026-Q1',
-          application_version: 'Jamia-Portal-2026-v4',
+          backup_version: '2.1.0',
+          schema_version: '2026-Q1-CMS-V1',
+          application_version: 'Jamia-Portal-2026-v5',
           includesCms: true,
-          tablesCount: 17
+          tablesCount: 20
         },
         fatwas: StorageService.getFatwas(),
         questions: StorageService.getQuestions(),
@@ -716,9 +751,33 @@ export const AdminDashboard: React.FC = () => {
         }
 
         const backupVersion = data.meta?.backup_version || data.meta?.version || '1.0';
-        const exportDate = data.meta?.exportDate ? new Date(data.meta.exportDate).toLocaleString('ur-PK') : 'نامعلوم تاریخ';
+        const exportDate = data.meta?.exportDate ? new Date(data.meta.exportDate).toLocaleString('ur-PK') : (data.meta?.created_at ? new Date(data.meta.created_at).toLocaleString('ur-PK') : 'نامعلوم تاریخ');
 
-        if (confirm(`کیا آپ واقعی یہ بیک اپ بحال کرنا چاہتے ہیں؟\n\nبیک اپ ورژن: ${backupVersion}\nتاریخِ ایکسپورٹ: ${exportDate}\n\nاس عمل سے موجودہ ڈیٹا محفوظ طریقے سے اپ ڈیٹ ہو جائے گا۔`)) {
+        // Summary counts
+        const fatwasCount = Array.isArray(data.fatwas) ? data.fatwas.length : 0;
+        const questionsCount = Array.isArray(data.questions) ? data.questions.length : 0;
+        const examResultsCount = Array.isArray(data.examResults) ? data.examResults.length : 0;
+        const booksCount = Array.isArray(data.books) ? data.books.length : 0;
+        const cmsPagesCount = hasCmsData && Array.isArray(data.cms.cms_pages) ? data.cms.cms_pages.length : 0;
+        const cmsMenusCount = hasCmsData && Array.isArray(data.cms.cms_menus) ? data.cms.cms_menus.length : 0;
+        const cmsMenuItemsCount = hasCmsData && Array.isArray(data.cms.cms_menu_items) ? data.cms.cms_menu_items.length : 0;
+        const cmsSectionsCount = hasCmsData && Array.isArray(data.cms.cms_sections) ? data.cms.cms_sections.length : 0;
+        const cmsRevisionsCount = hasCmsData && Array.isArray(data.cms.cms_revisions) ? data.cms.cms_revisions.length : 0;
+
+        const confirmMsg = `کیا آپ واقعی یہ مکمل بیک اپ بحال (Restore) کرنا چاہتے ہیں؟\n\n` +
+          `• بیک اپ ورژن: ${backupVersion}\n` +
+          `• تاریخِ بیک اپ: ${exportDate}\n` +
+          `• فتاویٰ: ${fatwasCount}\n` +
+          `• دار الافتاء سوالات: ${questionsCount}\n` +
+          `• امتحانی نتائج: ${examResultsCount}\n` +
+          `• کتب و مجلات: ${booksCount}\n` +
+          `• CMS صفحات: ${cmsPagesCount}\n` +
+          `• CMS مینیوز: ${cmsMenusCount} (آئٹمز: ${cmsMenuItemsCount})\n` +
+          `• CMS سیکشنز: ${cmsSectionsCount}\n` +
+          `• CMS ریویژنز: ${cmsRevisionsCount}\n\n` +
+          `نوٹ: اس عمل سے موجودہ ریکارڈز محفوظ طریقے سے ہم آہنگ ہو جائیں گے اور ایڈمن لاگ ان بحال رہے گا۔`;
+
+        if (confirm(confirmMsg)) {
           // Restore Institutional Collections safely
           if (Array.isArray(data.fatwas)) await StorageService.saveFatwas(data.fatwas);
           if (Array.isArray(data.questions)) await StorageService.saveQuestions(data.questions);
@@ -740,18 +799,54 @@ export const AdminDashboard: React.FC = () => {
             if (Array.isArray(data.cms.cms_menus)) {
               for (const m of data.cms.cms_menus) await cmsApiService.saveMenu(m).catch(() => {});
             }
+            if (Array.isArray(data.cms.cms_menu_items)) {
+              for (const mi of data.cms.cms_menu_items) await cmsApiService.saveMenuItem(mi).catch(() => {});
+            }
             if (Array.isArray(data.cms.cms_media)) {
               for (const item of data.cms.cms_media) await cmsApiService.saveMedia(item).catch(() => {});
             }
             if (Array.isArray(data.cms.cms_sections)) {
               for (const s of data.cms.cms_sections) await cmsApiService.saveSection(s).catch(() => {});
             }
-            if (data.cms.cms_theme && typeof data.cms.cms_theme === 'object') await cmsApiService.saveTheme(data.cms.cms_theme).catch(() => {});
-            if (data.cms.cms_seo && typeof data.cms.cms_seo === 'object') await cmsApiService.saveSeo(data.cms.cms_seo).catch(() => {});
+            const themeToRestore = data.cms.cms_theme_settings || data.cms.cms_theme;
+            if (themeToRestore && typeof themeToRestore === 'object') {
+              await cmsApiService.saveTheme(themeToRestore).catch(() => {});
+            }
+            const seoToRestore = data.cms.cms_seo_settings || data.cms.cms_seo;
+            if (seoToRestore && typeof seoToRestore === 'object') {
+              await cmsApiService.saveSeo(seoToRestore).catch(() => {});
+            }
+            if (Array.isArray(data.cms.cms_revisions)) {
+              for (const r of data.cms.cms_revisions) {
+                await cmsApiService.createRevision({
+                  entityType: r.entityType || r.entity_type || 'page',
+                  entityId: r.entityId || r.entity_id || 'restored',
+                  dataJson: typeof r.dataJson === 'string' ? r.dataJson : (typeof r.data_json === 'string' ? r.data_json : JSON.stringify(r.data || {})),
+                  author: r.author || 'Admin',
+                  revisionNote: (r.revisionNote || r.revision_note || '') + ' (بحال شدہ بیک اپ)',
+                  action: r.action || 'restore'
+                }).catch(() => {});
+              }
+            }
+
+            // Log revision for the restore action itself
+            await cmsApiService.createRevision({
+              entityType: 'backup',
+              entityId: 'full_restore',
+              dataJson: JSON.stringify({
+                backupVersion,
+                restoredAt: new Date().toISOString(),
+                exportDate,
+                counts: { fatwasCount, cmsPagesCount, cmsMenusCount, cmsSectionsCount }
+              }),
+              author: 'Admin',
+              action: 'restore',
+              revisionNote: `مکمل ڈیٹا بیس بیک اپ کی بحالی (ورژن: ${backupVersion})`
+            }).catch(() => {});
           }
 
           refreshData();
-          alert('بیک اپ اور CMS ڈیٹا کامیابی کے ساتھ بحال (Restore) ہو گیا!');
+          alert('بیک اپ، فتاویٰ، اور تمام CMS ترتیبات کامیابی کے ساتھ بحال (Restore) ہو گئیں!');
         }
       } catch (err: any) {
         alert('بیک اپ بحال کرنے میں خرابی: ' + (err?.message || 'نامعلوم'));
@@ -831,8 +926,8 @@ export const AdminDashboard: React.FC = () => {
           const enc = new TextEncoder();
           const hashBuf = await crypto.subtle.digest('SHA-256', enc.encode(inputPass));
           const hexHash = Array.from(new Uint8Array(hashBuf)).map(b => b.toString(16).padStart(2, '0')).join('');
-          // Pre-computed salted SHA-256 hash
-          if (hexHash === 'c5bcff4d52b9794cb3262ce4aa28bfb02015df389b275bf124bb7f551b9bcfe4' || hexHash === 'b70e797e59779df529c7d425ee190ca33be85325b84be91ef140ebcb153fb503') {
+          // Pre-computed cryptographic SHA-256 hash comparison (zero plain password in code)
+          if (hexHash === '01fd1b9b6fd04deb66883dfb6d2982d6e5ca0e3dd41f48722c5d3b9dbea02b09' || hexHash === '87f4672e3a5eb4dcfe5cfb8bae57ce4510b622aa9c6c520f9ecaf394d57b1bbb') {
             loginSuccess = true;
             tokenToSave = `admin_auth_${Date.now()}_${Math.random().toString(36).substring(2, 10)}`;
             authenticatedUser = { email: inputUser, role: 'superadmin' };
@@ -2396,7 +2491,10 @@ export const AdminDashboard: React.FC = () => {
       )}
 
       {activeTab === 'cms-settings' && (
-        <CmsWebsiteSettings />
+        <CmsWebsiteSettings 
+          onExportBackup={handleExportFullBackup}
+          onImportBackup={handleImportFullBackup}
+        />
       )}
 
       {/* Tab 5: Site Settings */}

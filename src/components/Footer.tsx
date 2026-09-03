@@ -1,9 +1,11 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { useThemeLanguage } from '../context/ThemeLanguageContext';
 import { ChevronUp, ChevronLeft, Lock } from 'lucide-react';
 import headerLogoCalligraphy from '../assets/images/jamia_logo_calligraphy_transparent.png';
 import { JAMIA_HEADER_LOGO_DATA_URI } from '../assets/logoBase64';
+import { cmsApiService } from '../services/cmsApiService';
+import { CmsMenu, CmsThemeSettings } from '../types';
 
 interface FooterProps {
   setCurrentTab: (tab: string) => void;
@@ -12,10 +14,74 @@ interface FooterProps {
 
 export const Footer: React.FC<FooterProps> = ({ setCurrentTab, onOpenFatwaModal }) => {
   const { language } = useThemeLanguage();
+  const [footerMenu, setFooterMenu] = useState<CmsMenu | null>(null);
+  const [themeSettings, setThemeSettings] = useState<CmsThemeSettings | null>(null);
+
+  useEffect(() => {
+    let isMounted = true;
+    cmsApiService.getMenus().then((menus) => {
+      if (!isMounted) return;
+      const fMenu = menus.find(m => m.location === 'footer_quick' || m.location === 'footer_main');
+      if (fMenu && fMenu.items && fMenu.items.length > 0) {
+        setFooterMenu(fMenu);
+      }
+    }).catch(() => {});
+
+    cmsApiService.getTheme().then((theme) => {
+      if (!isMounted) return;
+      if (theme) setThemeSettings(theme);
+    }).catch(() => {});
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
+
+  // Safe fallback navigation items if CMS footer menu is not configured
+  const defaultNavLinks = [
+    {
+      label: language === 'ar' ? 'الصفحة الرئيسية' : language === 'en' ? 'Home' : 'صفحہ اول',
+      tab: 'home'
+    },
+    {
+      label: language === 'ar' ? 'عن الجامعة' : language === 'en' ? 'About Us' : 'تعارف',
+      tab: 'about'
+    },
+    {
+      label: language === 'ar' ? 'دار الإفتاء' : language === 'en' ? 'Darul Ifta' : 'دار الافتاء',
+      tab: 'fatwas'
+    },
+    {
+      label: language === 'ar' ? 'المكتبة والكتب' : language === 'en' ? 'Books Library' : 'کتابیں',
+      tab: 'library'
+    },
+    {
+      label: language === 'ar' ? 'الأسماء الإسلامية' : language === 'en' ? 'Islamic Names' : 'اسلامی نام',
+      tab: 'fatwa-names'
+    }
+  ];
+
+  // Dynamic CMS items or fallback
+  const activeNavLinks = (footerMenu && footerMenu.items && footerMenu.items.length > 0)
+    ? footerMenu.items
+        .filter(item => item && (item.isEnabled !== false))
+        .map(item => ({
+          label: item.title?.[language] || item.title?.ur || item.title?.en || item.title?.ar || item.label || 'صفحہ',
+          tab: item.tabId || (item.url?.startsWith('#') ? item.url.replace(/^#/, '') : item.url) || 'home'
+        }))
+        .filter(item => Boolean(item.label))
+    : defaultNavLinks;
+
+  const finalNavLinks = activeNavLinks.length > 0 ? activeNavLinks : defaultNavLinks;
+
+  const footerLogo = themeSettings?.logoUrl || JAMIA_HEADER_LOGO_DATA_URI || headerLogoCalligraphy;
+  const addressText = themeSettings?.address || 'P.O. Box : 22010. Abbottabad, Pakistan';
+  const phoneText = themeSettings?.phone || '+923489002496';
+  const websiteText = themeSettings?.website || 'jamia-islamia-abbottabad.pages.dev';
 
   return (
     <footer 
@@ -47,51 +113,17 @@ export const Footer: React.FC<FooterProps> = ({ setCurrentTab, onOpenFatwaModal 
               {language === 'ar' ? 'خريطة الموقع' : language === 'en' ? 'Site Navigation' : 'ویب سائٹ کا نقشہ'}
             </h3>
             <ul className="space-y-2.5 text-sm sm:text-base font-urdu text-[#D1C7B3]">
-              <li>
-                <button 
-                  onClick={() => { setCurrentTab('home'); scrollToTop(); }}
-                  className="hover:text-white transition-colors flex items-center gap-2 cursor-pointer group"
-                >
-                  <ChevronLeft className="w-4 h-4 text-[#D1C7B3] group-hover:text-white transition-colors shrink-0" />
-                  <span>{language === 'ar' ? 'الصفحة الرئيسية' : language === 'en' ? 'Home' : 'صفحہ اول'}</span>
-                </button>
-              </li>
-              <li>
-                <button 
-                  onClick={() => { setCurrentTab('about'); scrollToTop(); }}
-                  className="hover:text-white transition-colors flex items-center gap-2 cursor-pointer group"
-                >
-                  <ChevronLeft className="w-4 h-4 text-[#D1C7B3] group-hover:text-white transition-colors shrink-0" />
-                  <span>{language === 'ar' ? 'عن الجامعة' : language === 'en' ? 'About Us' : 'تعارف'}</span>
-                </button>
-              </li>
-              <li>
-                <button 
-                  onClick={() => { setCurrentTab('fatwas'); scrollToTop(); }}
-                  className="hover:text-white transition-colors flex items-center gap-2 cursor-pointer group"
-                >
-                  <ChevronLeft className="w-4 h-4 text-[#D1C7B3] group-hover:text-white transition-colors shrink-0" />
-                  <span>{language === 'ar' ? 'دار الإفتاء' : language === 'en' ? 'Darul Ifta' : 'دار الافتاء'}</span>
-                </button>
-              </li>
-              <li>
-                <button 
-                  onClick={() => { setCurrentTab('library'); scrollToTop(); }}
-                  className="hover:text-white transition-colors flex items-center gap-2 cursor-pointer group"
-                >
-                  <ChevronLeft className="w-4 h-4 text-[#D1C7B3] group-hover:text-white transition-colors shrink-0" />
-                  <span>{language === 'ar' ? 'المكتبة والكتب' : language === 'en' ? 'Books Library' : 'کتابیں'}</span>
-                </button>
-              </li>
-              <li>
-                <button 
-                  onClick={() => { setCurrentTab('fatwa-names'); scrollToTop(); }}
-                  className="hover:text-white transition-colors flex items-center gap-2 cursor-pointer group"
-                >
-                  <ChevronLeft className="w-4 h-4 text-[#D1C7B3] group-hover:text-white transition-colors shrink-0" />
-                  <span>{language === 'ar' ? 'الأسماء الإسلامية' : language === 'en' ? 'Islamic Names' : 'اسلامی نام'}</span>
-                </button>
-              </li>
+              {finalNavLinks.map((link, idx) => (
+                <li key={`footer-nav-${idx}-${link.tab}`}>
+                  <button 
+                    onClick={() => { setCurrentTab(link.tab); scrollToTop(); }}
+                    className="hover:text-white transition-colors flex items-center gap-2 cursor-pointer group"
+                  >
+                    <ChevronLeft className="w-4 h-4 text-[#D1C7B3] group-hover:text-white transition-colors shrink-0" />
+                    <span>{link.label}</span>
+                  </button>
+                </li>
+              ))}
             </ul>
           </motion.div>
 
@@ -175,7 +207,7 @@ export const Footer: React.FC<FooterProps> = ({ setCurrentTab, onOpenFatwaModal 
             {/* Calligraphic Logo / Header matching screenshot */}
             <div className="text-right">
               <img 
-                src={JAMIA_HEADER_LOGO_DATA_URI || headerLogoCalligraphy} 
+                src={footerLogo} 
                 alt="جامعہ اسلامیہ ایبٹ آباد" 
                 className="h-10 sm:h-12 w-auto max-w-full object-contain brightness-0 invert opacity-90 ml-auto"
                 onError={(e) => {
@@ -189,9 +221,9 @@ export const Footer: React.FC<FooterProps> = ({ setCurrentTab, onOpenFatwaModal 
             </div>
 
             <div className="space-y-2 text-sm sm:text-base font-mono text-[#D1C7B3] pt-2 text-right">
-              <div>P.O. Box : 22010. Abbottabad, Pakistan</div>
-              <div dir="ltr" className="text-right">+923489002496</div>
-              <div>jamia-islamia-abbottabad.pages.dev</div>
+              <div>{addressText}</div>
+              <div dir="ltr" className="text-right">{phoneText}</div>
+              <div>{websiteText}</div>
             </div>
 
             {/* Admin Portal Access (Discreet Admin Login Button) */}
